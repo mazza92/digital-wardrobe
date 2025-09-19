@@ -2,68 +2,68 @@
   "influencer": {
     "name": "Emmanuelle K",
     "brand": "EMMANUELLE K",
-    "heroImage": "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+    "heroImage": "https://scontent-fra5-2.cdninstagram.com/v/t51.2885-19/491516163_2442986576037906_5794195110959056409_n.jpg?efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-fra5-2.cdninstagram.com&_nc_cat=106&_nc_oc=Q6cZ2QEBzn34FIO3NW3BkEwTYlLc5aCKKkvL9QHK7GyfMsrVA12MkrDO36JHG-ZyjHVxSM4&_nc_ohc=Y2KlRMExtrQQ7kNvwH_wwqM&_nc_gid=1KLdQ-UvwH0SCViGrjsOLQ&edm=AP4sbd4BAAAA&ccb=7-5&oh=00_AfaMpJ3WmTwxo_ZSbCAPmGBH9mBp4CEbNZbS7GzgHJU7lQ&oe=68D2DFC8&_nc_sid=7a9f4b",
     "bio": "Luxury fashion & lifestyle content creator. Sharing elegant, sophisticated style for the modern woman."
   },
   "outfits": [
     {
       "id": "outfit-1",
-      "title": "Chic Office Look",
-      "image": "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-      "description": "Perfect for a professional meeting or elegant dinner",
+      "title": "Elegant Evening Look",
+      "image": "https://scontent-fra5-1.cdninstagram.com/v/t51.2885-15/548911780_18525565567056912_4743033959921102930_n.jpg?stp=dst-jpg_e35_tt6&cb=8438d1d6-56ed1c41&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0uaW1hZ2VfdXJsZ2VuLjE0NDB4MTkyMC5zZHIuZjgyNzg3LmRlZmF1bHRfaW1hZ2UuYzIifQ&_nc_ht=scontent-fra5-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2QEBzn34FIO3NW3BkEwTYlLc5aCKKkvL9QHK7GyfMsrVA12MkrDO36JHG-ZyjHVxSM4&_nc_ohc=D91CQSpnZTEQ7kNvwHycEwv&_nc_gid=1KLdQ-UvwH0SCViGrjsOLQ&edm=AP4sbd4BAAAA&ccb=7-5&ig_cache_key=MzcyMjM3NDAxMjQ4ODkzNzcxOQ%3D%3D.3-ccb7-5-cb8438d1d6-56ed1c41&oh=00_AfYjTocjOd68bP1J8ch4Hzi0YLpTti_puMsmEJTXImrTJg&oe=68D2F2C0&_nc_sid=7a9f4b",
+      "description": "Sophisticated look perfect for special occasions",
       "products": [
         {
           "id": "product-1-1",
-          "name": "Blazer",
+          "name": "Silk Blouse",
           "brand": "Zara",
           "price": "$89.99",
-          "link": "https://shop.zara.com/blazer",
-          "x": 30,
-          "y": 25
+          "link": "https://shop.zara.com/silk-blouse",
+          "x": 50,
+          "y": 30
         },
         {
           "id": "product-1-2",
-          "name": "Silk Blouse",
+          "name": "High-Waist Trousers",
           "brand": "Mango",
-          "price": "$45.99",
-          "link": "https://shop.mango.com/silk-blouse",
+          "price": "$79.99",
+          "link": "https://shop.mango.com/trousers",
           "x": 50,
-          "y": 35
+          "y": 65
         },
         {
           "id": "product-1-3",
-          "name": "Trousers",
-          "brand": "H&M",
-          "price": "$39.99",
-          "link": "https://shop.hm.com/trousers",
-          "x": 45,
-          "y": 70
-        },
-        {
-          "id": "product-1-4",
-          "name": "Heels",
+          "name": "Leather Heels",
           "brand": "Steve Madden",
-          "price": "$129.99",
+          "price": "$149.99",
           "link": "https://shop.stevemadden.com/heels",
           "x": 50,
           "y": 85
+        },
+        {
+          "id": "product-1-4",
+          "name": "Gold Earrings",
+          "brand": "Zara",
+          "price": "$29.99",
+          "link": "https://shop.zara.com/earrings",
+          "x": 30,
+          "y": 15
         }
       ]
     },
     {
       "id": "outfit-2",
-      "title": "Casual Weekend",
-      "image": "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-      "description": "Comfortable yet stylish for weekend adventures",
+      "title": "Chic Casual Style",
+      "image": "https://scontent-fra5-1.cdninstagram.com/v/t51.2885-15/545208465_18525023992056912_3040549994486493807_n.jpg?stp=dst-jpg_e35_tt6&cb=8438d1d6-56ed1c41&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0uaW1hZ2VfdXJsZ2VuLjE0NDB4MTc5NS5zZHIuZjgyNzg3LmRlZmF1bHRfaW1hZ2UuYzIifQ&_nc_ht=scontent-fra5-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2QEBzn34FIO3NW3BkEwTYlLc5aCKKkvL9QHK7GyfMsrVA12MkrDO36JHG-ZyjHVxSM4&_nc_ohc=9iDEJyYQh2EQ7kNvwEIR4N3&_nc_gid=1KLdQ-UvwH0SCViGrjsOLQ&edm=AP4sbd4BAAAA&ccb=7-5&ig_cache_key=MzcyMDE2MzQ2OTc0NTIxMjU3NQ%3D%3D.3-ccb7-5-cb8438d1d6-56ed1c41&oh=00_AfYPW3VXd3vOr7ktouuFUqyFOvNx7Fsz1zUJlV-D2Qo23Q&oe=68D2F1B3&_nc_sid=7a9f4b",
+      "description": "Effortlessly stylish for everyday elegance",
       "products": [
         {
           "id": "product-2-1",
-          "name": "Denim Jacket",
-          "brand": "Levi's",
-          "price": "$79.99",
-          "link": "https://shop.levis.com/denim-jacket",
-          "x": 25,
-          "y": 20
+          "name": "Oversized Blazer",
+          "brand": "H&M",
+          "price": "$69.99",
+          "link": "https://shop.hm.com/blazer",
+          "x": 30,
+          "y": 25
         },
         {
           "id": "product-2-2",
@@ -76,18 +76,18 @@
         },
         {
           "id": "product-2-3",
-          "name": "High-Waist Jeans",
-          "brand": "Topshop",
-          "price": "$69.99",
-          "link": "https://shop.topshop.com/jeans",
+          "name": "Straight Jeans",
+          "brand": "Levi's",
+          "price": "$89.99",
+          "link": "https://shop.levis.com/jeans",
           "x": 50,
-          "y": 65
+          "y": 70
         },
         {
           "id": "product-2-4",
-          "name": "Sneakers",
+          "name": "White Sneakers",
           "brand": "Nike",
-          "price": "$89.99",
+          "price": "$99.99",
           "link": "https://shop.nike.com/sneakers",
           "x": 50,
           "y": 90
@@ -96,127 +96,83 @@
     },
     {
       "id": "outfit-3",
-      "title": "Evening Glamour",
-      "image": "https://images.unsplash.com/photo-1515377905703-c4788e51afd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-      "description": "Stunning look for special occasions and parties",
+      "title": "Minimalist Elegance",
+      "image": "https://scontent-fra5-1.cdninstagram.com/v/t51.2885-15/544027567_18524523601056912_5993596775060166244_n.jpg?stp=dst-jpg_e35_tt6&cb=8438d1d6-56ed1c41&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0uaW1hZ2VfdXJsZ2VuLjE0NDB4MTc5NS5zZHIuZjgyNzg3LmRlZmF1bHRfaW1hZ2UuYzIifQ&_nc_ht=scontent-fra5-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2QEBzn34FIO3NW3BkEwTYlLc5aCKKkvL9QHK7GyfMsrVA12MkrDO36JHG-ZyjHVxSM4&_nc_ohc=q6VYZXv_dqIQ7kNvwEBwboN&_nc_gid=1KLdQ-UvwH0SCViGrjsOLQ&edm=AP4sbd4BAAAA&ccb=7-5&ig_cache_key=MzcxODAzMjMzMDQ1MjY3MDYzMg%3D%3D.3-ccb7-5-cb8438d1d6-56ed1c41&oh=00_AfZe87l1gr9Z4JX7gFRM_Dg6Z5iplyLbeETYFJYwENzzXw&oe=68D2FD67&_nc_sid=7a9f4b",
+      "description": "Clean lines and sophisticated simplicity",
       "products": [
         {
           "id": "product-3-1",
-          "name": "Sequined Dress",
-          "brand": "ASOS",
-          "price": "$149.99",
-          "link": "https://shop.asos.com/sequined-dress",
+          "name": "Trench Coat",
+          "brand": "Zara",
+          "price": "$129.99",
+          "link": "https://shop.zara.com/trench-coat",
           "x": 50,
-          "y": 30
+          "y": 20
         },
         {
           "id": "product-3-2",
-          "name": "Clutch Bag",
-          "brand": "Michael Kors",
-          "price": "$199.99",
-          "link": "https://shop.michaelkors.com/clutch",
-          "x": 70,
-          "y": 50
+          "name": "Knit Sweater",
+          "brand": "Mango",
+          "price": "$59.99",
+          "link": "https://shop.mango.com/sweater",
+          "x": 50,
+          "y": 45
         },
         {
           "id": "product-3-3",
-          "name": "Statement Earrings",
-          "brand": "Zara",
-          "price": "$29.99",
-          "link": "https://shop.zara.com/earrings",
-          "x": 30,
-          "y": 15
+          "name": "Wide-Leg Pants",
+          "brand": "H&M",
+          "price": "$49.99",
+          "link": "https://shop.hm.com/pants",
+          "x": 50,
+          "y": 70
         },
         {
           "id": "product-3-4",
-          "name": "Stiletto Heels",
-          "brand": "Jimmy Choo",
-          "price": "$495.99",
-          "link": "https://shop.jimmychoo.com/stiletto",
+          "name": "Leather Loafers",
+          "brand": "Zara",
+          "price": "$79.99",
+          "link": "https://shop.zara.com/loafers",
           "x": 50,
-          "y": 85
+          "y": 90
         }
       ]
     },
     {
       "id": "outfit-4",
-      "title": "Spring Floral",
-      "image": "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-      "description": "Fresh and feminine look perfect for spring days",
+      "title": "Luxury Weekend",
+      "image": "https://scontent-fra5-1.cdninstagram.com/v/t51.2885-15/542337224_18523149820056912_1002845043641011769_n.jpg?stp=dst-jpg_e35_tt6&cb=8438d1d6-56ed1c41&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0uaW1hZ2VfdXJsZ2VuLjE0NDB4MTc5NS5zZHIuZjgyNzg3LmRlZmF1bHRfaW1hZ2UuYzIifQ&_nc_ht=scontent-fra5-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2QEBzn34FIO3NW3BkEwTYlLc5aCKKkvL9QHK7GyfMsrVA12MkrDO36JHG-ZyjHVxSM4&_nc_ohc=5FTaAmgvKxgQ7kNvwF6utc8&_nc_gid=1KLdQ-UvwH0SCViGrjsOLQ&edm=AP4sbd4BAAAA&ccb=7-5&ig_cache_key=MzcxMzcxNjk5NTg2ODEyMjUyMQ%3D%3D.3-ccb7-5-cb8438d1d6-56ed1c41&oh=00_Afb90BaBj0zb0bnLqkQMjTkmRWTYdxWlmxtfusyc4tlI-g&oe=68D2EFEC&_nc_sid=7a9f4b",
+      "description": "Relaxed yet refined for weekend outings",
       "products": [
         {
           "id": "product-4-1",
-          "name": "Floral Dress",
-          "brand": "H&M",
-          "price": "$39.99",
-          "link": "https://shop.hm.com/floral-dress",
-          "x": 50,
-          "y": 35
+          "name": "Cashmere Cardigan",
+          "brand": "Mango",
+          "price": "$89.99",
+          "link": "https://shop.mango.com/cardigan",
+          "x": 30,
+          "y": 30
         },
         {
           "id": "product-4-2",
-          "name": "Denim Jacket",
-          "brand": "Gap",
-          "price": "$59.99",
-          "link": "https://shop.gap.com/denim-jacket",
-          "x": 25,
-          "y": 25
+          "name": "Silk Camisole",
+          "brand": "Zara",
+          "price": "$39.99",
+          "link": "https://shop.zara.com/camisole",
+          "x": 50,
+          "y": 40
         },
         {
           "id": "product-4-3",
-          "name": "Ankle Boots",
-          "brand": "Zara",
-          "price": "$79.99",
-          "link": "https://shop.zara.com/ankle-boots",
-          "x": 50,
-          "y": 85
-        },
-        {
-          "id": "product-4-4",
-          "name": "Crossbody Bag",
-          "brand": "Coach",
-          "price": "$295.99",
-          "link": "https://shop.coach.com/crossbody",
-          "x": 70,
-          "y": 55
-        }
-      ]
-    },
-    {
-      "id": "outfit-5",
-      "title": "Cozy Winter",
-      "image": "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-      "description": "Warm and stylish for cold winter days",
-      "products": [
-        {
-          "id": "product-5-1",
-          "name": "Wool Coat",
-          "brand": "Mango",
-          "price": "$199.99",
-          "link": "https://shop.mango.com/wool-coat",
-          "x": 50,
-          "y": 20
-        },
-        {
-          "id": "product-5-2",
-          "name": "Knit Sweater",
-          "brand": "Uniqlo",
-          "price": "$49.99",
-          "link": "https://shop.uniqlo.com/knit-sweater",
-          "x": 50,
-          "y": 45
-        },
-        {
-          "id": "product-5-3",
-          "name": "Wide-Leg Pants",
-          "brand": "Zara",
+          "name": "Linen Pants",
+          "brand": "H&M",
           "price": "$59.99",
-          "link": "https://shop.zara.com/wide-leg-pants",
+          "link": "https://shop.hm.com/linen-pants",
           "x": 50,
           "y": 70
         },
         {
-          "id": "product-5-4",
+          "id": "product-4-4",
           "name": "Ankle Boots",
           "brand": "Steve Madden",
           "price": "$119.99",
@@ -228,9 +184,9 @@
     }
   ],
   "socialMedia": {
-    "instagram": "https://instagram.com/isabellarose",
-    "tiktok": "https://tiktok.com/@isabellarose",
-    "youtube": "https://youtube.com/@isabellarose",
-    "pinterest": "https://pinterest.com/isabellarose"
+    "instagram": "https://instagram.com/emmanuellek_",
+    "tiktok": "https://tiktok.com/@emmanuellek_",
+    "youtube": "https://youtube.com/@emmanuellek_",
+    "pinterest": "https://pinterest.com/emmanuellek_"
   }
 }
