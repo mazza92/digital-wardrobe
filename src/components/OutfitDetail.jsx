@@ -5,42 +5,48 @@ import outfitsData from '../data/outfits.json'
 
 const DetailContainer = styled.div`
   min-height: 100vh;
-  background: #f8f9fa;
+  background: #fafafa;
   padding-bottom: 2rem;
 `
 
 const Header = styled.header`
   background: white;
-  padding: 1rem 2rem;
+  padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(20px);
 `
 
 const BackButton = styled.button`
   background: none;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1rem;
   cursor: pointer;
-  color: #333;
+  color: #666;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
   
   &:hover {
-    color: #667eea;
+    color: #1a1a1a;
+    background-color: #f5f5f5;
   }
 `
 
 const BrandName = styled.h1`
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 300;
   margin: 0;
-  color: #333;
+  color: #1a1a1a;
+  letter-spacing: 2px;
 `
 
 const ImageContainer = styled.div`
@@ -55,19 +61,19 @@ const ImageContainer = styled.div`
 
 const ProductTag = styled.button`
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: #667eea;
-  border: 3px solid white;
+  background: #1a1a1a;
+  border: 2px solid white;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
   z-index: 10;
   
   &:hover {
-    transform: scale(1.2);
-    background: #5a6fd8;
+    transform: scale(1.3);
+    background: #333;
   }
   
   &::after {
@@ -76,8 +82,8 @@ const ProductTag = styled.button`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
     background: white;
     border-radius: 50%;
   }
@@ -86,14 +92,15 @@ const ProductTag = styled.button`
 const ProductPopup = styled.div`
   position: absolute;
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 1rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   z-index: 20;
-  min-width: 200px;
-  max-width: 250px;
+  min-width: 180px;
+  max-width: 220px;
   transform: translate(-50%, -100%);
-  margin-top: -10px;
+  margin-top: -8px;
+  border: 1px solid #f0f0f0;
   
   &::after {
     content: '';
@@ -103,45 +110,49 @@ const ProductPopup = styled.div`
     transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-top: 10px solid white;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid white;
   }
 `
 
 const ProductName = styled.h3`
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
-  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0 0 0.25rem 0;
+  color: #1a1a1a;
+  letter-spacing: 0.5px;
 `
 
 const ProductBrand = styled.p`
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #666;
   margin: 0 0 0.5rem 0;
+  font-weight: 400;
 `
 
 const ProductPrice = styled.p`
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #667eea;
-  margin: 0 0 1rem 0;
+  color: #1a1a1a;
+  margin: 0 0 0.75rem 0;
 `
 
 const ShopButton = styled.a`
   display: block;
-  background: #667eea;
+  background: #1a1a1a;
   color: white;
   text-decoration: none;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
   text-align: center;
   font-weight: 500;
-  transition: background-color 0.3s ease;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
   
   &:hover {
-    background: #5a6fd8;
+    background: #333;
+    transform: translateY(-1px);
   }
 `
 

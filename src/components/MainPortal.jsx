@@ -5,70 +5,115 @@ import outfitsData from '../data/outfits.json'
 
 const MainContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #fafafa;
+  color: #1a1a1a;
 `
 
-const HeroSection = styled.section`
-  height: 100vh;
+const Header = styled.header`
+  background: white;
+  padding: 1rem 1.5rem;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  text-align: center;
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
 `
 
-const HeroImage = styled.div`
-  width: 200px;
-  height: 200px;
+const BrandName = styled.h1`
+  font-size: 1.1rem;
+  font-weight: 300;
+  margin: 0;
+  letter-spacing: 3px;
+  color: #1a1a1a;
+`
+
+const NavLink = styled(Link)`
+  color: #666;
+  text-decoration: none;
+  font-weight: 400;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    color: #1a1a1a;
+    background-color: #f5f5f5;
+  }
+`
+
+const InfluencerSection = styled.section`
+  padding: 2rem 1.5rem 1rem;
+  text-align: center;
+  background: white;
+  margin-bottom: 1rem;
+`
+
+const InfluencerImage = styled.div`
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background-image: url(${props => props.image});
   background-size: cover;
   background-position: center;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  margin-bottom: 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  margin: 0 auto 1rem;
+  border: 2px solid #f0f0f0;
 `
 
-const BrandName = styled.h1`
-  font-size: 2.5rem;
-  font-weight: 300;
+const InfluencerName = styled.h2`
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin: 0 0 0.5rem 0;
+  color: #1a1a1a;
+  letter-spacing: 1px;
+`
+
+const InfluencerBio = styled.p`
+  font-size: 0.85rem;
+  color: #666;
   margin: 0;
-  letter-spacing: 2px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  line-height: 1.4;
+  max-width: 280px;
+  margin: 0 auto;
 `
 
-const Tagline = styled.p`
-  font-size: 1.1rem;
-  margin: 1rem 0 3rem 0;
-  opacity: 0.9;
-  max-width: 300px;
-  line-height: 1.6;
+const OutfitsSection = styled.section`
+  padding: 0 1.5rem 2rem;
+`
+
+const SectionTitle = styled.h3`
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 1.5rem 0;
+  color: #1a1a1a;
+  text-align: center;
+  letter-spacing: 1px;
 `
 
 const OutfitsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
-  padding: 2rem;
   max-width: 400px;
   margin: 0 auto;
 `
 
 const OutfitCard = styled(Link)`
   position: relative;
-  aspect-ratio: 1;
-  border-radius: 12px;
+  aspect-ratio: 0.75;
+  border-radius: 8px;
   overflow: hidden;
   text-decoration: none;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
+  background: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   }
 `
 
@@ -78,6 +123,7 @@ const OutfitImage = styled.div`
   background-image: url(${props => props.image});
   background-size: cover;
   background-position: center;
+  position: relative;
 `
 
 const OutfitOverlay = styled.div`
@@ -85,82 +131,53 @@ const OutfitOverlay = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-  padding: 1rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  padding: 1rem 0.75rem 0.75rem;
   color: white;
 `
 
-const OutfitTitle = styled.h3`
-  font-size: 0.9rem;
+const OutfitTitle = styled.h4`
+  font-size: 0.8rem;
   font-weight: 500;
   margin: 0;
   text-align: center;
+  letter-spacing: 0.5px;
 `
 
-const Navigation = styled.nav`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 100;
-`
-
-const NavLink = styled(Link)`
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  transition: background-color 0.3s ease;
-  
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-`
-
-const ScrollIndicator = styled.div`
+const ShopButton = styled.div`
   position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: bounce 2s infinite;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: #1a1a1a;
+  opacity: 0;
+  transition: all 0.3s ease;
   
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-      transform: translateX(-50%) translateY(0);
-    }
-    40% {
-      transform: translateX(-50%) translateY(-10px);
-    }
-    60% {
-      transform: translateX(-50%) translateY(-5px);
-    }
+  ${OutfitCard}:hover & {
+    opacity: 1;
   }
 `
 
-const ScrollArrow = styled.div`
-  width: 2px;
-  height: 30px;
+const Footer = styled.footer`
   background: white;
-  position: relative;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: -3px;
-    width: 8px;
-    height: 8px;
-    border-right: 2px solid white;
-    border-bottom: 2px solid white;
-    transform: rotate(45deg);
-  }
+  padding: 2rem 1.5rem;
+  text-align: center;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 2rem;
+`
+
+const FooterText = styled.p`
+  font-size: 0.8rem;
+  color: #999;
+  margin: 0;
+  line-height: 1.4;
 `
 
 function MainPortal() {
@@ -174,32 +191,37 @@ function MainPortal() {
 
   return (
     <MainContainer>
-      <Navigation>
-        <BrandName style={{ fontSize: '1.2rem', margin: 0 }}>
-          {influencer?.brand}
-        </BrandName>
+      <Header>
+        <BrandName>{influencer?.brand}</BrandName>
         <NavLink to="/about">About</NavLink>
-      </Navigation>
+      </Header>
       
-      <HeroSection>
-        <HeroImage image={influencer?.heroImage} />
-        <BrandName>{influencer?.name}</BrandName>
-        <Tagline>{influencer?.bio}</Tagline>
-        <ScrollIndicator>
-          <ScrollArrow />
-        </ScrollIndicator>
-      </HeroSection>
+      <InfluencerSection>
+        <InfluencerImage image={influencer?.heroImage} />
+        <InfluencerName>{influencer?.name}</InfluencerName>
+        <InfluencerBio>{influencer?.bio}</InfluencerBio>
+      </InfluencerSection>
       
-      <OutfitsGrid>
-        {outfits.map((outfit) => (
-          <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
-            <OutfitImage image={outfit.image} />
-            <OutfitOverlay>
-              <OutfitTitle>{outfit.title}</OutfitTitle>
-            </OutfitOverlay>
-          </OutfitCard>
-        ))}
-      </OutfitsGrid>
+      <OutfitsSection>
+        <SectionTitle>Latest Outfits</SectionTitle>
+        <OutfitsGrid>
+          {outfits.map((outfit) => (
+            <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
+              <OutfitImage image={outfit.image} />
+              <ShopButton>→</ShopButton>
+              <OutfitOverlay>
+                <OutfitTitle>{outfit.title}</OutfitTitle>
+              </OutfitOverlay>
+            </OutfitCard>
+          ))}
+        </OutfitsGrid>
+      </OutfitsSection>
+      
+      <Footer>
+        <FooterText>
+          Tap any outfit to shop the look • All items are shoppable
+        </FooterText>
+      </Footer>
     </MainContainer>
   )
 }
