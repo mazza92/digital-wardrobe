@@ -4,7 +4,12 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://digital-wardrobe-a
 
 export const fetchOutfits = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/outfits/export?${Date.now()}`, {
+    const url = `${API_BASE_URL}/outfits/export?${Date.now()}`
+    console.log('🔍 Fetching outfits from:', url)
+    console.log('🔍 API_BASE_URL:', API_BASE_URL)
+    console.log('🔍 VITE_API_URL env:', import.meta.env.VITE_API_URL)
+    
+    const response = await fetch(url, {
       mode: 'cors',
       headers: {
         'Accept': 'application/json',
@@ -12,14 +17,18 @@ export const fetchOutfits = async () => {
       cache: 'no-cache'
     })
     
+    console.log('📡 Response status:', response.status)
+    console.log('📡 Response headers:', response.headers)
+    
     if (response.ok) {
       const data = await response.json()
+      console.log('✅ API data received:', data)
       return data
     } else {
       throw new Error(`API not available: ${response.status}`)
     }
   } catch (error) {
-    console.error('API fetch failed:', error.message)
+    console.error('❌ API fetch failed:', error.message)
     throw error
   }
 }
