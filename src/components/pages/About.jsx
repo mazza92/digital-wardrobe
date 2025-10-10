@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import outfitsData from '../data/outfits.json'
+import outfitsData from '../../data/outfits.json'
 
 const AboutContainer = styled.div`
   min-height: 100vh;
@@ -182,7 +182,7 @@ function About() {
     <AboutContainer>
       <Header>
         <BackButton to="/">
-          ← Back
+          ← Retour
         </BackButton>
         <BrandName>{influencer.brand}</BrandName>
       </Header>

@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import styled from 'styled-components'
-import MainPortal from './components/MainPortal'
-import OutfitDetail from './components/OutfitDetail'
-import About from './components/About'
+import MainPortal from './components/pages/MainPortal'
+import OutfitDetail from './components/pages/OutfitDetail'
+import About from './components/pages/About'
 
 const AppContainer = styled.div`
   min-height: 100vh;
