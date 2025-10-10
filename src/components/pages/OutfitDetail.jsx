@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useFavorites } from '../../hooks/useFavorites'
+import { fetchOutfits } from '../../utils/api'
 import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
 
@@ -500,15 +501,10 @@ function OutfitDetail() {
   const fetchData = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('http://localhost:3000/api/outfits/export?' + Date.now())
-      if (response.ok) {
-        const data = await response.json()
-        const foundOutfit = data.outfits.find(o => o.id === outfitId)
-        setOutfit(foundOutfit)
-        setInfluencer(data.influencer)
-      } else {
-        throw new Error('API not available')
-      }
+      const data = await fetchOutfits()
+      const foundOutfit = data.outfits.find(o => o.id === outfitId)
+      setOutfit(foundOutfit)
+      setInfluencer(data.influencer)
     } catch (err) {
       console.log('Using fallback data:', err.message)
       const fallbackData = await import('../../data/outfits.json')
