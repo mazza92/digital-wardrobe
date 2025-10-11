@@ -117,15 +117,20 @@ const ProductTag = styled.button`
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  background: ${props => props.$isHovered 
+    ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' 
+    : 'linear-gradient(135deg, #1a1a1a 0%, #333 100%)'};
   border: 3px solid white;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: ${props => props.$isHovered 
+    ? '0 0 0 8px rgba(220, 38, 38, 0.2), 0 6px 30px rgba(220, 38, 38, 0.4)' 
+    : '0 4px 20px rgba(0, 0, 0, 0.3)'};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
+  transform: ${props => props.$isHovered ? 'scale(1.4)' : 'scale(1)'};
   
   &:hover {
     transform: scale(1.3);
@@ -310,18 +315,37 @@ const ProductCard = styled.div`
   background: white;
   border-radius: 16px;
   padding: 0;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 2px solid ${props => props.$isHovered ? 'rgba(220, 38, 38, 0.3)' : 'rgba(0, 0, 0, 0.06)'};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   position: relative;
   min-height: 280px;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: ${props => props.$isHovered 
+      ? '0 12px 24px rgba(220, 38, 38, 0.2)' 
+      : '0 12px 24px rgba(0, 0, 0, 0.1)'};
+    border-color: ${props => props.$isHovered 
+      ? 'rgba(220, 38, 38, 0.5)' 
+      : 'rgba(0, 0, 0, 0.1)'};
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: ${props => props.$isHovered 
+      ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' 
+      : 'transparent'};
+    transition: all 0.3s ease;
+    z-index: 1;
   }
 `
 
@@ -539,6 +563,7 @@ function OutfitDetail() {
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 })
   const [isLoading, setIsLoading] = useState(true)
+  const [hoveredProductId, setHoveredProductId] = useState(null)
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
   
   const {
@@ -697,6 +722,7 @@ function OutfitDetail() {
                     top: `${smartPos.y}%`
                   }}
                   onClick={(e) => handleProductClick(product, e)}
+                  $isHovered={hoveredProductId === product.id}
                 />
               )
             })}
@@ -732,7 +758,12 @@ function OutfitDetail() {
             <SectionTitle>Acheter ce Look</SectionTitle>
             <ProductsGrid>
               {outfit.products.map((product) => (
-                <ProductCard key={product.id}>
+                <ProductCard 
+                  key={product.id}
+                  $isHovered={hoveredProductId === product.id}
+                  onMouseEnter={() => setHoveredProductId(product.id)}
+                  onMouseLeave={() => setHoveredProductId(null)}
+                >
                   <ProductThumbnail />
                   <ProductCardContent>
                     <ProductCardName>{product.name}</ProductCardName>
