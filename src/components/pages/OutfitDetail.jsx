@@ -114,8 +114,8 @@ const ImageContainer = styled.div`
 
 const ProductTag = styled.button`
   position: absolute;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
   border: 3px solid white;
@@ -123,21 +123,20 @@ const ProductTag = styled.button`
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
   &:hover {
-    transform: scale(1.4);
+    transform: scale(1.3);
     background: linear-gradient(135deg, #333 0%, #1a1a1a 100%);
     box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
   }
   
   &::after {
     content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     background: white;
     border-radius: 50%;
   }
@@ -272,38 +271,79 @@ const ProductsSection = styled.div`
 `
 
 const SectionTitle = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 2rem 0;
   color: #1a1a1a;
   letter-spacing: 0.5px;
+  text-align: center;
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+    border-radius: 2px;
+  }
 `
 
 const ProductsGrid = styled.div`
   display: grid;
-  gap: 1rem;
+  gap: 1.5rem;
   
   @media (min-width: 480px) {
     grid-template-columns: repeat(2, 1fr);
   }
   
   @media (min-width: 768px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
   }
 `
 
 const ProductCard = styled.div`
-  background: #f8f9fa;
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
   
   &:hover {
-    background: white;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    border-color: rgba(0, 0, 0, 0.1);
   }
+`
+
+const ProductThumbnail = styled.div`
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &::before {
+    content: '👗';
+    font-size: 3rem;
+    opacity: 0.3;
+  }
+`
+
+const ProductCardContent = styled.div`
+  padding: 1.5rem;
 `
 
 const ProductCardName = styled.h3`
@@ -516,6 +556,30 @@ function OutfitDetail() {
     }
   }
 
+  // Smart positioning function to avoid edges
+  const getSmartPosition = (x, y) => {
+    const tagSize = 28
+    const margin = 20
+    
+    // Adjust horizontal position if too close to edges
+    let adjustedX = x
+    if (x < margin) {
+      adjustedX = margin
+    } else if (x > 100 - margin) {
+      adjustedX = 100 - margin
+    }
+    
+    // Adjust vertical position if too close to edges
+    let adjustedY = y
+    if (y < margin) {
+      adjustedY = margin
+    } else if (y > 100 - margin) {
+      adjustedY = 100 - margin
+    }
+    
+    return { x: adjustedX, y: adjustedY }
+  }
+
   const handleProductClick = (product, event) => {
     event.stopPropagation()
     const rect = event.currentTarget.getBoundingClientRect()
@@ -608,16 +672,19 @@ function OutfitDetail() {
       <MainContent>
         <ImageSection>
           <ImageContainer image={outfit.image} onClick={handleImageClick}>
-            {outfit.products.map((product) => (
-              <ProductTag
-                key={product.id}
-                style={{
-                  left: `${product.x}%`,
-                  top: `${product.y}%`
-                }}
-                onClick={(e) => handleProductClick(product, e)}
-              />
-            ))}
+            {outfit.products.map((product) => {
+              const smartPos = getSmartPosition(product.x, product.y)
+              return (
+                <ProductTag
+                  key={product.id}
+                  style={{
+                    left: `${smartPos.x}%`,
+                    top: `${smartPos.y}%`
+                  }}
+                  onClick={(e) => handleProductClick(product, e)}
+                />
+              )
+            })}
             
             {selectedProduct && (
               <ProductPopup
@@ -651,24 +718,27 @@ function OutfitDetail() {
             <ProductsGrid>
               {outfit.products.map((product) => (
                 <ProductCard key={product.id}>
-                  <ProductCardName>{product.name}</ProductCardName>
-                  <ProductCardBrand>{product.brand}</ProductCardBrand>
-                  <ProductCardPrice>{convertToEuros(product.price)}</ProductCardPrice>
-                  <ProductCardActions>
-                    <ProductCardButton 
-                      href={product.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                    >
-                      Acheter
-                    </ProductCardButton>
-                    <AddToCartButton 
-                      onClick={() => handleToggleFavorite(product)}
-                      data-product-id={product.id}
-                    >
-                      {isFavorited(product.id) ? '♥ Sauvé' : 'Sauvegarder'}
-                    </AddToCartButton>
-                  </ProductCardActions>
+                  <ProductThumbnail />
+                  <ProductCardContent>
+                    <ProductCardName>{product.name}</ProductCardName>
+                    <ProductCardBrand>{product.brand}</ProductCardBrand>
+                    <ProductCardPrice>{convertToEuros(product.price)}</ProductCardPrice>
+                    <ProductCardActions>
+                      <ProductCardButton 
+                        href={product.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
+                        Acheter
+                      </ProductCardButton>
+                      <AddToCartButton 
+                        onClick={() => handleToggleFavorite(product)}
+                        data-product-id={product.id}
+                      >
+                        {isFavorited(product.id) ? '♥ Sauvé' : 'Sauvegarder'}
+                      </AddToCartButton>
+                    </ProductCardActions>
+                  </ProductCardContent>
                 </ProductCard>
               ))}
             </ProductsGrid>
