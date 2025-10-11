@@ -352,9 +352,13 @@ const ProductCount = styled.div`
 const Footer = styled.footer`
   background: #1a1a1a;
   color: white;
-  padding: 3rem 1.5rem;
+  padding: 2rem 1rem;
   text-align: center;
   margin-top: 4rem;
+  
+  @media (min-width: 768px) {
+    padding: 3rem 1.5rem;
+  }
 `
 
 const FooterContent = styled.div`
@@ -363,35 +367,55 @@ const FooterContent = styled.div`
 `
 
 const FooterTitle = styled.h3`
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
   color: white;
+  
+  @media (min-width: 768px) {
+    font-size: 1.5rem;
+  }
 `
 
 const FooterText = styled.p`
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 2rem 0;
   line-height: 1.6;
+  
+  @media (min-width: 768px) {
+    font-size: 1rem;
+  }
 `
 
 const SocialLinks = styled.div`
   display: flex;
   justify-content: center;
-  gap: 2rem;
+  gap: 1rem;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  
+  @media (min-width: 768px) {
+    gap: 2rem;
+  }
 `
 
 const SocialLink = styled.a`
   color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
   font-weight: 500;
-  font-size: 0.95rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 25px;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
+  white-space: nowrap;
+  
+  @media (min-width: 768px) {
+    font-size: 0.95rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+  }
   
   &:hover {
     color: white;
