@@ -401,9 +401,11 @@ const ProductCardButton = styled.a`
 `
 
 const AddToCartButton = styled.button`
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  color: #666;
-  border: 2px solid #e9ecef;
+  background: ${props => props.$isFavorited 
+    ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' 
+    : 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'};
+  color: ${props => props.$isFavorited ? 'white' : '#666'};
+  border: 2px solid ${props => props.$isFavorited ? '#dc2626' : '#e9ecef'};
   padding: 0.5rem 1rem;
   border-radius: 10px;
   font-weight: 600;
@@ -413,11 +415,17 @@ const AddToCartButton = styled.button`
   letter-spacing: 0.5px;
   
   &:hover {
-    background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
-    border-color: #dee2e6;
-    color: #333;
+    background: ${props => props.$isFavorited 
+      ? 'linear-gradient(135deg, #b91c1c 0%, #991b1b 100%)' 
+      : 'linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%)'};
+    border-color: ${props => props.$isFavorited ? '#b91c1c' : '#dee2e6'};
+    color: ${props => props.$isFavorited ? 'white' : '#333'};
     transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `
 
@@ -622,21 +630,16 @@ function OutfitDetail() {
 
   const handleToggleFavorite = (product) => {
     toggleFavorite(product)
-    // Show a brief success message
+    // Simple feedback without inline styles - let styled-components handle the styling
     const button = document.querySelector(`[data-product-id="${product.id}"]`)
     if (button) {
       const isCurrentlyFavorited = isFavorited(product.id)
       const originalText = button.textContent
-      button.textContent = isCurrentlyFavorited ? 'Removed!' : 'Added!'
-      button.style.background = isCurrentlyFavorited 
-        ? 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)'
-        : 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)'
+      button.textContent = isCurrentlyFavorited ? '♥ Sauvé!' : 'Ajouté!'
+      
       setTimeout(() => {
         button.textContent = originalText
-        button.style.background = isCurrentlyFavorited
-          ? 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)'
-          : 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)'
-      }, 1500)
+      }, 1000)
     }
   }
 
@@ -746,6 +749,7 @@ function OutfitDetail() {
                       <AddToCartButton 
                         onClick={() => handleToggleFavorite(product)}
                         data-product-id={product.id}
+                        $isFavorited={isFavorited(product.id)}
                       >
                         {isFavorited(product.id) ? '♥ Sauvé' : 'Sauvegarder'}
                       </AddToCartButton>
