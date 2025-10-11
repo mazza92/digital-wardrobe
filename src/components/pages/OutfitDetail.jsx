@@ -293,44 +293,41 @@ const SectionTitle = styled.h2`
 `
 
 const ProductsGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
   
-  @media (min-width: 768px) {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
+  @media (min-width: 480px) {
+    gap: 1.25rem;
   }
   
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2.5rem;
+  @media (min-width: 768px) {
+    gap: 1.5rem;
   }
 `
 
 const ProductCard = styled.div`
   background: white;
-  border-radius: 24px;
+  border-radius: 16px;
   padding: 0;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   position: relative;
-  min-height: 400px;
+  min-height: 280px;
   display: flex;
   flex-direction: column;
   
   &:hover {
-    transform: translateY(-12px);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
     border-color: rgba(0, 0, 0, 0.1);
   }
 `
 
 const ProductThumbnail = styled.div`
   width: 100%;
-  height: 240px;
+  height: 140px;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   position: relative;
   overflow: hidden;
@@ -340,13 +337,13 @@ const ProductThumbnail = styled.div`
   
   &::before {
     content: '👗';
-    font-size: 4rem;
+    font-size: 2.5rem;
     opacity: 0.4;
   }
 `
 
 const ProductCardContent = styled.div`
-  padding: 2rem;
+  padding: 1.25rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -354,33 +351,33 @@ const ProductCardContent = styled.div`
 `
 
 const ProductCardName = styled.h3`
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 0.5rem 0;
   color: #1a1a1a;
-  line-height: 1.3;
+  line-height: 1.2;
 `
 
 const ProductCardBrand = styled.p`
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   color: #666;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 1px;
 `
 
 const ProductCardPrice = styled.p`
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: #1a1a1a;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
 `
 
 const ProductCardActions = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin-top: auto;
 `
 
@@ -388,18 +385,18 @@ const ProductCardButton = styled.a`
   background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
   color: white;
   text-decoration: none;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
   text-align: center;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   transition: all 0.3s ease;
   letter-spacing: 0.5px;
   
   &:hover {
     background: linear-gradient(135deg, #333 0%, #1a1a1a 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
 `
 
@@ -407,10 +404,10 @@ const AddToCartButton = styled.button`
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   color: #666;
   border: 2px solid #e9ecef;
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
   letter-spacing: 0.5px;
@@ -570,7 +567,7 @@ function OutfitDetail() {
   // Smart positioning function to avoid edges
   const getSmartPosition = (x, y) => {
     const tagSize = 28
-    const margin = 15 // Reduced margin for better positioning
+    const margin = 25 // Increased margin for better safety
     
     // Adjust horizontal position if too close to edges
     let adjustedX = x
@@ -580,11 +577,13 @@ function OutfitDetail() {
       adjustedX = 100 - margin
     }
     
-    // Adjust vertical position if too close to edges - more aggressive for top
+    // Much more aggressive vertical positioning to prevent cropping
     let adjustedY = y
-    if (y < 8) { // Very close to top edge
-      adjustedY = 8
-    } else if (y < margin) { // Close to top edge
+    if (y < 12) { // Very close to top edge - force down
+      adjustedY = 12
+    } else if (y < 20) { // Close to top edge - force down more
+      adjustedY = 20
+    } else if (y < margin) { // Still too close to top
       adjustedY = margin
     } else if (y > 100 - margin) {
       adjustedY = 100 - margin
