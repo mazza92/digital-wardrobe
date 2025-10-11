@@ -156,22 +156,25 @@ const ProductPopup = styled.div`
   z-index: 20;
   min-width: 220px;
   max-width: 280px;
-  transform: translate(-50%, -100%);
-  margin-top: -12px;
+  transform: ${props => props.$transform || 'translate(-50%, -100%)'};
+  margin-top: ${props => props.$arrowPosition === 'bottom' ? '-12px' : '12px'};
   border: 1px solid rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(20px);
   
   &::after {
     content: '';
     position: absolute;
-    top: 100%;
+    ${props => props.$arrowPosition === 'top' ? 'bottom: 100%;' : 'top: 100%;'}
     left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
     border-left: 12px solid transparent;
     border-right: 12px solid transparent;
-    border-top: 12px solid white;
+    ${props => props.$arrowPosition === 'top' 
+      ? 'border-bottom: 12px solid white;' 
+      : 'border-top: 12px solid white;'}
+    display: ${props => props.$arrowPosition === 'none' ? 'none' : 'block'};
   }
 `
 
@@ -630,10 +633,59 @@ function OutfitDetail() {
     const rect = event.currentTarget.getBoundingClientRect()
     const containerRect = event.currentTarget.parentElement.getBoundingClientRect()
     
+    // Calculate popup dimensions (approximate)
+    const popupWidth = 250 // max-width from styled component
+    const popupHeight = 200 // estimated height
+    const popupMargin = 20 // margin from edges
+    
+    // Calculate tag center position relative to container
+    const tagCenterX = rect.left - containerRect.left + rect.width / 2
+    const tagCenterY = rect.top - containerRect.top + rect.height / 2
+    
+    // Smart positioning logic
+    let popupX = tagCenterX
+    let popupY = tagCenterY
+    let popupTransform = 'translate(-50%, -100%)' // default: above tag
+    let arrowPosition = 'bottom' // default arrow position
+    
+    // Check if popup would go outside container bounds
+    const containerWidth = containerRect.width
+    const containerHeight = containerRect.height
+    
+    // Horizontal positioning
+    if (popupX - popupWidth / 2 < popupMargin) {
+      popupX = popupMargin + popupWidth / 2
+    } else if (popupX + popupWidth / 2 > containerWidth - popupMargin) {
+      popupX = containerWidth - popupMargin - popupWidth / 2
+    }
+    
+    // Vertical positioning - check if there's space above
+    const spaceAbove = tagCenterY
+    const spaceBelow = containerHeight - tagCenterY
+    
+    if (spaceAbove < popupHeight + popupMargin && spaceBelow > popupHeight + popupMargin) {
+      // Not enough space above, position below
+      popupY = tagCenterY + rect.height / 2 + popupMargin
+      popupTransform = 'translate(-50%, 0%)'
+      arrowPosition = 'top'
+    } else if (spaceAbove > popupHeight + popupMargin) {
+      // Enough space above, position above (default)
+      popupY = tagCenterY - rect.height / 2 - popupMargin
+      popupTransform = 'translate(-50%, -100%)'
+      arrowPosition = 'bottom'
+    } else {
+      // Not enough space in either direction, position in center
+      popupY = containerHeight / 2
+      popupTransform = 'translate(-50%, -50%)'
+      arrowPosition = 'none'
+    }
+    
     setSelectedProduct(product)
     setPopupPosition({
-      x: rect.left - containerRect.left + rect.width / 2,
-      y: rect.top - containerRect.top
+      x: popupX,
+      y: popupY,
+      transform: popupTransform,
+      arrowPosition: arrowPosition
     })
   }
 
@@ -733,6 +785,8 @@ function OutfitDetail() {
                   left: `${popupPosition.x}px`,
                   top: `${popupPosition.y}px`
                 }}
+                $transform={popupPosition.transform}
+                $arrowPosition={popupPosition.arrowPosition}
               >
                 <ClosePopup onClick={() => setSelectedProduct(null)}>×</ClosePopup>
                 <ProductName>{selectedProduct.name}</ProductName>
