@@ -85,7 +85,7 @@ const ImageSection = styled.div`
   position: relative;
   background: white;
   border-radius: 20px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
   
@@ -106,6 +106,7 @@ const ImageContainer = styled.div`
   background-size: cover;
   width: 100%;
   aspect-ratio: 3/4;
+  overflow: visible;
   
   @media (min-width: 768px) {
     aspect-ratio: 4/5;
@@ -636,7 +637,7 @@ function OutfitDetail() {
     // Calculate popup dimensions (approximate)
     const popupWidth = 250 // max-width from styled component
     const popupHeight = 200 // estimated height
-    const popupMargin = 20 // margin from edges
+    const popupMargin = 30 // increased margin from edges for safety
     
     // Calculate tag center position relative to container
     const tagCenterX = rect.left - containerRect.left + rect.width / 2
@@ -659,16 +660,18 @@ function OutfitDetail() {
       popupX = containerWidth - popupMargin - popupWidth / 2
     }
     
-    // Vertical positioning - check if there's space above
+    // Vertical positioning - check if there's space above (be more conservative)
     const spaceAbove = tagCenterY
     const spaceBelow = containerHeight - tagCenterY
+    const requiredSpaceAbove = popupHeight + popupMargin + 20 // extra buffer for top
+    const requiredSpaceBelow = popupHeight + popupMargin
     
-    if (spaceAbove < popupHeight + popupMargin && spaceBelow > popupHeight + popupMargin) {
+    if (spaceAbove < requiredSpaceAbove && spaceBelow > requiredSpaceBelow) {
       // Not enough space above, position below
       popupY = tagCenterY + rect.height / 2 + popupMargin
       popupTransform = 'translate(-50%, 0%)'
       arrowPosition = 'top'
-    } else if (spaceAbove > popupHeight + popupMargin) {
+    } else if (spaceAbove > requiredSpaceAbove) {
       // Enough space above, position above (default)
       popupY = tagCenterY - rect.height / 2 - popupMargin
       popupTransform = 'translate(-50%, -100%)'
