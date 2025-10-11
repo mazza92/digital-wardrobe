@@ -580,6 +580,8 @@ function OutfitDetail() {
   } = useFavorites()
 
   useEffect(() => {
+    // Scroll to top when component mounts or outfitId changes
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
     fetchData()
   }, [outfitId])
 
