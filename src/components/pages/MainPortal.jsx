@@ -156,111 +156,243 @@ const StatLabel = styled.div`
   letter-spacing: 1px;
 `
 
-// Editable Hero Components
+// Modern Edit UI Components
 const EditButton = styled.button`
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `
 
-const EditableImage = styled.div`
-  width: 100px;
-  height: 100px;
+const EditIcon = styled.span`
+  font-size: 1rem;
+`
+
+// Modern Modal Components
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  opacity: ${props => props.$isOpen ? 1 : 0};
+  visibility: ${props => props.$isOpen ? 'visible' : 'hidden'};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+`
+
+const ModalContent = styled.div`
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  transform: ${props => props.$isOpen ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(20px)'};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+`
+
+const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+`
+
+const ModalTitle = styled.h2`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+`
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #1a1a1a;
+  }
+`
+
+const FormGroup = styled.div`
+  margin-bottom: 1.5rem;
+`
+
+const Label = styled.label`
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+`
+
+const ImageUploadArea = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  border: 2px dashed rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: #1a1a1a;
+    background: #f0f0f0;
+  }
+`
+
+const PreviewImage = styled.div`
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background-image: url(${props => props.image});
   background-size: cover;
   background-position: center;
-  margin: 0 auto 1.5rem;
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  border: 3px solid white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+`
+
+const UploadText = styled.div`
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+`
+
+const Input = styled.input`
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+  
+  &:focus {
+    outline: none;
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
+  }
+  
+  &::placeholder {
+    color: #999;
+  }
+`
+
+const TextArea = styled.textarea`
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  font-size: 1rem;
+  min-height: 100px;
+  resize: vertical;
+  transition: all 0.3s ease;
+  background: white;
+  font-family: inherit;
+  
+  &:focus {
+    outline: none;
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
+  }
+  
+  &::placeholder {
+    color: #999;
+  }
+`
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+`
+
+const SaveButton = styled.button`
+  flex: 1;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  position: relative;
   
   &:hover {
-    transform: scale(1.05);
-    border-color: rgba(255, 255, 255, 0.4);
+    background: #333;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(26, 26, 26, 0.3);
   }
   
-  &::after {
-    content: '📷';
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  &:hover::after {
-    opacity: 1;
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 `
 
-const EditableName = styled.input`
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
-  color: white;
-  letter-spacing: -0.5px;
+const CancelButton = styled.button`
+  flex: 1;
   background: transparent;
-  border: none;
-  text-align: center;
-  width: 100%;
-  outline: none;
-  border-bottom: 2px solid transparent;
-  transition: border-color 0.3s ease;
+  color: #666;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
   
-  &:focus {
-    border-bottom-color: rgba(255, 255, 255, 0.5);
-  }
-  
-  @media (max-width: 767px) {
-    font-size: 1.75rem;
-  }
-`
-
-const EditableBio = styled.textarea`
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-  line-height: 1.6;
-  font-weight: 400;
-  background: transparent;
-  border: none;
-  text-align: center;
-  width: 100%;
-  outline: none;
-  resize: none;
-  border-bottom: 2px solid transparent;
-  transition: border-color 0.3s ease;
-  min-height: 60px;
-  
-  &:focus {
-    border-bottom-color: rgba(255, 255, 255, 0.5);
+  &:hover {
+    border-color: #1a1a1a;
+    color: #1a1a1a;
+    background: rgba(26, 26, 26, 0.02);
   }
 `
 
@@ -613,13 +745,14 @@ const LoadingText = styled.p`
 function MainPortal() {
   const { outfits, influencer, isLoading, error } = useOutfits()
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('outfits')
   const [editedInfluencer, setEditedInfluencer] = useState({
     name: '',
     bio: '',
     heroImage: ''
   })
+  const [isSaving, setIsSaving] = useState(false)
   
   const {
     favorites,
@@ -628,9 +761,18 @@ function MainPortal() {
     getFavoritesCount
   } = useFavorites()
 
-  // Initialize edited influencer data when influencer data loads
+  // Load saved influencer data from localStorage on component mount
   useEffect(() => {
-    if (influencer) {
+    const savedData = localStorage.getItem('influencer-data')
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData)
+        setEditedInfluencer(parsed)
+      } catch (error) {
+        console.error('Error parsing saved influencer data:', error)
+      }
+    } else if (influencer) {
+      // Initialize with default data if no saved data exists
       setEditedInfluencer({
         name: influencer.name || '',
         bio: influencer.bio || '',
@@ -639,14 +781,30 @@ function MainPortal() {
     }
   }, [influencer])
 
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing)
+  const handleEditModalOpen = () => {
+    setIsEditModalOpen(true)
   }
 
-  const handleSave = () => {
-    // Here you would typically save to backend
-    console.log('Saving influencer data:', editedInfluencer)
-    setIsEditing(false)
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false)
+  }
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      // Save to localStorage for persistence
+      localStorage.setItem('influencer-data', JSON.stringify(editedInfluencer))
+      
+      // Here you would typically also save to backend
+      // await saveInfluencerData(editedInfluencer)
+      
+      console.log('Saving influencer data:', editedInfluencer)
+      setIsEditModalOpen(false)
+    } catch (error) {
+      console.error('Error saving influencer data:', error)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleImageChange = (event) => {
@@ -661,6 +819,13 @@ function MainPortal() {
       }
       reader.readAsDataURL(file)
     }
+  }
+
+  const handleInputChange = (field, value) => {
+    setEditedInfluencer(prev => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
   if (isLoading) {
@@ -713,38 +878,13 @@ function MainPortal() {
       
       <HeroSection>
         <HeroContent>
-          {isEditing ? (
-            <>
-              <EditButton onClick={handleSave}>Sauvegarder</EditButton>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                style={{ display: 'none' }}
-                id="avatar-upload"
-              />
-              <label htmlFor="avatar-upload">
-                <EditableImage image={editedInfluencer.heroImage} />
-              </label>
-              <EditableName
-                value={editedInfluencer.name}
-                onChange={(e) => setEditedInfluencer(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Nom de l'influenceur"
-              />
-              <EditableBio
-                value={editedInfluencer.bio}
-                onChange={(e) => setEditedInfluencer(prev => ({ ...prev, bio: e.target.value }))}
-                placeholder="Bio de l'influenceur"
-              />
-            </>
-          ) : (
-            <>
-              <EditButton onClick={handleEditToggle}>Modifier</EditButton>
-              <InfluencerImage image={editedInfluencer.heroImage || influencer?.heroImage} />
-              <InfluencerName>{editedInfluencer.name || influencer?.name}</InfluencerName>
-              <InfluencerBio>{editedInfluencer.bio || influencer?.bio}</InfluencerBio>
-            </>
-          )}
+          <EditButton onClick={handleEditModalOpen}>
+            <EditIcon>✏️</EditIcon>
+            Modifier
+          </EditButton>
+          <InfluencerImage image={editedInfluencer.heroImage || influencer?.heroImage} />
+          <InfluencerName>{editedInfluencer.name || influencer?.name}</InfluencerName>
+          <InfluencerBio>{editedInfluencer.bio || influencer?.bio}</InfluencerBio>
         </HeroContent>
       </HeroSection>
 
@@ -800,18 +940,38 @@ function MainPortal() {
             </OutfitsGrid>
           </>
         ) : (
-          <SectionHeader>
-            <SectionTitle>Wishlist</SectionTitle>
-            <SectionSubtitle>Mes sélections et produits favoris</SectionSubtitle>
-            <div style={{ 
-              textAlign: 'center', 
-              padding: '4rem 2rem',
-              color: '#666',
-              fontSize: '1.1rem'
-            }}>
-              🛍️ Bientôt disponible - Créez vos propres sélections de produits
-            </div>
-          </SectionHeader>
+          <>
+            <SectionHeader>
+              <SectionTitle>Wishlist</SectionTitle>
+              <SectionSubtitle>Mes sélections et produits favoris</SectionSubtitle>
+            </SectionHeader>
+            
+            <OutfitsGrid>
+              {outfits.map((outfit) => (
+                <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
+                  <OutfitImage image={outfit.image} />
+                  <ProductTags>
+                    {outfit.products.map((product) => (
+                      <ProductTag
+                        key={product.id}
+                        x={product.x}
+                        y={product.y}
+                        title={`${product.name} - ${product.brand}`}
+                      />
+                    ))}
+                  </ProductTags>
+                  <ProductCount>{outfit.products.length} articles</ProductCount>
+                  <OutfitOverlay>
+                    <OutfitTitle>{outfit.title}</OutfitTitle>
+                    <OutfitDescription>{outfit.description}</OutfitDescription>
+                    <ShopButton>
+                      Acheter le Look →
+                    </ShopButton>
+                  </OutfitOverlay>
+                </OutfitCard>
+              ))}
+            </OutfitsGrid>
+          </>
         )}
       </ContentSection>
       
@@ -850,6 +1010,67 @@ function MainPortal() {
         onRemoveFavorite={removeFromFavorites}
         onClearFavorites={clearFavorites}
       />
+
+      {/* Edit Profile Modal */}
+      <ModalOverlay $isOpen={isEditModalOpen} onClick={handleEditModalClose}>
+        <ModalContent $isOpen={isEditModalOpen} onClick={(e) => e.stopPropagation()}>
+          <ModalHeader>
+            <ModalTitle>Modifier le Profil</ModalTitle>
+            <CloseButton onClick={handleEditModalClose}>×</CloseButton>
+          </ModalHeader>
+          
+          <FormGroup>
+            <Label>Photo de Profil</Label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              style={{ display: 'none' }}
+              id="avatar-upload"
+            />
+            <label htmlFor="avatar-upload">
+              <ImageUploadArea>
+                {editedInfluencer.heroImage ? (
+                  <PreviewImage image={editedInfluencer.heroImage} />
+                ) : (
+                  <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📷</div>
+                )}
+                <UploadText>
+                  {editedInfluencer.heroImage ? 'Cliquer pour changer' : 'Cliquer pour ajouter une photo'}
+                </UploadText>
+              </ImageUploadArea>
+            </label>
+          </FormGroup>
+
+          <FormGroup>
+            <Label>Nom</Label>
+            <Input
+              type="text"
+              value={editedInfluencer.name}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+              placeholder="Nom de l'influenceur"
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label>Bio</Label>
+            <TextArea
+              value={editedInfluencer.bio}
+              onChange={(e) => handleInputChange('bio', e.target.value)}
+              placeholder="Description de l'influenceur"
+            />
+          </FormGroup>
+
+          <ButtonGroup>
+            <CancelButton onClick={handleEditModalClose}>
+              Annuler
+            </CancelButton>
+            <SaveButton onClick={handleSave} disabled={isSaving}>
+              {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
+            </SaveButton>
+          </ButtonGroup>
+        </ModalContent>
+      </ModalOverlay>
     </MainContainer>
   )
 }
