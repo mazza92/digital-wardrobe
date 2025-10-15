@@ -598,7 +598,7 @@ function MainPortal() {
             </SectionHeader>
             
             <OutfitsGrid>
-              {outfits.map((outfit) => (
+              {outfits.filter(outfit => outfit.category === 'outfit').map((outfit) => (
                 <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
                   <OutfitImage image={outfit.image} />
                   <ProductTags>
@@ -631,7 +631,7 @@ function MainPortal() {
             </SectionHeader>
             
             <OutfitsGrid>
-              {outfits.map((outfit) => (
+              {outfits.filter(outfit => outfit.category === 'wishlist').map((outfit) => (
                 <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
                   <OutfitImage image={outfit.image} />
                   <ProductTags>
