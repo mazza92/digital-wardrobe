@@ -553,7 +553,7 @@ function MainPortal() {
   return (
     <MainContainer>
       <Header>
-        <BrandName>{influencer?.brand || 'Garde-Robe Numérique'}</BrandName>
+        <BrandName>Garde-Robe Numérique</BrandName>
         <HeaderRight>
           <FavoritesButton 
             onClick={() => setIsFavoritesOpen(true)} 
