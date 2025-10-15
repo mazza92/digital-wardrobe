@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useOutfits } from '../../hooks/useOutfits'
@@ -154,6 +154,154 @@ const StatLabel = styled.div`
   color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
   letter-spacing: 1px;
+`
+
+// Editable Hero Components
+const EditButton = styled.button`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+`
+
+const EditableImage = styled.div`
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-image: url(${props => props.image});
+  background-size: cover;
+  background-position: center;
+  margin: 0 auto 1.5rem;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  
+  &:hover {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  
+  &::after {
+    content: '📷';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  &:hover::after {
+    opacity: 1;
+  }
+`
+
+const EditableName = styled.input`
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: white;
+  letter-spacing: -0.5px;
+  background: transparent;
+  border: none;
+  text-align: center;
+  width: 100%;
+  outline: none;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.3s ease;
+  
+  &:focus {
+    border-bottom-color: rgba(255, 255, 255, 0.5);
+  }
+  
+  @media (max-width: 767px) {
+    font-size: 1.75rem;
+  }
+`
+
+const EditableBio = styled.textarea`
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.6;
+  font-weight: 400;
+  background: transparent;
+  border: none;
+  text-align: center;
+  width: 100%;
+  outline: none;
+  resize: none;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.3s ease;
+  min-height: 60px;
+  
+  &:focus {
+    border-bottom-color: rgba(255, 255, 255, 0.5);
+  }
+`
+
+// Tab Menu Components
+const TabContainer = styled.div`
+  background: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 80px;
+  z-index: 50;
+`
+
+const TabMenu = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  padding: 0 1.5rem;
+`
+
+const TabButton = styled.button`
+  background: none;
+  border: none;
+  padding: 1.5rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${props => props.$active ? '#1a1a1a' : '#666'};
+  cursor: pointer;
+  border-bottom: 3px solid ${props => props.$active ? '#1a1a1a' : 'transparent'};
+  transition: all 0.3s ease;
+  position: relative;
+  
+  &:hover {
+    color: #1a1a1a;
+    background: rgba(0, 0, 0, 0.02);
+  }
+`
+
+const ContentSection = styled.section`
+  padding: 3rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
 `
 
 const OutfitsSection = styled.section`
@@ -465,6 +613,13 @@ const LoadingText = styled.p`
 function MainPortal() {
   const { outfits, influencer, isLoading, error } = useOutfits()
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [activeTab, setActiveTab] = useState('outfits')
+  const [editedInfluencer, setEditedInfluencer] = useState({
+    name: '',
+    bio: '',
+    heroImage: ''
+  })
   
   const {
     favorites,
@@ -472,6 +627,41 @@ function MainPortal() {
     clearFavorites,
     getFavoritesCount
   } = useFavorites()
+
+  // Initialize edited influencer data when influencer data loads
+  useEffect(() => {
+    if (influencer) {
+      setEditedInfluencer({
+        name: influencer.name || '',
+        bio: influencer.bio || '',
+        heroImage: influencer.heroImage || ''
+      })
+    }
+  }, [influencer])
+
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing)
+  }
+
+  const handleSave = () => {
+    // Here you would typically save to backend
+    console.log('Saving influencer data:', editedInfluencer)
+    setIsEditing(false)
+  }
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setEditedInfluencer(prev => ({
+          ...prev,
+          heroImage: e.target.result
+        }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -523,60 +713,107 @@ function MainPortal() {
       
       <HeroSection>
         <HeroContent>
-          <InfluencerImage image={influencer?.heroImage} />
-          <InfluencerName>{influencer?.name}</InfluencerName>
-          <InfluencerBrand>{influencer?.brand}</InfluencerBrand>
-          <InfluencerBio>{influencer?.bio}</InfluencerBio>
-          
-          <StatsSection>
-            <StatItem>
-              <StatNumber>{outfits.length}</StatNumber>
-              <StatLabel>Outfits</StatLabel>
-            </StatItem>
-            <StatItem>
-              <StatNumber>{outfits.reduce((acc, outfit) => acc + outfit.products.length, 0)}</StatNumber>
-              <StatLabel>Products</StatLabel>
-            </StatItem>
-            <StatItem>
-              <StatNumber>24/7</StatNumber>
-              <StatLabel>Available</StatLabel>
-            </StatItem>
-          </StatsSection>
+          {isEditing ? (
+            <>
+              <EditButton onClick={handleSave}>Sauvegarder</EditButton>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                style={{ display: 'none' }}
+                id="avatar-upload"
+              />
+              <label htmlFor="avatar-upload">
+                <EditableImage image={editedInfluencer.heroImage} />
+              </label>
+              <EditableName
+                value={editedInfluencer.name}
+                onChange={(e) => setEditedInfluencer(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Nom de l'influenceur"
+              />
+              <EditableBio
+                value={editedInfluencer.bio}
+                onChange={(e) => setEditedInfluencer(prev => ({ ...prev, bio: e.target.value }))}
+                placeholder="Bio de l'influenceur"
+              />
+            </>
+          ) : (
+            <>
+              <EditButton onClick={handleEditToggle}>Modifier</EditButton>
+              <InfluencerImage image={editedInfluencer.heroImage || influencer?.heroImage} />
+              <InfluencerName>{editedInfluencer.name || influencer?.name}</InfluencerName>
+              <InfluencerBio>{editedInfluencer.bio || influencer?.bio}</InfluencerBio>
+            </>
+          )}
         </HeroContent>
       </HeroSection>
+
+      <TabContainer>
+        <TabMenu>
+          <TabButton 
+            $active={activeTab === 'outfits'} 
+            onClick={() => setActiveTab('outfits')}
+          >
+            Tenues
+          </TabButton>
+          <TabButton 
+            $active={activeTab === 'wishlist'} 
+            onClick={() => setActiveTab('wishlist')}
+          >
+            Wishlist
+          </TabButton>
+        </TabMenu>
+      </TabContainer>
       
-      <OutfitsSection>
-        <SectionHeader>
-          <SectionTitle>Dernières Tenues</SectionTitle>
-          <SectionSubtitle>Appuyez sur une tenue pour acheter le look complet</SectionSubtitle>
-        </SectionHeader>
-        
-        <OutfitsGrid>
-          {outfits.map((outfit) => (
-            <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
-              <OutfitImage image={outfit.image} />
-              <ProductTags>
-                {outfit.products.map((product) => (
-                  <ProductTag
-                    key={product.id}
-                    x={product.x}
-                    y={product.y}
-                    title={`${product.name} - ${product.brand}`}
-                  />
-                ))}
-              </ProductTags>
-              <ProductCount>{outfit.products.length} articles</ProductCount>
-              <OutfitOverlay>
-                <OutfitTitle>{outfit.title}</OutfitTitle>
-                <OutfitDescription>{outfit.description}</OutfitDescription>
-                <ShopButton>
-                  Acheter le Look →
-                </ShopButton>
-              </OutfitOverlay>
-            </OutfitCard>
-          ))}
-        </OutfitsGrid>
-      </OutfitsSection>
+      <ContentSection>
+        {activeTab === 'outfits' ? (
+          <>
+            <SectionHeader>
+              <SectionTitle>Dernières Tenues</SectionTitle>
+              <SectionSubtitle>Appuyez sur une tenue pour acheter le look complet</SectionSubtitle>
+            </SectionHeader>
+            
+            <OutfitsGrid>
+              {outfits.map((outfit) => (
+                <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
+                  <OutfitImage image={outfit.image} />
+                  <ProductTags>
+                    {outfit.products.map((product) => (
+                      <ProductTag
+                        key={product.id}
+                        x={product.x}
+                        y={product.y}
+                        title={`${product.name} - ${product.brand}`}
+                      />
+                    ))}
+                  </ProductTags>
+                  <ProductCount>{outfit.products.length} articles</ProductCount>
+                  <OutfitOverlay>
+                    <OutfitTitle>{outfit.title}</OutfitTitle>
+                    <OutfitDescription>{outfit.description}</OutfitDescription>
+                    <ShopButton>
+                      Acheter le Look →
+                    </ShopButton>
+                  </OutfitOverlay>
+                </OutfitCard>
+              ))}
+            </OutfitsGrid>
+          </>
+        ) : (
+          <SectionHeader>
+            <SectionTitle>Wishlist</SectionTitle>
+            <SectionSubtitle>Mes sélections et produits favoris</SectionSubtitle>
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '4rem 2rem',
+              color: '#666',
+              fontSize: '1.1rem'
+            }}>
+              🛍️ Bientôt disponible - Créez vos propres sélections de produits
+            </div>
+          </SectionHeader>
+        )}
+      </ContentSection>
       
       {influencer && (
         <Footer>
