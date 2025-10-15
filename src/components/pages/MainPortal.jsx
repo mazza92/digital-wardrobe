@@ -83,6 +83,10 @@ const HeroContent = styled.div`
   z-index: 1;
   max-width: 600px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 `
 
 const InfluencerImage = styled.div`
@@ -92,7 +96,7 @@ const InfluencerImage = styled.div`
   background-image: url(${props => props.image});
   background-size: cover;
   background-position: center;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto;
   border: 3px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 `
@@ -100,7 +104,7 @@ const InfluencerImage = styled.div`
 const InfluencerName = styled.h2`
   font-size: 2rem;
   font-weight: 700;
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   color: white;
   letter-spacing: -0.5px;
   
