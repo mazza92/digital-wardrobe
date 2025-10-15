@@ -112,7 +112,7 @@ const InfluencerName = styled.h2`
 const InfluencerBrand = styled.p`
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 1rem 0;
+  margin: 0;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -567,6 +567,7 @@ function MainPortal() {
         <HeroContent>
           <InfluencerImage image={influencer?.heroImage} />
           <InfluencerName>{influencer?.name}</InfluencerName>
+          <InfluencerBrand>{influencer?.brand}</InfluencerBrand>
           <InfluencerBio>{influencer?.bio}</InfluencerBio>
         </HeroContent>
       </HeroSection>
