@@ -1,7 +1,7 @@
 // Custom hook for managing outfits data
 
 import { useState, useEffect } from 'react'
-import { fetchOutfits } from '../utils/api'
+import { fetchOutfits, fetchProfile } from '../utils/api'
 
 export const useOutfits = () => {
   const [outfits, setOutfits] = useState([])
@@ -13,12 +13,18 @@ export const useOutfits = () => {
     try {
       setIsLoading(true)
       setError(null)
-      const data = await fetchOutfits()
-      setOutfits(data.outfits)
-      setInfluencer(data.influencer)
+      
+      // Fetch outfits and profile data in parallel
+      const [outfitsData, profileData] = await Promise.all([
+        fetchOutfits(),
+        fetchProfile()
+      ])
+      
+      setOutfits(outfitsData.outfits)
+      setInfluencer(profileData) // Use profile data from backend
     } catch (err) {
       setError(err.message)
-      console.error('Failed to load outfits:', err)
+      console.error('Failed to load data:', err)
       // Don't set any data on error - let the error state handle it
     } finally {
       setIsLoading(false)

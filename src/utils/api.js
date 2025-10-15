@@ -33,6 +33,34 @@ export const fetchOutfits = async () => {
   }
 }
 
+export const fetchProfile = async () => {
+  try {
+    const url = `${API_BASE_URL}/profile?${Date.now()}`
+    console.log('🔍 Fetching profile from:', url)
+    
+    const response = await fetch(url, {
+      mode: 'cors',
+      headers: {
+        'Accept': 'application/json',
+      },
+      cache: 'no-cache'
+    })
+    
+    console.log('📡 Profile response status:', response.status)
+    
+    if (response.ok) {
+      const data = await response.json()
+      console.log('✅ Profile data received:', data)
+      return data
+    } else {
+      throw new Error(`Profile API not available: ${response.status}`)
+    }
+  } catch (error) {
+    console.error('❌ Profile fetch failed:', error.message)
+    throw error
+  }
+}
+
 export const getRelativeTime = (dateString) => {
   const date = new Date(dateString)
   const now = new Date()
