@@ -2,8 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Suspense } from 'react'
 
 // Import design system components
-import { LoadingFallback, PerformanceErrorBoundary } from './utils/performance'
-import { LazyMainPortal, LazyOutfitDetail, LazyAbout } from './utils/performance'
+import { LoadingFallback, PerformanceErrorBoundary } from './utils/performance.jsx'
+import { LazyMainPortal, LazyOutfitDetail, LazyAbout } from './utils/performance.jsx'
 
 // Import global styles
 import './styles/globals.css'

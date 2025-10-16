@@ -16,30 +16,29 @@ export const LazyAbout = lazy(() => import('../components/pages/About'))
 export const LazyFavoritesList = lazy(() => import('../components/ui/FavoritesList'))
 export const LazyCartButton = lazy(() => import('../components/ui/CartButton'))
 
+import React from 'react'
+
 // Loading component for Suspense fallback
 export const LoadingFallback = ({ message = "Chargement..." }) => {
-  const React = require('react')
-  return React.createElement('div', {
-    style: {
+  return (
+    <div style={{
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: '200px',
       gap: '1rem'
-    }
-  }, 
-    React.createElement('div', {
-      style: {
+    }}>
+      <div style={{
         width: '40px',
         height: '40px',
         border: '4px solid #f3f3f3',
         borderTop: '4px solid #1a1a1a',
         borderRadius: '50%',
         animation: 'spin 1s linear infinite'
-      }
-    }),
-    React.createElement('p', { style: { color: '#666', margin: 0 } }, message)
+      }} />
+      <p style={{ color: '#666', margin: 0 }}>{message}</p>
+    </div>
   )
 }
 
@@ -72,9 +71,6 @@ export const optimizeImageUrl = (url, options = {}) => {
 
 // Lazy image component with intersection observer
 export const LazyImage = ({ src, alt, className, ...props }) => {
-  const React = require('react')
-  const { useState, useRef, useEffect } = React
-  
   const [isLoaded, setIsLoaded] = useState(false)
   const [isInView, setIsInView] = useState(false)
   const imgRef = useRef()
@@ -97,16 +93,20 @@ export const LazyImage = ({ src, alt, className, ...props }) => {
     return () => observer.disconnect()
   }, [])
   
-  return React.createElement('div', { ref: imgRef, className, ...props },
-    isInView && React.createElement('img', {
-      src,
-      alt,
-      onLoad: () => setIsLoaded(true),
-      style: {
-        opacity: isLoaded ? 1 : 0,
-        transition: 'opacity 0.3s ease'
-      }
-    })
+  return (
+    <div ref={imgRef} className={className} {...props}>
+      {isInView && (
+        <img
+          src={src}
+          alt={alt}
+          onLoad={() => setIsLoaded(true)}
+          style={{
+            opacity: isLoaded ? 1 : 0,
+            transition: 'opacity 0.3s ease'
+          }}
+        />
+      )}
+    </div>
   )
 }
 
@@ -305,9 +305,9 @@ export const bundleAnalyzer = {
 // ============================================================================
 
 // Error boundary for performance monitoring
-export class PerformanceErrorBoundary {
+export class PerformanceErrorBoundary extends React.Component {
   constructor(props) {
-    this.props = props
+    super(props)
     this.state = { hasError: false, error: null }
   }
   
@@ -323,18 +323,16 @@ export class PerformanceErrorBoundary {
   }
   
   render() {
-    const React = require('react')
-    
     if (this.state.hasError) {
-      return React.createElement('div', {
-        style: {
+      return (
+        <div style={{
           padding: '2rem',
           textAlign: 'center',
           color: '#666'
-        }
-      },
-        React.createElement('h2', null, 'Une erreur s\'est produite'),
-        React.createElement('p', null, 'Veuillez recharger la page ou réessayer plus tard.')
+        }}>
+          <h2>Une erreur s'est produite</h2>
+          <p>Veuillez recharger la page ou réessayer plus tard.</p>
+        </div>
       )
     }
     

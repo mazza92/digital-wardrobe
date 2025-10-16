@@ -1,7 +1,7 @@
 // Accessibility Utilities
 // Comprehensive accessibility features for WCAG 2.1 AA compliance
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 // ============================================================================
 // KEYBOARD NAVIGATION
@@ -93,8 +93,7 @@ export const screenReader = {
   
   // Create screen reader only text
   createScreenReaderText: (text) => {
-    const React = require('react')
-    return React.createElement('span', { className: 'sr-only' }, text)
+    return <span className="sr-only">{text}</span>
   },
   
   // Generate accessible labels
@@ -259,81 +258,81 @@ export const motionUtils = {
 // ============================================================================
 
 // Accessible button component
-export const AccessibleButton = ({ 
-  children, 
-  onClick, 
-  ariaLabel, 
+export const AccessibleButton = ({
+  children,
+  onClick,
+  ariaLabel,
   ariaDescribedBy,
   disabled = false,
-  ...props 
+  ...props
 }) => {
-  const React = require('react')
-  
   const handleKeyDown = (event) => {
     keyboardNavigation.handleActivation(event, onClick)
   }
-  
-  return React.createElement('button', {
-    onClick,
-    onKeyDown: handleKeyDown,
-    'aria-label': ariaLabel,
-    'aria-describedby': ariaDescribedBy,
-    disabled,
-    ...props
-  }, children)
+
+  return (
+    <button
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+      disabled={disabled}
+      {...props}
+    >
+      {children}
+    </button>
+  )
 }
 
 // Accessible link component
-export const AccessibleLink = ({ 
-  children, 
-  href, 
+export const AccessibleLink = ({
+  children,
+  href,
   ariaLabel,
   external = false,
-  ...props 
+  ...props
 }) => {
-  const React = require('react')
-  
   const linkProps = {
     href,
     'aria-label': ariaLabel,
     ...props
   }
-  
+
   if (external) {
     linkProps.target = '_blank'
     linkProps.rel = 'noopener noreferrer'
     linkProps['aria-label'] = `${ariaLabel} (ouvre dans un nouvel onglet)`
   }
-  
-  return React.createElement('a', linkProps,
-    children,
-    external && screenReader.createScreenReaderText('(ouvre dans un nouvel onglet)')
+
+  return (
+    <a {...linkProps}>
+      {children}
+      {external && screenReader.createScreenReaderText('(ouvre dans un nouvel onglet)')}
+    </a>
   )
 }
 
 // Accessible image component
-export const AccessibleImage = ({ 
-  src, 
-  alt, 
+export const AccessibleImage = ({
+  src,
+  alt,
   ariaLabel,
   decorative = false,
-  ...props 
+  ...props
 }) => {
-  const React = require('react')
-  
   const imageProps = {
     src,
     alt: decorative ? '' : alt,
     'aria-label': ariaLabel,
     ...props
   }
-  
+
   if (decorative) {
     imageProps.role = 'presentation'
     imageProps['aria-hidden'] = 'true'
   }
-  
-  return React.createElement('img', imageProps)
+
+  return <img {...imageProps} />
 }
 
 // ============================================================================

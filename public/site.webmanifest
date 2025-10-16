@@ -1,0 +1,30 @@
+{
+  "name": "Garde-Robe Numérique",
+  "short_name": "Garde-Robe",
+  "description": "Découvrez les looks élégants et sophistiqués d'Emmanuelle K. Shopping mode de luxe avec des tenues stylées et des produits sélectionnés.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#1a1a1a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["fashion", "shopping", "lifestyle"],
+  "lang": "fr",
+  "dir": "ltr"
+}
