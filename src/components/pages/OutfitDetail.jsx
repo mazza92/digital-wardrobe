@@ -976,8 +976,13 @@ function OutfitDetail() {
   const formatPrice = (priceString) => {
     if (!priceString) return 'Prix non disponible'
     
-    // Return the price exactly as input by the user
-    return priceString
+    // If price already contains currency symbol, return as-is
+    if (priceString.includes('€') || priceString.includes('$') || priceString.includes('£')) {
+      return priceString
+    }
+    
+    // Otherwise, add Euro currency to the price
+    return `${priceString} €`
   }
 
   const handleToggleFavorite = (product) => {

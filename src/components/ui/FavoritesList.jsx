@@ -232,6 +232,18 @@ const Overlay = styled.div`
 `
 
 function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, onClearFavorites }) {
+  const formatPrice = (priceString) => {
+    if (!priceString) return 'Prix non disponible'
+    
+    // If price already contains currency symbol, return as-is
+    if (priceString.includes('€') || priceString.includes('$') || priceString.includes('£')) {
+      return priceString
+    }
+    
+    // Otherwise, add Euro currency to the price
+    return `${priceString} €`
+  }
+
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose()
@@ -264,7 +276,7 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
                   <ProductInfo>
                     <ProductName>{item.name}</ProductName>
                     <ProductBrand>{item.brand}</ProductBrand>
-                    <ProductPrice>{item.price}</ProductPrice>
+                    <ProductPrice>{formatPrice(item.price)}</ProductPrice>
                   </ProductInfo>
                   <RemoveButton 
                     onClick={() => onRemoveFavorite(item.id)}

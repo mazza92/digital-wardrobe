@@ -222,6 +222,18 @@ const Overlay = styled.div`
 `
 
 function ShoppingCart({ isOpen, onClose, cart, updateQuantity, removeFromCart, getCartTotal }) {
+  const formatPrice = (priceString) => {
+    if (!priceString) return 'Prix non disponible'
+    
+    // If price already contains currency symbol, return as-is
+    if (priceString.includes('€') || priceString.includes('$') || priceString.includes('£')) {
+      return priceString
+    }
+    
+    // Otherwise, add Euro currency to the price
+    return `${priceString} €`
+  }
+
   const handleQuantityChange = (productId, newQuantity) => {
     updateQuantity(productId, parseInt(newQuantity) || 0)
   }
@@ -255,7 +267,7 @@ function ShoppingCart({ isOpen, onClose, cart, updateQuantity, removeFromCart, g
                 <ItemDetails>
                   <ItemName>{item.name}</ItemName>
                   <ItemBrand>{item.brand}</ItemBrand>
-                  <ItemPrice>{item.price}</ItemPrice>
+                  <ItemPrice>{formatPrice(item.price)}</ItemPrice>
                   <QuantityControls>
                     <QuantityButton 
                       onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
@@ -287,7 +299,7 @@ function ShoppingCart({ isOpen, onClose, cart, updateQuantity, removeFromCart, g
           <CartFooter>
             <CartTotal>
               <TotalLabel>Total:</TotalLabel>
-              <TotalAmount>${getCartTotal().toFixed(2)}</TotalAmount>
+              <TotalAmount>{getCartTotal().toFixed(2)} €</TotalAmount>
             </CartTotal>
             <CheckoutButton onClick={handleCheckout}>
               Proceed to Checkout
