@@ -973,16 +973,11 @@ function OutfitDetail() {
     setSelectedProduct(null)
   }
 
-  const convertToEuros = (priceString) => {
-    if (!priceString) return '0 €'
+  const formatPrice = (priceString) => {
+    if (!priceString) return 'Prix non disponible'
     
-    // Extract number from price string (handles $89.99, €89.99, etc.)
-    const priceNumber = parseFloat(priceString.replace(/[^0-9.-]+/g, ''))
-    if (isNaN(priceNumber)) return priceString
-    
-    // Convert USD to EUR (approximate rate: 1 USD = 0.85 EUR)
-    const euroPrice = Math.round(priceNumber * 0.85 * 100) / 100
-    return `${euroPrice.toFixed(2)} €`
+    // Return the price exactly as input by the user
+    return priceString
   }
 
   const handleToggleFavorite = (product) => {
@@ -1071,7 +1066,7 @@ function OutfitDetail() {
                 <ClosePopup onClick={() => setSelectedProduct(null)}>×</ClosePopup>
                 <ProductName>{selectedProduct.name}</ProductName>
                 <ProductBrand>{selectedProduct.brand}</ProductBrand>
-                <ProductPrice>{convertToEuros(selectedProduct.price)}</ProductPrice>
+                <ProductPrice>{formatPrice(selectedProduct.price)}</ProductPrice>
                 <ShopButton 
                   href={selectedProduct.link} 
                   target="_blank" 
@@ -1102,7 +1097,7 @@ function OutfitDetail() {
                   <ProductCardContent>
                     <ProductCardName>{product.name}</ProductCardName>
                     <ProductCardBrand>{product.brand}</ProductCardBrand>
-                    <ProductCardPrice>{convertToEuros(product.price)}</ProductCardPrice>
+                    <ProductCardPrice>{formatPrice(product.price)}</ProductCardPrice>
                     <ProductCardActions>
                       <ProductCardButton 
                         href={product.link} 

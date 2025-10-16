@@ -391,6 +391,17 @@ const ProductCount = styled.div`
   backdrop-filter: blur(10px);
 `
 
+const NoOutfitsMessage = styled.div`
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #666;
+  font-size: 1.1rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 1rem;
+  border: 2px dashed rgba(0, 0, 0, 0.1);
+`
+
 const Footer = styled.footer`
   background: #1a1a1a;
   color: white;
@@ -602,29 +613,35 @@ function MainPortal() {
             </SectionHeader>
             
             <OutfitsGrid>
-              {outfits.filter(outfit => outfit.category === 'outfit').map((outfit) => (
-                <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
-                  <OutfitImage image={outfit.image} />
-                  <ProductTags>
-                    {outfit.products.map((product) => (
-                      <ProductTag
-                        key={product.id}
-                        x={product.x}
-                        y={product.y}
-                        title={`${product.name} - ${product.brand}`}
-                      />
-                    ))}
-                  </ProductTags>
-                  <ProductCount>{outfit.products.length} articles</ProductCount>
-                  <OutfitOverlay>
-                    <OutfitTitle>{outfit.title}</OutfitTitle>
-                    <OutfitDescription>{outfit.description}</OutfitDescription>
-                    <ShopButton>
-                      Acheter le Look →
-                    </ShopButton>
-                  </OutfitOverlay>
-                </OutfitCard>
-              ))}
+              {outfits.filter(outfit => outfit.category === 'outfit').length > 0 ? (
+                outfits.filter(outfit => outfit.category === 'outfit').map((outfit) => (
+                  <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
+                    <OutfitImage image={outfit.image} />
+                    <ProductTags>
+                      {outfit.products.map((product) => (
+                        <ProductTag
+                          key={product.id}
+                          x={product.x}
+                          y={product.y}
+                          title={`${product.name} - ${product.brand}`}
+                        />
+                      ))}
+                    </ProductTags>
+                    <ProductCount>{outfit.products.length} articles</ProductCount>
+                    <OutfitOverlay>
+                      <OutfitTitle>{outfit.title}</OutfitTitle>
+                      <OutfitDescription>{outfit.description}</OutfitDescription>
+                      <ShopButton>
+                        Acheter le Look →
+                      </ShopButton>
+                    </OutfitOverlay>
+                  </OutfitCard>
+                ))
+              ) : (
+                <NoOutfitsMessage>
+                  Pas de tenues publiées pour le moment
+                </NoOutfitsMessage>
+              )}
             </OutfitsGrid>
           </>
         ) : (
@@ -635,29 +652,35 @@ function MainPortal() {
             </SectionHeader>
             
             <OutfitsGrid>
-              {outfits.filter(outfit => outfit.category === 'wishlist').map((outfit) => (
-                <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
-                  <OutfitImage image={outfit.image} />
-                  <ProductTags>
-                    {outfit.products.map((product) => (
-                      <ProductTag
-                        key={product.id}
-                        x={product.x}
-                        y={product.y}
-                        title={`${product.name} - ${product.brand}`}
-                      />
-                    ))}
-                  </ProductTags>
-                  <ProductCount>{outfit.products.length} articles</ProductCount>
-                  <OutfitOverlay>
-                    <OutfitTitle>{outfit.title}</OutfitTitle>
-                    <OutfitDescription>{outfit.description}</OutfitDescription>
-                    <ShopButton>
-                      Acheter le Look →
-                    </ShopButton>
-                  </OutfitOverlay>
-                </OutfitCard>
-              ))}
+              {outfits.filter(outfit => outfit.category === 'wishlist').length > 0 ? (
+                outfits.filter(outfit => outfit.category === 'wishlist').map((outfit) => (
+                  <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
+                    <OutfitImage image={outfit.image} />
+                    <ProductTags>
+                      {outfit.products.map((product) => (
+                        <ProductTag
+                          key={product.id}
+                          x={product.x}
+                          y={product.y}
+                          title={`${product.name} - ${product.brand}`}
+                        />
+                      ))}
+                    </ProductTags>
+                    <ProductCount>{outfit.products.length} articles</ProductCount>
+                    <OutfitOverlay>
+                      <OutfitTitle>{outfit.title}</OutfitTitle>
+                      <OutfitDescription>{outfit.description}</OutfitDescription>
+                      <ShopButton>
+                        Acheter le Look →
+                      </ShopButton>
+                    </OutfitOverlay>
+                  </OutfitCard>
+                ))
+              ) : (
+                <NoOutfitsMessage>
+                  Pas de tenues publiées pour le moment
+                </NoOutfitsMessage>
+              )}
             </OutfitsGrid>
           </>
         )}
