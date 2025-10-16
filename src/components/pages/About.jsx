@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import { useSEO, seoConfig } from '../../hooks/useSEO'
 import outfitsData from '../../data/outfits.json'
 
 const AboutContainer = styled.div`
@@ -177,6 +178,9 @@ const ShopButton = styled(Link)`
 
 function About() {
   const { influencer, socialMedia } = outfitsData
+
+  // SEO optimization
+  useSEO(seoConfig.about)
 
   return (
     <AboutContainer>

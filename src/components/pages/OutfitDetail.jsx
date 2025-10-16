@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useFavorites } from '../../hooks/useFavorites'
+import { useSEO, seoConfig } from '../../hooks/useSEO'
 import { fetchOutfits } from '../../utils/api'
 import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
@@ -569,6 +570,9 @@ function OutfitDetail() {
   const [isLoading, setIsLoading] = useState(true)
   const [hoveredProductId, setHoveredProductId] = useState(null)
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
+
+  // SEO optimization
+  useSEO(outfit ? seoConfig.outfit(outfit) : seoConfig.home)
   
   const {
     favorites,

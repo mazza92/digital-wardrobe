@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useOutfits } from '../../hooks/useOutfits'
 import { useFavorites } from '../../hooks/useFavorites'
+import { useSEO, seoConfig } from '../../hooks/useSEO'
 import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
 
@@ -514,6 +515,9 @@ function MainPortal() {
     clearFavorites,
     getFavoritesCount
   } = useFavorites()
+
+  // SEO optimization
+  useSEO(seoConfig.home)
 
   if (isLoading) {
     return (
