@@ -600,19 +600,18 @@ const CarouselWrapper = styled.div`
   overflow: hidden;
   border-radius: 12px;
   background: white;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 `
 
 const CarouselContainer = styled.div`
   overflow: hidden;
-  border-radius: 12px;
 `
 
 const CarouselTrack = styled.div`
   display: flex;
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   transform: translateX(-${props => props.index * (100 / props.slidesPerView)}%);
-  gap: 1rem;
+  gap: 0.75rem;
   padding: 1rem;
 `
 
@@ -641,15 +640,17 @@ const RecommendationCard = styled(Link)`
 
 const RecommendationImage = styled.div`
   width: 100%;
-  height: 160px;
+  height: 180px;
   background-image: url(${props => props.image});
-  background-size: cover;
+  background-size: contain;
   background-position: center;
+  background-repeat: no-repeat;
+  background-color: #f8f9fa;
   position: relative;
   overflow: hidden;
   
   @media (max-width: 767px) {
-    height: 140px;
+    height: 160px;
   }
 `
 
@@ -659,75 +660,24 @@ const RecommendationOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+  background: rgba(0, 0, 0, 0.1);
   opacity: 0;
   transition: opacity 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   
   ${RecommendationCard}:hover & {
     opacity: 1;
   }
 `
 
-const RecommendationPlayIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #1a1a1a;
-  font-size: 1.2rem;
-  font-weight: bold;
-`
-
 const RecommendationContent = styled.div`
-  padding: 1rem;
-`
-
-const RecommendationMeta = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-`
-
-const RecommendationCategory = styled.span`
-  background: ${props => props.category === 'wishlist' ? '#8b5cf6' : '#3b82f6'};
-  color: white;
-  padding: 0.2rem 0.6rem;
-  border-radius: 8px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`
-
-const RecommendationProducts = styled.span`
-  color: #666;
-  font-size: 0.8rem;
-  font-weight: 500;
+  padding: 1rem 1rem 1.25rem;
 `
 
 const RecommendationCardTitle = styled.h4`
   font-size: 0.95rem;
   font-weight: 600;
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 0.5rem 0;
   color: #1a1a1a;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`
-
-const RecommendationCardDescription = styled.p`
-  font-size: 0.8rem;
-  color: #666;
-  margin: 0;
   line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -735,50 +685,64 @@ const RecommendationCardDescription = styled.p`
   overflow: hidden;
 `
 
-const CarouselControls = styled.div`
+const RecommendationMeta = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 1rem;
-  padding: 0 1rem;
+`
+
+const RecommendationCategory = styled.span`
+  background: ${props => props.category === 'wishlist' ? '#8b5cf6' : '#3b82f6'};
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`
+
+const RecommendationProducts = styled.span`
+  color: #999;
+  font-size: 0.75rem;
+  font-weight: 500;
+`
+
+const CarouselControls = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
 `
 
 const CarouselButton = styled.button`
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  width: 40px;
-  height: 40px;
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   color: #6b7280;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   
   &:hover {
     border-color: #1a1a1a;
     color: #1a1a1a;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
   
   &:disabled {
-    opacity: 0.4;
+    opacity: 0.3;
     cursor: not-allowed;
-    transform: none;
-  }
-  
-  @media (max-width: 767px) {
-    width: 36px;
-    height: 36px;
   }
 `
 
 const CarouselDots = styled.div`
   display: flex;
-  gap: 0.4rem;
+  gap: 0.5rem;
 `
 
 const CarouselDot = styled.button`
@@ -788,11 +752,10 @@ const CarouselDot = styled.button`
   border: none;
   background: ${props => props.active ? '#1a1a1a' : '#d1d5db'};
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.2s ease;
   
   &:hover {
     background: ${props => props.active ? '#1a1a1a' : '#9ca3af'};
-    transform: scale(1.2);
   }
 `
 
@@ -1196,10 +1159,11 @@ function OutfitDetail() {
                     <CarouselSlide key={recommendedOutfit.id} slidesPerView={slidesPerView}>
                       <RecommendationCard to={`/outfits/${recommendedOutfit.id}`}>
                         <RecommendationImage image={recommendedOutfit.image} />
-                        <RecommendationOverlay>
-                          <RecommendationPlayIcon>→</RecommendationPlayIcon>
-                        </RecommendationOverlay>
+                        <RecommendationOverlay />
                         <RecommendationContent>
+                          <RecommendationCardTitle>
+                            {recommendedOutfit.title}
+                          </RecommendationCardTitle>
                           <RecommendationMeta>
                             <RecommendationCategory category={recommendedOutfit.category}>
                               {recommendedOutfit.category === 'wishlist' ? 'Wishlist' : 'Tenue'}
@@ -1208,12 +1172,6 @@ function OutfitDetail() {
                               {recommendedOutfit.products?.length || 0} articles
                             </RecommendationProducts>
                           </RecommendationMeta>
-                          <RecommendationCardTitle>
-                            {recommendedOutfit.title}
-                          </RecommendationCardTitle>
-                          <RecommendationCardDescription>
-                            {recommendedOutfit.description}
-                          </RecommendationCardDescription>
                         </RecommendationContent>
                       </RecommendationCard>
                     </CarouselSlide>
