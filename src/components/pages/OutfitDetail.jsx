@@ -363,9 +363,13 @@ const ProductThumbnail = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  background-image: ${props => props.imageUrl ? `url(${props.imageUrl})` : 'none'};
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   
   &::before {
-    content: '👗';
+    content: ${props => props.imageUrl ? 'none' : "'👗'"};
     font-size: 2.5rem;
     opacity: 0.4;
   }
@@ -1098,7 +1102,7 @@ function OutfitDetail() {
                   onMouseEnter={() => setHoveredProductId(product.id)}
                   onMouseLeave={() => setHoveredProductId(null)}
                 >
-                  <ProductThumbnail />
+                  <ProductThumbnail imageUrl={product.imageUrl} />
                   <ProductCardContent>
                     <ProductCardName>{product.name}</ProductCardName>
                     <ProductCardBrand>{product.brand}</ProductCardBrand>
