@@ -1,26 +1,52 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import styled from 'styled-components'
-import MainPortal from './components/pages/MainPortal'
-import OutfitDetail from './components/pages/OutfitDetail'
-import About from './components/pages/About'
+import { HelmetProvider } from 'react-helmet-async'
+import { Suspense } from 'react'
 
-const AppContainer = styled.div`
-  min-height: 100vh;
-  background: #fafafa;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-`
+// Import design system components
+import { LoadingFallback, PerformanceErrorBoundary } from './utils/performance'
+import { LazyMainPortal, LazyOutfitDetail, LazyAbout } from './utils/performance'
+
+// Import global styles
+import './styles/globals.css'
 
 function App() {
   return (
-    <AppContainer>
-      <Router>
-        <Routes>
-          <Route path="/" element={<MainPortal />} />
-          <Route path="/outfits/:outfitId" element={<OutfitDetail />} />
-          <Route path="/about" element={<About />} />
-        </Routes>
-      </Router>
-    </AppContainer>
+    <HelmetProvider>
+      <PerformanceErrorBoundary>
+        <div className="app-container">
+          <Router>
+            <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
+              <Routes>
+                <Route 
+                  path="/" 
+                  element={
+                    <Suspense fallback={<LoadingFallback message="Chargement de la page d'accueil..." />}>
+                      <LazyMainPortal />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/outfits/:outfitId" 
+                  element={
+                    <Suspense fallback={<LoadingFallback message="Chargement des détails de la tenue..." />}>
+                      <LazyOutfitDetail />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/about" 
+                  element={
+                    <Suspense fallback={<LoadingFallback message="Chargement de la page À propos..." />}>
+                      <LazyAbout />
+                    </Suspense>
+                  } 
+                />
+              </Routes>
+            </Suspense>
+          </Router>
+        </div>
+      </PerformanceErrorBoundary>
+    </HelmetProvider>
   )
 }
 

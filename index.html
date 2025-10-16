@@ -1,17 +1,164 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
+    <!-- Basic Meta Tags -->
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Digital Wardrobe - Emmanuelle K</title>
-    <meta name="description" content="Shop Emmanuelle K's luxury fashion looks and discover elegant, sophisticated style" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Emmanuelle K" />
+    <meta name="language" content="French" />
+    <meta name="revisit-after" content="7 days" />
+    
+    <!-- Primary Meta Tags -->
+    <title>Garde-Robe Numérique - Mode de Luxe avec Emmanuelle K</title>
+    <meta name="title" content="Garde-Robe Numérique - Mode de Luxe avec Emmanuelle K" />
+    <meta name="description" content="Découvrez les looks élégants et sophistiqués d'Emmanuelle K. Shopping mode de luxe avec des tenues stylées et des produits sélectionnés. Influenceur mode française." />
+    <meta name="keywords" content="mode, luxe, fashion, style, tenues, shopping, Emmanuelle K, influenceur mode, looks élégants, mode féminine, tendances mode, shopping en ligne, produits de luxe, styling, outfits" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://digital-wardrobe-puce.vercel.app/" />
+    <meta property="og:title" content="Garde-Robe Numérique - Mode de Luxe avec Emmanuelle K" />
+    <meta property="og:description" content="Découvrez les looks élégants et sophistiqués d'Emmanuelle K. Shopping mode de luxe avec des tenues stylées et des produits sélectionnés." />
+    <meta property="og:image" content="https://www.na-kd.com/cdn-cgi/image/quality=80,sharpen=0.3,width=984/globalassets/oversized_belted_trenchcoat_1858-000002-0765_3_campaign.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Emmanuelle K - Fashion Influencer" />
+    <meta property="og:site_name" content="Garde-Robe Numérique" />
+    <meta property="og:locale" content="fr_FR" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://digital-wardrobe-puce.vercel.app/" />
+    <meta property="twitter:title" content="Garde-Robe Numérique - Mode de Luxe avec Emmanuelle K" />
+    <meta property="twitter:description" content="Découvrez les looks élégants et sophistiqués d'Emmanuelle K. Shopping mode de luxe avec des tenues stylées et des produits sélectionnés." />
+    <meta property="twitter:image" content="https://www.na-kd.com/cdn-cgi/image/quality=80,sharpen=0.3,width=984/globalassets/oversized_belted_trenchcoat_1858-000002-0765_3_campaign.jpg" />
+    <meta property="twitter:image:alt" content="Emmanuelle K - Fashion Influencer" />
+    <meta property="twitter:site" content="@emmanuellek" />
+    <meta property="twitter:creator" content="@emmanuellek" />
+    
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="msapplication-TileColor" content="#1a1a1a" />
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.google-analytics.com" />
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//www.google-analytics.com" />
+    <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Garde-Robe Numérique",
+      "url": "https://digital-wardrobe-puce.vercel.app",
+      "description": "Découvrez les looks élégants et sophistiqués d'Emmanuelle K. Shopping mode de luxe avec des tenues stylées et des produits sélectionnés.",
+      "author": {
+        "@type": "Person",
+        "name": "Emmanuelle K",
+        "url": "https://digital-wardrobe-puce.vercel.app",
+        "image": "https://www.na-kd.com/cdn-cgi/image/quality=80,sharpen=0.3,width=984/globalassets/oversized_belted_trenchcoat_1858-000002-0765_3_campaign.jpg",
+        "sameAs": [
+          "https://instagram.com/emmanuellek",
+          "https://tiktok.com/@emmanuellek",
+          "https://youtube.com/@emmanuellek",
+          "https://pinterest.com/emmanuellek"
+        ]
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Garde-Robe Numérique",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://digital-wardrobe-puce.vercel.app/logo.png"
+        }
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://digital-wardrobe-puce.vercel.app/search?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    
+    <!-- Additional Person Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Emmanuelle K",
+      "description": "Créatrice de contenu mode et lifestyle de luxe. Partageant un style élégant et sophistiqué pour la femme moderne.",
+      "image": "https://www.na-kd.com/cdn-cgi/image/quality=80,sharpen=0.3,width=984/globalassets/oversized_belted_trenchcoat_1858-000002-0765_3_campaign.jpg",
+      "url": "https://digital-wardrobe-puce.vercel.app",
+      "jobTitle": "Fashion Influencer & Content Creator",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "EMMANUELLE K"
+      },
+      "sameAs": [
+        "https://instagram.com/emmanuellek",
+        "https://tiktok.com/@emmanuellek",
+        "https://youtube.com/@emmanuellek",
+        "https://pinterest.com/emmanuellek"
+      ],
+      "knowsAbout": [
+        "Fashion",
+        "Style",
+        "Luxury Fashion",
+        "Fashion Trends",
+        "Outfit Styling"
+      ],
+      "hasOccupation": {
+        "@type": "Occupation",
+        "name": "Fashion Influencer",
+        "occupationLocation": {
+          "@type": "Country",
+          "name": "France"
+        }
+      }
+    }
+    </script>
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com;" />
+    
+    <!-- Performance Hints -->
+    <link rel="preload" href="/src/main.jsx" as="script" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style" />
   </head>
   <body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Google Analytics (if enabled) -->
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'GA_MEASUREMENT_ID');
+    </script> -->
   </body>
 </html>
