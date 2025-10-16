@@ -675,28 +675,6 @@ const HeartIcon = styled.button`
   }
 `
 
-const PlayIcon = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #1a1a1a;
-  font-size: 1.2rem;
-  font-weight: bold;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  
-  ${RecommendationCard}:hover & {
-    opacity: 1;
-  }
-`
 
 
 function OutfitDetail() {
@@ -1057,14 +1035,14 @@ function OutfitDetail() {
         <RecommendationsSection>
           <RecommendationsContainer>
             <RecommendationsHeader>
-              <RecommendationsTitle>More from {influencer?.name || 'Emmanuelle K'}</RecommendationsTitle>
+              <RecommendationsTitle>Découvrir les autres tenues</RecommendationsTitle>
               <ViewAllButton>
-                View all →
+                Voir plus →
               </ViewAllButton>
             </RecommendationsHeader>
             
             <GalleryGrid>
-              {recommendedOutfits.slice(0, 8).map((recommendedOutfit) => (
+              {recommendedOutfits.slice(0, 4).map((recommendedOutfit) => (
                 <RecommendationCard key={recommendedOutfit.id} to={`/outfits/${recommendedOutfit.id}`}>
                   <RecommendationImage image={recommendedOutfit.image} />
                   <HeartIcon onClick={(e) => {
@@ -1073,7 +1051,6 @@ function OutfitDetail() {
                   }}>
                     ♥
                   </HeartIcon>
-                  <PlayIcon>▶</PlayIcon>
                 </RecommendationCard>
               ))}
             </GalleryGrid>
