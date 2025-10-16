@@ -560,16 +560,228 @@ const LoadingText = styled.p`
   font-weight: 500;
 `
 
+// Carousel Components
+const RecommendationsSection = styled.section`
+  background: white;
+  padding: 3rem 1.5rem;
+  margin-top: 2rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+`
+
+const RecommendationsContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+`
+
+const RecommendationsHeader = styled.div`
+  text-align: center;
+  margin-bottom: 2.5rem;
+`
+
+const RecommendationsTitle = styled.h2`
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+`
+
+const RecommendationsSubtitle = styled.p`
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+  font-weight: 400;
+`
+
+const CarouselContainer = styled.div`
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+`
+
+const CarouselTrack = styled.div`
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-${props => props.index * 100}%);
+`
+
+const CarouselSlide = styled.div`
+  min-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 0 0.5rem;
+`
+
+const RecommendationCard = styled(Link)`
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+`
+
+const RecommendationImage = styled.div`
+  width: 100%;
+  height: 200px;
+  background-image: url(${props => props.image});
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+`
+
+const RecommendationOverlay = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  padding: 1.5rem 1rem 1rem;
+  color: white;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  
+  ${RecommendationCard}:hover & {
+    transform: translateY(0);
+  }
+`
+
+const RecommendationTitle = styled.h3`
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  color: white;
+`
+
+const RecommendationDescription = styled.p`
+  font-size: 0.85rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+`
+
+const RecommendationContent = styled.div`
+  padding: 1.25rem;
+`
+
+const RecommendationMeta = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+`
+
+const RecommendationCategory = styled.span`
+  background: ${props => props.category === 'wishlist' ? '#8b5cf6' : '#3b82f6'};
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`
+
+const RecommendationProducts = styled.span`
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 500;
+`
+
+const RecommendationCardTitle = styled.h4`
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #1a1a1a;
+  line-height: 1.3;
+`
+
+const RecommendationCardDescription = styled.p`
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`
+
+const CarouselControls = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+`
+
+const CarouselButton = styled.button`
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #6b7280;
+  
+  &:hover {
+    border-color: #1a1a1a;
+    color: #1a1a1a;
+    transform: scale(1.05);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+`
+
+const CarouselDots = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`
+
+const CarouselDot = styled.button`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: ${props => props.active ? '#1a1a1a' : '#d1d5db'};
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${props => props.active ? '#1a1a1a' : '#9ca3af'};
+  }
+`
+
 function OutfitDetail() {
   const { outfitId } = useParams()
   const navigate = useNavigate()
   const [outfit, setOutfit] = useState(null)
   const [influencer, setInfluencer] = useState(null)
+  const [allOutfits, setAllOutfits] = useState([])
+  const [recommendedOutfits, setRecommendedOutfits] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 })
   const [isLoading, setIsLoading] = useState(true)
   const [hoveredProductId, setHoveredProductId] = useState(null)
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
+  const [carouselIndex, setCarouselIndex] = useState(0)
 
   // SEO optimization
   useSEO(outfit ? seoConfig.outfit(outfit) : seoConfig.home)
@@ -596,15 +808,81 @@ function OutfitDetail() {
       const foundOutfit = data.outfits.find(o => o.id === outfitId)
       setOutfit(foundOutfit)
       setInfluencer(data.influencer)
+      setAllOutfits(data.outfits)
+      
+      // Generate recommendations
+      const recommendations = generateRecommendations(foundOutfit, data.outfits)
+      setRecommendedOutfits(recommendations)
     } catch (err) {
       console.log('Using fallback data:', err.message)
       const fallbackData = await import('../../data/outfits.json')
       const foundOutfit = fallbackData.default.outfits.find(o => o.id === outfitId)
       setOutfit(foundOutfit)
       setInfluencer(fallbackData.default.influencer)
+      setAllOutfits(fallbackData.default.outfits)
+      
+      // Generate recommendations
+      const recommendations = generateRecommendations(foundOutfit, fallbackData.default.outfits)
+      setRecommendedOutfits(recommendations)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Recommendation algorithm
+  const generateRecommendations = (currentOutfit, allOutfits) => {
+    if (!currentOutfit || !allOutfits) return []
+    
+    const currentBrands = currentOutfit.products?.map(p => p.brand.toLowerCase()) || []
+    const currentCategory = currentOutfit.category || 'outfit'
+    
+    // Score outfits based on similarity
+    const scoredOutfits = allOutfits
+      .filter(o => o.id !== currentOutfit.id) // Exclude current outfit
+      .map(outfit => {
+        let score = 0
+        const outfitBrands = outfit.products?.map(p => p.brand.toLowerCase()) || []
+        
+        // Brand similarity (40% weight)
+        const brandMatches = outfitBrands.filter(brand => 
+          currentBrands.some(currentBrand => 
+            currentBrand.includes(brand) || brand.includes(currentBrand)
+          )
+        ).length
+        score += (brandMatches / Math.max(currentBrands.length, 1)) * 40
+        
+        // Category match (20% weight)
+        if (outfit.category === currentCategory) {
+          score += 20
+        }
+        
+        // Recency bonus (20% weight) - newer outfits get higher scores
+        const daysSinceCreated = (Date.now() - new Date(outfit.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+        const recencyScore = Math.max(0, 20 - (daysSinceCreated / 30) * 20) // Decay over 30 days
+        score += recencyScore
+        
+        // Random factor for diversity (20% weight)
+        score += Math.random() * 20
+        
+        return { ...outfit, score }
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6) // Top 6 recommendations
+    
+    return scoredOutfits
+  }
+
+  // Carousel navigation
+  const nextSlide = () => {
+    setCarouselIndex(prev => 
+      prev + 1 >= Math.ceil(recommendedOutfits.length / 3) ? 0 : prev + 1
+    )
+  }
+
+  const prevSlide = () => {
+    setCarouselIndex(prev => 
+      prev - 1 < 0 ? Math.ceil(recommendedOutfits.length / 3) - 1 : prev - 1
+    )
   }
 
   // Smart positioning function to avoid edges
@@ -854,31 +1132,83 @@ function OutfitDetail() {
             </ProductsGrid>
           </ProductsSection>
           
-          {influencer && (
-            <InfluencerSection>
-              <InfluencerHeader>
-                <InfluencerAvatar image={influencer.heroImage} />
-                <InfluencerInfo>
-                  <InfluencerName>{influencer.name}</InfluencerName>
-                  <InfluencerBrand>{influencer.brand}</InfluencerBrand>
-                </InfluencerInfo>
-              </InfluencerHeader>
-              <InfluencerBio>{influencer.bio}</InfluencerBio>
-              <SocialLinks>
-                <SocialLink href={influencer.socialMedia?.instagram} target="_blank">
-                  Instagram
-                </SocialLink>
-                <SocialLink href={influencer.socialMedia?.tiktok} target="_blank">
-                  TikTok
-                </SocialLink>
-                <SocialLink href={influencer.socialMedia?.youtube} target="_blank">
-                  YouTube
-                </SocialLink>
-              </SocialLinks>
-            </InfluencerSection>
-          )}
         </InfoSection>
       </MainContent>
+      
+      {/* Recommendations Carousel */}
+      {recommendedOutfits.length > 0 && (
+        <RecommendationsSection>
+          <RecommendationsContainer>
+            <RecommendationsHeader>
+              <RecommendationsTitle>Outfits you will also love</RecommendationsTitle>
+              <RecommendationsSubtitle>
+                Discover more looks curated just for you
+              </RecommendationsSubtitle>
+            </RecommendationsHeader>
+            
+            <CarouselContainer>
+              <CarouselTrack index={carouselIndex}>
+                {Array.from({ length: Math.ceil(recommendedOutfits.length / 3) }, (_, slideIndex) => (
+                  <CarouselSlide key={slideIndex}>
+                    {recommendedOutfits
+                      .slice(slideIndex * 3, (slideIndex + 1) * 3)
+                      .map((recommendedOutfit) => (
+                        <RecommendationCard 
+                          key={recommendedOutfit.id} 
+                          to={`/outfits/${recommendedOutfit.id}`}
+                        >
+                          <RecommendationImage image={recommendedOutfit.image} />
+                          <RecommendationOverlay>
+                            <RecommendationTitle>{recommendedOutfit.title}</RecommendationTitle>
+                            <RecommendationDescription>
+                              {recommendedOutfit.description}
+                            </RecommendationDescription>
+                          </RecommendationOverlay>
+                          <RecommendationContent>
+                            <RecommendationMeta>
+                              <RecommendationCategory category={recommendedOutfit.category}>
+                                {recommendedOutfit.category === 'wishlist' ? 'Wishlist' : 'Tenue'}
+                              </RecommendationCategory>
+                              <RecommendationProducts>
+                                {recommendedOutfit.products?.length || 0} articles
+                              </RecommendationProducts>
+                            </RecommendationMeta>
+                            <RecommendationCardTitle>
+                              {recommendedOutfit.title}
+                            </RecommendationCardTitle>
+                            <RecommendationCardDescription>
+                              {recommendedOutfit.description}
+                            </RecommendationCardDescription>
+                          </RecommendationContent>
+                        </RecommendationCard>
+                      ))}
+                  </CarouselSlide>
+                ))}
+              </CarouselTrack>
+            </CarouselContainer>
+            
+            {recommendedOutfits.length > 3 && (
+              <CarouselControls>
+                <CarouselButton onClick={prevSlide}>
+                  ←
+                </CarouselButton>
+                <CarouselDots>
+                  {Array.from({ length: Math.ceil(recommendedOutfits.length / 3) }, (_, index) => (
+                    <CarouselDot
+                      key={index}
+                      active={index === carouselIndex}
+                      onClick={() => setCarouselIndex(index)}
+                    />
+                  ))}
+                </CarouselDots>
+                <CarouselButton onClick={nextSlide}>
+                  →
+                </CarouselButton>
+              </CarouselControls>
+            )}
+          </RecommendationsContainer>
+        </RecommendationsSection>
+      )}
       
       <FavoritesList
         isOpen={isFavoritesOpen}
