@@ -11,7 +11,7 @@ export const useSEO = ({
   url,
   type = 'website',
   author = 'Emmanuelle K',
-  siteName = 'Garde-Robe Numérique'
+  siteName = 'Virtual Dressing'
 }) => {
   useEffect(() => {
     // Update document title

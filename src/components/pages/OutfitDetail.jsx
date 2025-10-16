@@ -16,7 +16,7 @@ const DetailContainer = styled.div`
 const Header = styled.header`
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;

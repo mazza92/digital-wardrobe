@@ -16,7 +16,7 @@ const MainContainer = styled.div`
 const Header = styled.header`
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -484,8 +484,8 @@ const LoadingContainer = styled.div`
 `
 
 const LoadingSpinner = styled.div`
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border: 4px solid #f3f3f3;
   border-top: 4px solid #1a1a1a;
   border-radius: 50%;
@@ -500,7 +500,7 @@ const LoadingSpinner = styled.div`
 const LoadingText = styled.p`
   color: #666;
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 500;
 `
 
@@ -557,7 +557,7 @@ function MainPortal() {
   return (
     <MainContainer>
       <Header>
-        <BrandName>Garde-Robe Numérique</BrandName>
+        <BrandName>Virtual Dressing</BrandName>
         <HeaderRight>
           <FavoritesButton 
             onClick={() => setIsFavoritesOpen(true)} 
