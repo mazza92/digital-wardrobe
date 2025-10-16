@@ -560,10 +560,10 @@ const LoadingText = styled.p`
   font-weight: 500;
 `
 
-// Carousel Components
+// Gallery Components
 const RecommendationsSection = styled.section`
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  padding: 2rem 1rem;
+  background: #fafafa;
+  padding: 1.5rem 1rem;
   margin-top: 2rem;
 `
 
@@ -574,190 +574,130 @@ const RecommendationsContainer = styled.div`
 
 const RecommendationsHeader = styled.div`
   margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `
 
 const RecommendationsTitle = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
   color: #1a1a1a;
-  letter-spacing: -0.5px;
   
   @media (max-width: 767px) {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
   }
 `
 
-const RecommendationsSubtitle = styled.p`
-  font-size: 0.9rem;
+const ViewAllButton = styled.button`
+  background: none;
+  border: none;
   color: #666;
-  margin: 0;
-  font-weight: 400;
-`
-
-const CarouselWrapper = styled.div`
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  background: white;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-`
-
-const CarouselContainer = styled.div`
-  overflow: hidden;
-`
-
-const CarouselTrack = styled.div`
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
   display: flex;
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  transform: translateX(-${props => props.index * (100 / props.slidesPerView)}%);
-  gap: 0.75rem;
-  padding: 1rem;
+  align-items: center;
+  gap: 0.25rem;
+  
+  &:hover {
+    color: #1a1a1a;
+  }
 `
 
-const CarouselSlide = styled.div`
-  min-width: ${props => 100 / props.slidesPerView}%;
-  flex-shrink: 0;
+const GalleryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+  
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
 `
 
 const RecommendationCard = styled(Link)`
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   color: inherit;
   position: relative;
   display: block;
-  height: 100%;
+  aspect-ratio: 3/4;
+  transition: transform 0.2s ease;
   
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: scale(1.02);
   }
 `
 
 const RecommendationImage = styled.div`
   width: 100%;
-  height: 180px;
+  height: 100%;
   background-image: url(${props => props.image});
-  background-size: contain;
+  background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-  background-color: #f8f9fa;
   position: relative;
   overflow: hidden;
+`
+
+const HeartIcon = styled.button`
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
   
-  @media (max-width: 767px) {
-    height: 160px;
+  &:hover {
+    background: white;
+    color: #e91e63;
+    transform: scale(1.1);
+  }
+  
+  &:active {
+    transform: scale(0.95);
   }
 `
 
-const RecommendationOverlay = styled.div`
+const PlayIcon = styled.div`
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.1);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1a1a;
+  font-size: 1.2rem;
+  font-weight: bold;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
   
   ${RecommendationCard}:hover & {
     opacity: 1;
   }
 `
 
-const RecommendationContent = styled.div`
-  padding: 1rem 1rem 1.25rem;
-`
-
-const RecommendationCardTitle = styled.h4`
-  font-size: 0.95rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
-  color: #1a1a1a;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`
-
-const RecommendationMeta = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`
-
-const RecommendationCategory = styled.span`
-  background: ${props => props.category === 'wishlist' ? '#8b5cf6' : '#3b82f6'};
-  color: white;
-  padding: 0.2rem 0.6rem;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`
-
-const RecommendationProducts = styled.span`
-  color: #999;
-  font-size: 0.75rem;
-  font-weight: 500;
-`
-
-const CarouselControls = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-`
-
-const CarouselButton = styled.button`
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #6b7280;
-  
-  &:hover {
-    border-color: #1a1a1a;
-    color: #1a1a1a;
-  }
-  
-  &:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-`
-
-const CarouselDots = styled.div`
-  display: flex;
-  gap: 0.5rem;
-`
-
-const CarouselDot = styled.button`
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  border: none;
-  background: ${props => props.active ? '#1a1a1a' : '#d1d5db'};
-  cursor: pointer;
-  transition: background 0.2s ease;
-  
-  &:hover {
-    background: ${props => props.active ? '#1a1a1a' : '#9ca3af'};
-  }
-`
 
 function OutfitDetail() {
   const { outfitId } = useParams()
@@ -771,8 +711,6 @@ function OutfitDetail() {
   const [isLoading, setIsLoading] = useState(true)
   const [hoveredProductId, setHoveredProductId] = useState(null)
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
-  const [carouselIndex, setCarouselIndex] = useState(0)
-  const [slidesPerView, setSlidesPerView] = useState(3)
 
   // SEO optimization
   useSEO(outfit ? seoConfig.outfit(outfit) : seoConfig.home)
@@ -863,33 +801,6 @@ function OutfitDetail() {
     return scoredOutfits
   }
 
-  // Responsive slides per view
-  useEffect(() => {
-    const updateSlidesPerView = () => {
-      if (window.innerWidth < 768) {
-        setSlidesPerView(1.2) // Show 1.2 slides on mobile for peek effect
-      } else if (window.innerWidth < 1024) {
-        setSlidesPerView(2.2) // Show 2.2 slides on tablet
-      } else {
-        setSlidesPerView(3) // Show 3 slides on desktop
-      }
-    }
-
-    updateSlidesPerView()
-    window.addEventListener('resize', updateSlidesPerView)
-    return () => window.removeEventListener('resize', updateSlidesPerView)
-  }, [])
-
-  // Carousel navigation
-  const nextSlide = () => {
-    const maxIndex = Math.ceil(recommendedOutfits.length / slidesPerView) - 1
-    setCarouselIndex(prev => prev >= maxIndex ? 0 : prev + 1)
-  }
-
-  const prevSlide = () => {
-    const maxIndex = Math.ceil(recommendedOutfits.length / slidesPerView) - 1
-    setCarouselIndex(prev => prev <= 0 ? maxIndex : prev - 1)
-  }
 
   // Smart positioning function to avoid edges
   const getSmartPosition = (x, y) => {
@@ -1141,67 +1052,31 @@ function OutfitDetail() {
         </InfoSection>
       </MainContent>
       
-      {/* Recommendations Carousel */}
+      {/* Recommendations Gallery */}
       {recommendedOutfits.length > 0 && (
         <RecommendationsSection>
           <RecommendationsContainer>
             <RecommendationsHeader>
-              <RecommendationsTitle>Outfits you will also love</RecommendationsTitle>
-              <RecommendationsSubtitle>
-                Discover more looks curated just for you
-              </RecommendationsSubtitle>
+              <RecommendationsTitle>More from {influencer?.name || 'Emmanuelle K'}</RecommendationsTitle>
+              <ViewAllButton>
+                View all →
+              </ViewAllButton>
             </RecommendationsHeader>
             
-            <CarouselWrapper>
-              <CarouselContainer>
-                <CarouselTrack index={carouselIndex} slidesPerView={slidesPerView}>
-                  {recommendedOutfits.map((recommendedOutfit) => (
-                    <CarouselSlide key={recommendedOutfit.id} slidesPerView={slidesPerView}>
-                      <RecommendationCard to={`/outfits/${recommendedOutfit.id}`}>
-                        <RecommendationImage image={recommendedOutfit.image} />
-                        <RecommendationOverlay />
-                        <RecommendationContent>
-                          <RecommendationCardTitle>
-                            {recommendedOutfit.title}
-                          </RecommendationCardTitle>
-                          <RecommendationMeta>
-                            <RecommendationCategory category={recommendedOutfit.category}>
-                              {recommendedOutfit.category === 'wishlist' ? 'Wishlist' : 'Tenue'}
-                            </RecommendationCategory>
-                            <RecommendationProducts>
-                              {recommendedOutfit.products?.length || 0} articles
-                            </RecommendationProducts>
-                          </RecommendationMeta>
-                        </RecommendationContent>
-                      </RecommendationCard>
-                    </CarouselSlide>
-                  ))}
-                </CarouselTrack>
-              </CarouselContainer>
-              
-              {recommendedOutfits.length > slidesPerView && (
-                <CarouselControls>
-                  <CarouselButton onClick={prevSlide} disabled={carouselIndex === 0}>
-                    ←
-                  </CarouselButton>
-                  <CarouselDots>
-                    {Array.from({ length: Math.ceil(recommendedOutfits.length / slidesPerView) }, (_, index) => (
-                      <CarouselDot
-                        key={index}
-                        active={index === carouselIndex}
-                        onClick={() => setCarouselIndex(index)}
-                      />
-                    ))}
-                  </CarouselDots>
-                  <CarouselButton 
-                    onClick={nextSlide} 
-                    disabled={carouselIndex >= Math.ceil(recommendedOutfits.length / slidesPerView) - 1}
-                  >
-                    →
-                  </CarouselButton>
-                </CarouselControls>
-              )}
-            </CarouselWrapper>
+            <GalleryGrid>
+              {recommendedOutfits.slice(0, 8).map((recommendedOutfit) => (
+                <RecommendationCard key={recommendedOutfit.id} to={`/outfits/${recommendedOutfit.id}`}>
+                  <RecommendationImage image={recommendedOutfit.image} />
+                  <HeartIcon onClick={(e) => {
+                    e.preventDefault()
+                    // Add to favorites logic here
+                  }}>
+                    ♥
+                  </HeartIcon>
+                  <PlayIcon>▶</PlayIcon>
+                </RecommendationCard>
+              ))}
+            </GalleryGrid>
           </RecommendationsContainer>
         </RecommendationsSection>
       )}
