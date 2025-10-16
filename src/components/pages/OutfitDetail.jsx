@@ -590,7 +590,7 @@ const RecommendationsTitle = styled.h2`
   }
 `
 
-const ViewAllButton = styled.button`
+const ViewAllButton = styled(Link)`
   background: none;
   border: none;
   color: #666;
@@ -600,6 +600,7 @@ const ViewAllButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  text-decoration: none;
   
   &:hover {
     color: #1a1a1a;
@@ -1133,7 +1134,7 @@ function OutfitDetail() {
           <RecommendationsContainer>
             <RecommendationsHeader>
               <RecommendationsTitle>Découvrir les autres tenues</RecommendationsTitle>
-              <ViewAllButton>
+              <ViewAllButton to="/">
                 Voir plus →
               </ViewAllButton>
             </RecommendationsHeader>
