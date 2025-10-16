@@ -646,33 +646,130 @@ const RecommendationImage = styled.div`
   background-position: center;
   position: relative;
   overflow: hidden;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.7));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  ${RecommendationCard}:hover &::after {
+    opacity: 1;
+  }
 `
 
-const HeartIcon = styled.button`
+const ProductTags = styled.div`
   position: absolute;
-  bottom: 0.5rem;
-  right: 0.5rem;
-  width: 24px;
-  height: 24px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  
+  ${RecommendationCard}:hover & {
+    opacity: 1;
+  }
+`
+
+const GalleryProductTag = styled.div`
+  position: absolute;
+  width: 12px;
+  height: 12px;
   background: rgba(255, 255, 255, 0.9);
-  border: none;
+  border: 2px solid #1a1a1a;
   border-radius: 50%;
-  display: flex;
+  left: ${props => props.x}%;
+  top: ${props => props.y}%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 0 rgba(26, 26, 26, 0.4);
+  animation: pulse 2s infinite;
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(26, 26, 26, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 8px rgba(26, 26, 26, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(26, 26, 26, 0);
+    }
+  }
+`
+
+const GalleryOverlay = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  color: white;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  
+  ${RecommendationCard}:hover & {
+    transform: translateY(0);
+  }
+`
+
+const GalleryTitle = styled.h3`
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  color: white;
+  letter-spacing: 0.5px;
+`
+
+const GalleryDescription = styled.p`
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`
+
+const GalleryShopButton = styled.div`
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #666;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 15px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
   
   &:hover {
-    background: white;
-    color: #e91e63;
-    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
   }
-  
-  &:active {
-    transform: scale(0.95);
-  }
+`
+
+const ProductCount = styled.div`
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
 `
 
 
@@ -1045,12 +1142,25 @@ function OutfitDetail() {
               {recommendedOutfits.slice(0, 4).map((recommendedOutfit) => (
                 <RecommendationCard key={recommendedOutfit.id} to={`/outfits/${recommendedOutfit.id}`}>
                   <RecommendationImage image={recommendedOutfit.image} />
-                  <HeartIcon onClick={(e) => {
-                    e.preventDefault()
-                    // Add to favorites logic here
-                  }}>
-                    ♥
-                  </HeartIcon>
+                  <ProductCount>
+                    {recommendedOutfit.products?.length || 0} articles
+                  </ProductCount>
+                  <ProductTags>
+                    {recommendedOutfit.products?.slice(0, 3).map((product) => (
+                      <GalleryProductTag
+                        key={product.id}
+                        x={product.x}
+                        y={product.y}
+                      />
+                    ))}
+                  </ProductTags>
+                  <GalleryOverlay>
+                    <GalleryTitle>{recommendedOutfit.title}</GalleryTitle>
+                    <GalleryDescription>{recommendedOutfit.description}</GalleryDescription>
+                    <GalleryShopButton>
+                      Acheter le Look →
+                    </GalleryShopButton>
+                  </GalleryOverlay>
                 </RecommendationCard>
               ))}
             </GalleryGrid>
