@@ -7,7 +7,7 @@ import { useFavorites } from '../../hooks/useFavorites'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
 import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
-import ShareButton from '../ui/ShareButton'
+import SubtleShareButton from '../ui/SubtleShareButton'
 
 const MainContainer = styled.div`
   min-height: 100vh;
@@ -395,18 +395,6 @@ const ShopButton = styled.div`
   }
 `
 
-const ActionButtons = styled.div`
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  margin-top: 0.5rem;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-`
-
 const ProductCount = styled.div`
   position: absolute;
   top: 1rem;
@@ -660,13 +648,13 @@ function MainPortal() {
                     <OutfitOverlay>
                       <OutfitTitle>{outfit.title}</OutfitTitle>
                       <OutfitDescription>{outfit.description}</OutfitDescription>
-                      <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
-                      <ActionButtons>
-                        <ShareButton outfit={outfit} variant="secondary" />
-                        <ShopButton>
-                          Acheter le Look →
-                        </ShopButton>
-                      </ActionButtons>
+                      <PublicationDate>
+                        {getRelativeTime(outfit.createdAt)}
+                        <SubtleShareButton outfit={outfit} />
+                      </PublicationDate>
+                      <ShopButton>
+                        Acheter le Look →
+                      </ShopButton>
                     </OutfitOverlay>
                   </OutfitCard>
                 ))
@@ -703,13 +691,13 @@ function MainPortal() {
                     <OutfitOverlay>
                       <OutfitTitle>{outfit.title}</OutfitTitle>
                       <OutfitDescription>{outfit.description}</OutfitDescription>
-                      <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
-                      <ActionButtons>
-                        <ShareButton outfit={outfit} variant="secondary" />
-                        <ShopButton>
-                          Acheter le Look →
-                        </ShopButton>
-                      </ActionButtons>
+                      <PublicationDate>
+                        {getRelativeTime(outfit.createdAt)}
+                        <SubtleShareButton outfit={outfit} />
+                      </PublicationDate>
+                      <ShopButton>
+                        Acheter le Look →
+                      </ShopButton>
                     </OutfitOverlay>
                   </OutfitCard>
                 ))
