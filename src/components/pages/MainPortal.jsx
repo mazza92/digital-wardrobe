@@ -726,7 +726,7 @@ function MainPortal() {
               </SocialLink>
             </SocialLinks>
             <FooterBottom>
-              © 2024 {influencer.brand}. Tous droits réservés.
+              © 2025 Virtual Dressing. Tous droits réservés.
             </FooterBottom>
           </FooterContent>
         </Footer>
