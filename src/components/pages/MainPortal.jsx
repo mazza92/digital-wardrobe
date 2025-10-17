@@ -7,7 +7,6 @@ import { useFavorites } from '../../hooks/useFavorites'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
 import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
-import SubtleShareButton from '../ui/SubtleShareButton'
 
 const MainContainer = styled.div`
   min-height: 100vh;
@@ -648,10 +647,7 @@ function MainPortal() {
                     <OutfitOverlay>
                       <OutfitTitle>{outfit.title}</OutfitTitle>
                       <OutfitDescription>{outfit.description}</OutfitDescription>
-                      <PublicationDate>
-                        {getRelativeTime(outfit.createdAt)}
-                        <SubtleShareButton outfit={outfit} />
-                      </PublicationDate>
+                      <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
                       <ShopButton>
                         Acheter le Look →
                       </ShopButton>
@@ -691,10 +687,7 @@ function MainPortal() {
                     <OutfitOverlay>
                       <OutfitTitle>{outfit.title}</OutfitTitle>
                       <OutfitDescription>{outfit.description}</OutfitDescription>
-                      <PublicationDate>
-                        {getRelativeTime(outfit.createdAt)}
-                        <SubtleShareButton outfit={outfit} />
-                      </PublicationDate>
+                      <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
                       <ShopButton>
                         Acheter le Look →
                       </ShopButton>
