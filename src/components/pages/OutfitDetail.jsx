@@ -7,6 +7,7 @@ import { fetchOutfits, getRelativeTime } from '../../utils/api'
 import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
 import SubtleShareButton from '../ui/SubtleShareButton'
+import { handleAffiliateClick } from '../../utils/tracking'
 
 const DetailContainer = styled.div`
   min-height: 100vh;
@@ -1096,6 +1097,7 @@ function OutfitDetail() {
                   href={selectedProduct.link} 
                   target="_blank" 
                   rel="noopener noreferrer"
+                  onClick={(e) => handleAffiliateClick(selectedProduct, outfit.id, e)}
                 >
                   Acheter
                 </ShopButton>
@@ -1132,6 +1134,7 @@ function OutfitDetail() {
                         href={product.link} 
                         target="_blank" 
                         rel="noopener noreferrer"
+                        onClick={(e) => handleAffiliateClick(product, outfit.id, e)}
                       >
                         Acheter
                       </ProductCardButton>
