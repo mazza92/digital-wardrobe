@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useOutfits } from '../../hooks/useOutfits'
 import { getRelativeTime } from '../../utils/api'
 import { useFavorites } from '../../hooks/useFavorites'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
-import FavoritesList from '../ui/FavoritesList'
-import FavoritesButton from '../ui/CartButton'
+import { LazyFavoritesList, LazyCartButton, LoadingFallback, preloadResources } from '../../utils/performance'
 
 const MainContainer = styled.div`
   min-height: 100vh;
@@ -546,6 +545,21 @@ function MainPortal() {
   // SEO optimization
   useSEO(seoConfig.home)
 
+  // Preload critical images for better performance
+  useEffect(() => {
+    if (outfits.length > 0) {
+      // Preload first 4 outfit images (above the fold)
+      const criticalImages = outfits
+        .slice(0, 4)
+        .map(outfit => outfit.image)
+        .filter(Boolean)
+      
+      if (criticalImages.length > 0) {
+        preloadResources.preloadImages(criticalImages)
+      }
+    }
+  }, [outfits])
+
   if (isLoading) {
     return (
       <MainContainer>
@@ -586,10 +600,12 @@ function MainPortal() {
       <Header>
         <BrandName>Virtual Dressing</BrandName>
         <HeaderRight>
-          <FavoritesButton 
-            onClick={() => setIsFavoritesOpen(true)} 
-            favoritesCount={getFavoritesCount()} 
-          />
+          <Suspense fallback={<div style={{width: '40px', height: '40px'}} />}>
+            <LazyCartButton 
+              onClick={() => setIsFavoritesOpen(true)} 
+              favoritesCount={getFavoritesCount()} 
+            />
+          </Suspense>
           <NavLink to="/about">À propos</NavLink>
         </HeaderRight>
       </Header>
@@ -732,13 +748,15 @@ function MainPortal() {
         </Footer>
       )}
       
-      <FavoritesList
-        isOpen={isFavoritesOpen}
-        onClose={() => setIsFavoritesOpen(false)}
-        favorites={favorites}
-        onRemoveFavorite={removeFromFavorites}
-        onClearFavorites={clearFavorites}
-      />
+      <Suspense fallback={<LoadingFallback message="Chargement des favoris..." />}>
+        <LazyFavoritesList
+          isOpen={isFavoritesOpen}
+          onClose={() => setIsFavoritesOpen(false)}
+          favorites={favorites}
+          onRemoveFavorite={removeFromFavorites}
+          onClearFavorites={clearFavorites}
+        />
+      </Suspense>
     </MainContainer>
   )
 }

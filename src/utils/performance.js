@@ -20,25 +20,29 @@ import React from 'react'
 
 // Loading component for Suspense fallback
 export const LoadingFallback = ({ message = "Chargement..." }) => {
-  return (
-    <div style={{
+  return React.createElement('div', {
+    style: {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: '200px',
       gap: '1rem'
-    }}>
-      <div style={{
+    }
+  }, 
+    React.createElement('div', {
+      style: {
         width: '40px',
         height: '40px',
         border: '4px solid #f3f3f3',
         borderTop: '4px solid #1a1a1a',
         borderRadius: '50%',
         animation: 'spin 1s linear infinite'
-      }} />
-      <p style={{ color: '#666', margin: 0 }}>{message}</p>
-    </div>
+      }
+    }),
+    React.createElement('p', { 
+      style: { color: '#666', margin: 0 } 
+    }, message)
   )
 }
 
@@ -93,20 +97,20 @@ export const LazyImage = ({ src, alt, className, ...props }) => {
     return () => observer.disconnect()
   }, [])
   
-  return (
-    <div ref={imgRef} className={className} {...props}>
-      {isInView && (
-        <img
-          src={src}
-          alt={alt}
-          onLoad={() => setIsLoaded(true)}
-          style={{
-            opacity: isLoaded ? 1 : 0,
-            transition: 'opacity 0.3s ease'
-          }}
-        />
-      )}
-    </div>
+  return React.createElement('div', {
+    ref: imgRef,
+    className: className,
+    ...props
+  }, 
+    isInView && React.createElement('img', {
+      src: src,
+      alt: alt,
+      onLoad: () => setIsLoaded(true),
+      style: {
+        opacity: isLoaded ? 1 : 0,
+        transition: 'opacity 0.3s ease'
+      }
+    })
   )
 }
 
@@ -324,15 +328,15 @@ export class PerformanceErrorBoundary extends React.Component {
   
   render() {
     if (this.state.hasError) {
-      return (
-        <div style={{
+      return React.createElement('div', {
+        style: {
           padding: '2rem',
           textAlign: 'center',
           color: '#666'
-        }}>
-          <h2>Une erreur s'est produite</h2>
-          <p>Veuillez recharger la page ou réessayer plus tard.</p>
-        </div>
+        }
+      }, 
+        React.createElement('h2', null, 'Une erreur s\'est produite'),
+        React.createElement('p', null, 'Veuillez recharger la page ou réessayer plus tard.')
       )
     }
     
