@@ -186,23 +186,6 @@ export const memoize = (fn) => {
   }
 }
 
-// Memoize API responses
-export const memoizeApiCall = (apiCall, ttl = 5 * 60 * 1000) => { // 5 minutes default
-  const cache = new Map()
-  
-  return async (...args) => {
-    const key = JSON.stringify(args)
-    const cached = cache.get(key)
-    
-    if (cached && Date.now() - cached.timestamp < ttl) {
-      return cached.data
-    }
-    
-    const data = await apiCall(...args)
-    cache.set(key, { data, timestamp: Date.now() })
-    return data
-  }
-}
 
 // ============================================================================
 // DEBOUNCING & THROTTLING
@@ -275,50 +258,6 @@ export const preloadResources = {
   }
 }
 
-// ============================================================================
-// LOCAL STORAGE MANAGEMENT
-// ============================================================================
-
-// localStorage quota management utilities
-export const storageManager = {
-  // Get current localStorage usage
-  getStorageUsage: () => {
-    let total = 0
-    for (let key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
-        total += localStorage[key].length + key.length
-      }
-    }
-    return total
-  },
-  
-  // Clear old cache data
-  clearOldCache: () => {
-    const keysToCheck = ['cachedOutfits', 'cachedProfile', 'cacheTimestamp']
-    keysToCheck.forEach(key => {
-      try {
-        localStorage.removeItem(key)
-      } catch (error) {
-        console.warn(`Failed to remove ${key}:`, error)
-      }
-    })
-  },
-  
-  // Check if we're approaching quota limit
-  isNearQuota: (threshold = 0.8) => {
-    const usage = storageManager.getStorageUsage()
-    const quota = 5 * 1024 * 1024 // 5MB typical quota
-    return usage > (quota * threshold)
-  },
-  
-  // Clean up storage if near quota
-  cleanupIfNeeded: () => {
-    if (storageManager.isNearQuota()) {
-      console.log('localStorage near quota, cleaning up...')
-      storageManager.clearOldCache()
-    }
-  }
-}
 
 // ============================================================================
 // BUNDLE ANALYSIS
