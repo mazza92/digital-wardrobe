@@ -23,13 +23,13 @@ const ShareIcon = styled.button`
   border: none;
   color: #999;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 4px;
   transition: all 0.2s ease;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.25rem;
   
   &:hover {
     color: #666;
@@ -38,6 +38,16 @@ const ShareIcon = styled.button`
   
   &:active {
     transform: scale(0.95);
+  }
+`
+
+const ShareText = styled.span`
+  font-size: 0.8rem;
+  color: inherit;
+  white-space: nowrap;
+  
+  @media (max-width: 768px) {
+    display: none;
   }
 `
 
@@ -189,6 +199,7 @@ export default function SubtleShareButton({ outfit, className }) {
     <ShareContainer className={className}>
       <ShareIcon onClick={() => setIsOpen(!isOpen)}>
         🔗
+        <ShareText>Partager ce look à un ami</ShareText>
       </ShareIcon>
       
       {isOpen && (
