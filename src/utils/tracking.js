@@ -6,20 +6,23 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://digital-ward
 export const trackClick = async (productId, outfitId, productName, brand, affiliateLink) => {
   try {
     console.log('Attempting to track click:', { productId, outfitId, productName, brand })
-    console.log('API URL:', `${API_BASE_URL}/api/tracking/click`)
     
-    const response = await fetch(`${API_BASE_URL}/api/tracking/click`, {
-      method: 'POST',
+    // Use GET request to avoid CORS preflight issues
+    const params = new URLSearchParams({
+      productId,
+      outfitId,
+      productName: productName || '',
+      brand: brand || ''
+    })
+    
+    const apiUrl = `${API_BASE_URL}/api/track-click?${params}`
+    console.log('API URL:', apiUrl)
+    
+    const response = await fetch(apiUrl, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        productId,
-        outfitId,
-        productName,
-        brand,
-        affiliateLink
-      })
+      }
     })
 
     console.log('Response status:', response.status)
