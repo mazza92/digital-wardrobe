@@ -43,23 +43,31 @@ export const trackClick = async (productId, outfitId, productName, brand, affili
   }
 }
 
-export const handleAffiliateClick = async (product, outfitId, event) => {
-  // Track the click before redirecting
-  const trackingSuccess = await trackClick(
-    product.id,
-    outfitId,
-    product.name,
-    product.brand,
-    product.link
-  )
-
-  if (trackingSuccess) {
-    console.log(`Click tracked for ${product.name} by ${product.brand}`)
-  }
-
-  // If we have an affiliate link, open it in a new tab
+export const handleAffiliateClick = (product, outfitId, event) => {
+  // Open the link immediately to avoid popup blockers
   if (product.link) {
-    window.open(product.link, '_blank', 'noopener,noreferrer')
+    const newWindow = window.open(product.link, '_blank', 'noopener,noreferrer')
+    
+    // Track the click after opening (non-blocking)
+    trackClick(
+      product.id,
+      outfitId,
+      product.name,
+      product.brand,
+      product.link
+    ).then(success => {
+      if (success) {
+        console.log(`Click tracked for ${product.name} by ${product.brand}`)
+      }
+    }).catch(error => {
+      console.error('Error tracking click:', error)
+    })
+    
+    // If popup was blocked, fallback to direct navigation
+    if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+      console.log('Popup blocked, redirecting directly')
+      window.location.href = product.link
+    }
   }
 }
 
