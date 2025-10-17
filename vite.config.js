@@ -24,7 +24,9 @@ export default defineConfig({
     // Enable compression
     minify: 'esbuild',
     // Optimize chunk size
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 1000,
+    // Add cache busting
+    assetsInlineLimit: 0
   },
   // Optimize dependencies
   optimizeDeps: {
