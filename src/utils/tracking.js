@@ -5,6 +5,9 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://digital-ward
 
 export const trackClick = async (productId, outfitId, productName, brand, affiliateLink) => {
   try {
+    console.log('Attempting to track click:', { productId, outfitId, productName, brand })
+    console.log('API URL:', `${API_BASE_URL}/api/tracking/click`)
+    
     const response = await fetch(`${API_BASE_URL}/api/tracking/click`, {
       method: 'POST',
       headers: {
@@ -19,8 +22,12 @@ export const trackClick = async (productId, outfitId, productName, brand, affili
       })
     })
 
+    console.log('Response status:', response.status)
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+
     if (!response.ok) {
-      console.error('Failed to track click:', response.statusText)
+      const errorText = await response.text()
+      console.error('Failed to track click:', response.status, response.statusText, errorText)
       return false
     }
 
