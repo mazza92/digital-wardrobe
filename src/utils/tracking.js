@@ -46,6 +46,7 @@ export const trackClick = async (productId, outfitId, productName, brand, affili
 export const handleAffiliateClick = (product, outfitId, event) => {
   // Open the link immediately to avoid popup blockers
   if (product.link) {
+    // Try to open in new tab
     const newWindow = window.open(product.link, '_blank', 'noopener,noreferrer')
     
     // Track the click after opening (non-blocking)
@@ -63,10 +64,19 @@ export const handleAffiliateClick = (product, outfitId, event) => {
       console.error('Error tracking click:', error)
     })
     
-    // If popup was blocked, fallback to direct navigation
+    // If popup was blocked, copy link to clipboard as fallback
     if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-      console.log('Popup blocked, redirecting directly')
-      window.location.href = product.link
+      console.log('Popup blocked - copying link to clipboard')
+      try {
+        navigator.clipboard.writeText(product.link).then(() => {
+          // Show a subtle notification (you could replace this with a toast)
+          console.log('Lien copié dans le presse-papiers')
+        }).catch(() => {
+          console.log('Impossible de copier le lien automatiquement')
+        })
+      } catch (error) {
+        console.log('Clipboard not available')
+      }
     }
   }
 }
