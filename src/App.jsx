@@ -17,19 +17,11 @@ function App() {
             <Routes>
               <Route 
                 path="/" 
-                element={
-                  <Suspense fallback={<LoadingFallback message="Chargement de la page d'accueil..." />}>
-                    <LazyMainPortal />
-                  </Suspense>
-                } 
+                element={<LazyMainPortal />} 
               />
               <Route 
                 path="/outfits/:outfitId" 
-                element={
-                  <Suspense fallback={<LoadingFallback message="Chargement des détails de la tenue..." />}>
-                    <LazyOutfitDetail />
-                  </Suspense>
-                } 
+                element={<LazyOutfitDetail />} 
               />
               <Route 
                 path="/about" 
