@@ -346,7 +346,6 @@ export default {
   
   // Memoization
   memoize,
-  memoizeApiCall,
   
   // Debouncing & throttling
   debounce,
