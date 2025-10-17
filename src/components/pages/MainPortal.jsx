@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useOutfits } from '../../hooks/useOutfits'
+import { getRelativeTime } from '../../utils/api'
 import { useFavorites } from '../../hooks/useFavorites'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
 import FavoritesList from '../ui/FavoritesList'
@@ -354,8 +355,23 @@ const OutfitTitle = styled.h3`
 const OutfitDescription = styled.p`
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.5rem 0;
   line-height: 1.4;
+`
+
+const PublicationDate = styled.div`
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 1rem 0;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &::before {
+    content: '•';
+    color: rgba(255, 255, 255, 0.4);
+  }
 `
 
 const ShopButton = styled.div`
@@ -631,6 +647,7 @@ function MainPortal() {
                     <OutfitOverlay>
                       <OutfitTitle>{outfit.title}</OutfitTitle>
                       <OutfitDescription>{outfit.description}</OutfitDescription>
+                      <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
                       <ShopButton>
                         Acheter le Look →
                       </ShopButton>
@@ -670,6 +687,7 @@ function MainPortal() {
                     <OutfitOverlay>
                       <OutfitTitle>{outfit.title}</OutfitTitle>
                       <OutfitDescription>{outfit.description}</OutfitDescription>
+                      <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
                       <ShopButton>
                         Acheter le Look →
                       </ShopButton>

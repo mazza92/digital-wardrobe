@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useFavorites } from '../../hooks/useFavorites'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
-import { fetchOutfits } from '../../utils/api'
+import { fetchOutfits, getRelativeTime } from '../../utils/api'
 import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
 
@@ -272,8 +272,23 @@ const OutfitDescription = styled.p`
   font-size: 1.1rem;
   color: #666;
   line-height: 1.7;
+  margin: 0 0 1rem 0;
+  font-weight: 400;
+`
+
+const PublicationDate = styled.div`
+  font-size: 0.9rem;
+  color: #999;
   margin: 0 0 2rem 0;
   font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &::before {
+    content: '•';
+    color: #ccc;
+  }
 `
 
 const ProductsSection = styled.div`
@@ -1091,6 +1106,7 @@ function OutfitDetail() {
         <InfoSection>
           <OutfitTitle>{outfit.title}</OutfitTitle>
           <OutfitDescription>{outfit.description}</OutfitDescription>
+          <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
           
           <ProductsSection>
             <SectionTitle>Acheter ce Look</SectionTitle>
