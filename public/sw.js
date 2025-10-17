@@ -3,11 +3,20 @@ const CACHE_NAME = 'virtual-dressing-v1'
 const STATIC_CACHE = 'static-v1'
 const API_CACHE = 'api-v1'
 
-// Files to cache immediately
+// Files to cache immediately (only essential files)
 const STATIC_FILES = [
   '/',
-  '/index.html',
-  '/manifest.json'
+  '/index.html'
+]
+
+// Skip caching for these patterns
+const SKIP_CACHE_PATTERNS = [
+  /chrome-extension:/,
+  /moz-extension:/,
+  /safari-extension:/,
+  /data:/,
+  /blob:/,
+  /file:/
 ]
 
 // Install event - cache static files
@@ -42,10 +51,25 @@ self.addEventListener('activate', (event) => {
   )
 })
 
+// Helper function to check if we should skip caching
+function shouldSkipCache(url) {
+  return SKIP_CACHE_PATTERNS.some(pattern => pattern.test(url))
+}
+
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
+
+  // Skip non-http(s) requests and browser extensions
+  if (!url.protocol.startsWith('http') || shouldSkipCache(url.href)) {
+    return
+  }
+
+  // Skip requests that are not GET requests
+  if (request.method !== 'GET') {
+    return
+  }
 
   // Handle API requests with cache-first strategy
   if (url.pathname.startsWith('/api/')) {
@@ -74,7 +98,17 @@ self.addEventListener('fetch', (event) => {
                   }
                   return networkResponse
                 })
+                .catch(() => {
+                  // If network fails, return a basic error response
+                  return new Response('Network error', { status: 503 })
+                })
             })
+        })
+        .catch(() => {
+          // If cache fails, try network directly
+          return fetch(request).catch(() => {
+            return new Response('Service unavailable', { status: 503 })
+          })
         })
     )
     return
@@ -96,9 +130,20 @@ self.addEventListener('fetch', (event) => {
                 .then((cache) => {
                   cache.put(request, responseClone)
                 })
+                .catch(() => {}) // Ignore cache errors
             }
             return networkResponse
           })
+          .catch(() => {
+            // If network fails, return a basic error response
+            return new Response('Resource not found', { status: 404 })
+          })
+      })
+      .catch(() => {
+        // If cache fails, try network directly
+        return fetch(request).catch(() => {
+          return new Response('Service unavailable', { status: 503 })
+        })
       })
   )
 })
