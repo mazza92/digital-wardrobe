@@ -2,6 +2,34 @@
 
 import { useState, useEffect } from 'react'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://digital-wardrobe-admin.vercel.app/api'
+
+const trackFavoritesAnalytics = async (product, action) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/favorites`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        productId: product.id,
+        outfitId: product.outfitId || 'unknown',
+        productName: product.name,
+        brand: product.brand,
+        action: action // 'add' or 'remove'
+      })
+    })
+
+    if (response.ok) {
+      console.log(`Favorites analytics tracked: ${action} for ${product.name}`)
+    } else {
+      console.error('Failed to track favorites analytics:', response.status)
+    }
+  } catch (error) {
+    console.error('Error tracking favorites analytics:', error)
+  }
+}
+
 export const useFavorites = () => {
   const [favorites, setFavorites] = useState(() => {
     try {
@@ -21,6 +49,9 @@ export const useFavorites = () => {
     setFavorites(prevFavorites => {
       const existingItem = prevFavorites.find(item => item.id === product.id)
       if (!existingItem) {
+        // Track analytics
+        trackFavoritesAnalytics(product, 'add')
+        
         return [...prevFavorites, { 
           ...product, 
           favoritedAt: new Date().toISOString() 
@@ -31,7 +62,14 @@ export const useFavorites = () => {
   }
 
   const removeFromFavorites = (productId) => {
-    setFavorites(prevFavorites => prevFavorites.filter(item => item.id !== productId))
+    setFavorites(prevFavorites => {
+      const itemToRemove = prevFavorites.find(item => item.id === productId)
+      if (itemToRemove) {
+        // Track analytics
+        trackFavoritesAnalytics(itemToRemove, 'remove')
+      }
+      return prevFavorites.filter(item => item.id !== productId)
+    })
   }
 
   const toggleFavorite = (product) => {
