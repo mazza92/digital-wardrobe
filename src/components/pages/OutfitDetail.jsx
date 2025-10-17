@@ -6,6 +6,7 @@ import { useSEO, seoConfig } from '../../hooks/useSEO'
 import { fetchOutfits, getRelativeTime } from '../../utils/api'
 import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
+import ShareButton from '../ui/ShareButton'
 
 const DetailContainer = styled.div`
   min-height: 100vh;
@@ -1053,6 +1054,7 @@ function OutfitDetail() {
           <BrandName>{influencer?.brand || 'Virtual Wardrobe'}</BrandName>
         </HeaderLeft>
         <HeaderRight>
+          <ShareButton outfit={outfit} variant="primary" />
           <FavoritesButton 
             onClick={() => setIsFavoritesOpen(true)} 
             favoritesCount={getFavoritesCount()} 

@@ -7,6 +7,7 @@ import { useFavorites } from '../../hooks/useFavorites'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
 import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
+import ShareButton from '../ui/ShareButton'
 
 const MainContainer = styled.div`
   min-height: 100vh;
@@ -394,6 +395,18 @@ const ShopButton = styled.div`
   }
 `
 
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.5rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+`
+
 const ProductCount = styled.div`
   position: absolute;
   top: 1rem;
@@ -648,9 +661,12 @@ function MainPortal() {
                       <OutfitTitle>{outfit.title}</OutfitTitle>
                       <OutfitDescription>{outfit.description}</OutfitDescription>
                       <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
-                      <ShopButton>
-                        Acheter le Look →
-                      </ShopButton>
+                      <ActionButtons>
+                        <ShareButton outfit={outfit} variant="secondary" />
+                        <ShopButton>
+                          Acheter le Look →
+                        </ShopButton>
+                      </ActionButtons>
                     </OutfitOverlay>
                   </OutfitCard>
                 ))
@@ -688,9 +704,12 @@ function MainPortal() {
                       <OutfitTitle>{outfit.title}</OutfitTitle>
                       <OutfitDescription>{outfit.description}</OutfitDescription>
                       <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
-                      <ShopButton>
-                        Acheter le Look →
-                      </ShopButton>
+                      <ActionButtons>
+                        <ShareButton outfit={outfit} variant="secondary" />
+                        <ShopButton>
+                          Acheter le Look →
+                        </ShopButton>
+                      </ActionButtons>
                     </OutfitOverlay>
                   </OutfitCard>
                 ))
