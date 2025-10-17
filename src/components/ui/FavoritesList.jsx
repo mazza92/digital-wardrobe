@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import styled from 'styled-components'
+import { handleAffiliateClick } from '../../utils/tracking'
 
 const FavoritesContainer = styled.div`
   position: fixed;
@@ -98,6 +99,7 @@ const FavoriteItem = styled.div`
   border-radius: 12px;
   border: 1px solid #e9ecef;
   transition: all 0.3s ease;
+  cursor: ${props => props.hasLink ? 'pointer' : 'default'};
   
   &:hover {
     background: #e9ecef;
@@ -117,6 +119,17 @@ const ProductImage = styled.div`
   font-size: 1.5rem;
   color: #666;
   flex-shrink: 0;
+  background-image: ${props => props.imageUrl ? `url(${props.imageUrl})` : 'none'};
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
 `
 
 const ProductInfo = styled.div`
@@ -250,6 +263,23 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
     }
   }
 
+  const handleItemClick = (item, e) => {
+    // Prevent click if clicking on remove button
+    if (e.target.closest('button')) {
+      return
+    }
+    
+    // If item has affiliate link, track click and redirect
+    if (item.link) {
+      handleAffiliateClick(item, 'favorites', e)
+    }
+  }
+
+  const handleRemoveClick = (itemId, e) => {
+    e.stopPropagation()
+    onRemoveFavorite(itemId)
+  }
+
   return (
     <>
       <Overlay isOpen={isOpen} onClick={handleOverlayClick} />
@@ -271,15 +301,32 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
           ) : (
             <FavoritesList>
               {favorites.map((item) => (
-                <FavoriteItem key={item.id}>
-                  <ProductImage>👗</ProductImage>
+                <FavoriteItem 
+                  key={item.id}
+                  hasLink={!!item.link}
+                  onClick={(e) => handleItemClick(item, e)}
+                >
+                  <ProductImage imageUrl={item.imageUrl}>
+                    {item.imageUrl ? (
+                      <img 
+                        src={item.imageUrl} 
+                        alt={item.name}
+                        onError={(e) => {
+                          e.target.style.display = 'none'
+                          e.target.parentElement.innerHTML = '👗'
+                        }}
+                      />
+                    ) : (
+                      '👗'
+                    )}
+                  </ProductImage>
                   <ProductInfo>
                     <ProductName>{item.name}</ProductName>
                     <ProductBrand>{item.brand}</ProductBrand>
                     <ProductPrice>{formatPrice(item.price)}</ProductPrice>
                   </ProductInfo>
                   <RemoveButton 
-                    onClick={() => onRemoveFavorite(item.id)}
+                    onClick={(e) => handleRemoveClick(item.id, e)}
                     title="Remove from favorites"
                   >
                     ❤️
