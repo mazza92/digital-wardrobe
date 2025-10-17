@@ -57,8 +57,10 @@ export const handleAffiliateClick = async (product, outfitId, event) => {
     console.log(`Click tracked for ${product.name} by ${product.brand}`)
   }
 
-  // The link will still open normally due to href attribute
-  // This function is called on click but doesn't prevent the default behavior
+  // If we have an affiliate link, open it in a new tab
+  if (product.link) {
+    window.open(product.link, '_blank', 'noopener,noreferrer')
+  }
 }
 
 // Utility to create a tracked link component
