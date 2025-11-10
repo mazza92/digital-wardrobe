@@ -99,7 +99,7 @@ const InfluencerImage = styled.div`
 `
 
 const InfluencerName = styled.h2`
-  font-size: 2rem;
+  font-size: 2.3rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
   color: #101010;
@@ -107,7 +107,7 @@ const InfluencerName = styled.h2`
   font-family: serif;
   
   @media (max-width: 767px) {
-    font-size: 1.75rem;
+    font-size: 2.01rem;
   }
 `
 
