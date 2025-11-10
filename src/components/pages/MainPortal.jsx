@@ -60,8 +60,8 @@ const NavLink = styled(Link)`
 `
 
 const HeroSection = styled.section`
-  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
-  color: white;
+  background: #E3DBCC;
+  color: #101010;
   padding: 3rem 1.5rem;
   text-align: center;
   position: relative;
@@ -74,7 +74,7 @@ const HeroSection = styled.section`
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="black" opacity="0.05"/><circle cx="75" cy="75" r="1" fill="black" opacity="0.05"/><circle cx="50" cy="10" r="0.5" fill="black" opacity="0.05"/><circle cx="10" cy="60" r="0.5" fill="black" opacity="0.05"/><circle cx="90" cy="40" r="0.5" fill="black" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
     opacity: 0.3;
   }
 `
@@ -94,15 +94,15 @@ const InfluencerImage = styled.div`
   background-size: cover;
   background-position: center;
   margin: 0 auto 1.5rem;
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  border: 3px solid rgba(16, 16, 16, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 `
 
 const InfluencerName = styled.h2`
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
-  color: white;
+  color: #101010;
   letter-spacing: -0.5px;
   font-family: serif;
   
@@ -113,7 +113,8 @@ const InfluencerName = styled.h2`
 
 const InfluencerBrand = styled.p`
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: #101010;
+  opacity: 0.8;
   margin: 0;
   font-weight: 500;
   text-transform: uppercase;
@@ -122,7 +123,8 @@ const InfluencerBrand = styled.p`
 
 const InfluencerBio = styled.p`
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: #101010;
+  opacity: 0.9;
   margin: 0;
   line-height: 1.6;
   font-weight: 400;
@@ -139,7 +141,7 @@ const StatsSection = styled.div`
 const StatItem = styled.div`
   text-align: center;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.3);
   border-radius: 12px;
   backdrop-filter: blur(10px);
 `
@@ -147,13 +149,14 @@ const StatItem = styled.div`
 const StatNumber = styled.div`
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: #101010;
   margin-bottom: 0.25rem;
 `
 
 const StatLabel = styled.div`
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: #101010;
+  opacity: 0.7;
   text-transform: uppercase;
   letter-spacing: 1px;
 `
@@ -181,14 +184,14 @@ const TabButton = styled.button`
   padding: 1.5rem 2rem;
   font-size: 1rem;
   font-weight: 600;
-  color: ${props => props.$active ? '#1a1a1a' : '#666'};
+  color: ${props => props.$active ? '#101010' : '#666'};
   cursor: pointer;
-  border-bottom: 3px solid ${props => props.$active ? '#1a1a1a' : 'transparent'};
+  border-bottom: 3px solid ${props => props.$active ? '#101010' : 'transparent'};
   transition: all 0.3s ease;
   position: relative;
   
   &:hover {
-    color: #1a1a1a;
+    color: #101010;
     background: rgba(0, 0, 0, 0.02);
   }
 `
@@ -308,23 +311,23 @@ const ProductTag = styled.div`
   width: 12px;
   height: 12px;
   background: rgba(255, 255, 255, 0.9);
-  border: 2px solid #1a1a1a;
+  border: 2px solid #101010;
   border-radius: 50%;
   left: ${props => props.x}%;
   top: ${props => props.y}%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 0 rgba(26, 26, 26, 0.4);
+  box-shadow: 0 0 0 0 rgba(16, 16, 16, 0.4);
   animation: pulse 2s infinite;
   
   @keyframes pulse {
     0% {
-      box-shadow: 0 0 0 0 rgba(26, 26, 26, 0.4);
+      box-shadow: 0 0 0 0 rgba(16, 16, 16, 0.4);
     }
     70% {
-      box-shadow: 0 0 0 8px rgba(26, 26, 26, 0);
+      box-shadow: 0 0 0 8px rgba(16, 16, 16, 0);
     }
     100% {
-      box-shadow: 0 0 0 0 rgba(26, 26, 26, 0);
+      box-shadow: 0 0 0 0 rgba(16, 16, 16, 0);
     }
   }
 `
@@ -518,7 +521,7 @@ const LoadingSpinner = styled.div`
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #1a1a1a;
+  border-top: 4px solid #101010;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   

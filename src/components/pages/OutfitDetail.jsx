@@ -57,7 +57,7 @@ const BackButton = styled.button`
   font-weight: 500;
   
   &:hover {
-    color: #1a1a1a;
+    color: #101010;
     background-color: rgba(0, 0, 0, 0.05);
     transform: translateX(-2px);
   }
@@ -123,7 +123,7 @@ const ProductTag = styled.button`
   border-radius: 50%;
   background: ${props => props.$isHovered 
     ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-    : 'linear-gradient(135deg, #1a1a1a 0%, #333 100%)'};
+    : 'linear-gradient(135deg, #101010 0%, #333 100%)'};
   border: 3px solid white;
   cursor: pointer;
   box-shadow: ${props => props.$isHovered 
@@ -138,7 +138,7 @@ const ProductTag = styled.button`
   
   &:hover {
     transform: scale(1.3);
-    background: linear-gradient(135deg, #333 0%, #1a1a1a 100%);
+    background: linear-gradient(135deg, #333 0%, #101010 100%);
     box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
   }
   
@@ -208,7 +208,7 @@ const ProductPrice = styled.p`
 
 const ShopButton = styled.a`
   display: block;
-  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  background: linear-gradient(135deg, #101010 0%, #333 100%);
   color: white;
   text-decoration: none;
   padding: 0.875rem 1.5rem;
@@ -220,7 +220,7 @@ const ShopButton = styled.a`
   letter-spacing: 0.5px;
   
   &:hover {
-    background: linear-gradient(135deg, #333 0%, #1a1a1a 100%);
+    background: linear-gradient(135deg, #333 0%, #101010 100%);
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   }
@@ -432,7 +432,7 @@ const ProductCardActions = styled.div`
 `
 
 const ProductCardButton = styled.a`
-  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  background: linear-gradient(135deg, #101010 0%, #333 100%);
   color: white;
   text-decoration: none;
   padding: 0.75rem 1rem;
@@ -444,7 +444,7 @@ const ProductCardButton = styled.a`
   letter-spacing: 0.5px;
   
   &:hover {
-    background: linear-gradient(135deg, #333 0%, #1a1a1a 100%);
+    background: linear-gradient(135deg, #333 0%, #101010 100%);
     transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
@@ -547,7 +547,7 @@ const SocialLink = styled.a`
   transition: all 0.3s ease;
   
   &:hover {
-    color: #1a1a1a;
+    color: #101010;
     background: rgba(0, 0, 0, 0.05);
   }
 `
@@ -565,7 +565,7 @@ const LoadingSpinner = styled.div`
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #1a1a1a;
+  border-top: 4px solid #101010;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   
@@ -625,7 +625,7 @@ const ViewAllButton = styled(Link)`
   text-decoration: none;
   
   &:hover {
-    color: #1a1a1a;
+    color: #101010;
   }
 `
 
@@ -707,23 +707,23 @@ const GalleryProductTag = styled.div`
   width: 12px;
   height: 12px;
   background: rgba(255, 255, 255, 0.9);
-  border: 2px solid #1a1a1a;
+  border: 2px solid #101010;
   border-radius: 50%;
   left: ${props => props.x}%;
   top: ${props => props.y}%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 0 rgba(26, 26, 26, 0.4);
+  box-shadow: 0 0 0 0 rgba(16, 16, 16, 0.4);
   animation: pulse 2s infinite;
   
   @keyframes pulse {
     0% {
-      box-shadow: 0 0 0 0 rgba(26, 26, 26, 0.4);
+      box-shadow: 0 0 0 0 rgba(16, 16, 16, 0.4);
     }
     70% {
-      box-shadow: 0 0 0 8px rgba(26, 26, 26, 0);
+      box-shadow: 0 0 0 8px rgba(16, 16, 16, 0);
     }
     100% {
-      box-shadow: 0 0 0 0 rgba(26, 26, 26, 0);
+      box-shadow: 0 0 0 0 rgba(16, 16, 16, 0);
     }
   }
 `

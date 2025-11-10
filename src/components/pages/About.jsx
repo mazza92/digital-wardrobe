@@ -31,7 +31,7 @@ const BackButton = styled(Link)`
   transition: all 0.3s ease;
   
   &:hover {
-    color: #1a1a1a;
+    color: #101010;
     background-color: #f5f5f5;
   }
 `
