@@ -9,12 +9,12 @@ import { LazyFavoritesList, LazyCartButton, LoadingFallback, preloadResources } 
 
 const MainContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  color: #1a1a1a;
+  background: #FDFCF8;
+  color: #101010;
 `
 
 const Header = styled.header`
-  background: rgba(255, 255, 255, 0.95);
+  background: #E3DBCC;
   backdrop-filter: blur(20px);
   padding: 1rem 1.5rem;
   display: flex;
@@ -39,7 +39,7 @@ const BrandName = styled.h1`
   font-weight: 600;
   margin: 0;
   letter-spacing: 2px;
-  color: #1a1a1a;
+  color: #101010;
 `
 
 const NavLink = styled(Link)`
@@ -53,7 +53,7 @@ const NavLink = styled(Link)`
   border: 1px solid transparent;
   
   &:hover {
-    color: #1a1a1a;
+    color: #101010;
     background-color: rgba(0, 0, 0, 0.05);
     border-color: rgba(0, 0, 0, 0.1);
   }
@@ -104,6 +104,7 @@ const InfluencerName = styled.h2`
   margin: 0 0 0.5rem 0;
   color: white;
   letter-spacing: -0.5px;
+  font-family: serif;
   
   @media (max-width: 767px) {
     font-size: 1.75rem;
@@ -213,7 +214,7 @@ const SectionTitle = styled.h2`
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
-  color: #1a1a1a;
+  color: #101010;
   letter-spacing: -0.5px;
   
   @media (max-width: 767px) {
@@ -248,7 +249,7 @@ const OutfitsGrid = styled.div`
 const OutfitCard = styled(Link)`
   position: relative;
   background: white;
-  border-radius: 20px;
+  border-radius: 17px;
   overflow: hidden;
   text-decoration: none;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -418,8 +419,8 @@ const NoOutfitsMessage = styled.div`
 `
 
 const Footer = styled.footer`
-  background: #1a1a1a;
-  color: white;
+  background: #E3DBCC;
+  color: #101010;
   padding: 2rem 1rem;
   text-align: center;
   margin-top: 4rem;
@@ -438,7 +439,7 @@ const FooterTitle = styled.h3`
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: white;
+  color: #101010;
   
   @media (min-width: 768px) {
     font-size: 1.5rem;
@@ -447,7 +448,8 @@ const FooterTitle = styled.h3`
 
 const FooterText = styled.p`
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: #101010;
+  opacity: 0.8;
   margin: 0 0 2rem 0;
   line-height: 1.6;
   
@@ -469,13 +471,14 @@ const SocialLinks = styled.div`
 `
 
 const SocialLink = styled.a`
-  color: rgba(255, 255, 255, 0.7);
+  color: #101010;
+  opacity: 0.7;
   text-decoration: none;
   font-weight: 500;
   font-size: 0.85rem;
   padding: 0.5rem 1rem;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(16, 16, 16, 0.2);
   transition: all 0.3s ease;
   white-space: nowrap;
   
@@ -486,18 +489,20 @@ const SocialLink = styled.a`
   }
   
   &:hover {
-    color: white;
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
+    color: #101010;
+    opacity: 1;
+    background: rgba(16, 16, 16, 0.1);
+    border-color: rgba(16, 16, 16, 0.3);
   }
 `
 
 const FooterBottom = styled.p`
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: #101010;
+  opacity: 0.5;
   margin: 0;
   padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(16, 16, 16, 0.1);
 `
 
 const LoadingContainer = styled.div`

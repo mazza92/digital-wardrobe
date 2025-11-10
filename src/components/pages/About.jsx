@@ -5,12 +5,12 @@ import outfitsData from '../../data/outfits.json'
 
 const AboutContainer = styled.div`
   min-height: 100vh;
-  background: #fafafa;
-  color: #1a1a1a;
+  background: #FDFCF8;
+  color: #101010;
 `
 
 const Header = styled.header`
-  background: white;
+  background: #E3DBCC;
   padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
@@ -40,7 +40,7 @@ const BrandName = styled.h1`
   font-size: 1rem;
   font-weight: 300;
   margin: 0;
-  color: #1a1a1a;
+  color: #101010;
   letter-spacing: 2px;
 `
 
@@ -68,7 +68,8 @@ const Name = styled.h1`
   font-weight: 400;
   margin: 0 0 0.5rem 0;
   letter-spacing: 1px;
-  color: #1a1a1a;
+  color: #101010;
+  font-family: serif;
 `
 
 const Bio = styled.p`
@@ -94,7 +95,7 @@ const SectionTitle = styled.h2`
   font-weight: 500;
   margin: 0 0 1.5rem 0;
   text-align: center;
-  color: #1a1a1a;
+  color: #101010;
   letter-spacing: 1px;
 `
 
@@ -112,7 +113,7 @@ const SocialLink = styled.a`
   padding: 0.75rem;
   background: #f8f8f8;
   border-radius: 8px;
-  color: #1a1a1a;
+  color: #101010;
   text-decoration: none;
   font-weight: 400;
   font-size: 0.85rem;
@@ -127,7 +128,7 @@ const SocialLink = styled.a`
 const SocialIcon = styled.div`
   width: 20px;
   height: 20px;
-  background: #1a1a1a;
+  background: #101010;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -149,7 +150,7 @@ const CTATitle = styled.h3`
   font-size: 1.1rem;
   font-weight: 500;
   margin: 0 0 0.75rem 0;
-  color: #1a1a1a;
+  color: #101010;
 `
 
 const CTAText = styled.p`
@@ -161,7 +162,7 @@ const CTAText = styled.p`
 
 const ShopButton = styled(Link)`
   display: inline-block;
-  background: #1a1a1a;
+  background: #101010;
   color: white;
   text-decoration: none;
   padding: 0.75rem 1.5rem;

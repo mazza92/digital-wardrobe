@@ -11,12 +11,12 @@ import { handleAffiliateClick } from '../../utils/tracking'
 
 const DetailContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: #FDFCF8;
   padding-bottom: 2rem;
 `
 
 const Header = styled.header`
-  background: rgba(255, 255, 255, 0.95);
+  background: #E3DBCC;
   backdrop-filter: blur(20px);
   padding: 0.75rem 1.5rem;
   display: flex;
@@ -67,7 +67,7 @@ const BrandName = styled.h1`
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
-  color: #1a1a1a;
+  color: #101010;
   letter-spacing: 1px;
 `
 
@@ -87,7 +87,7 @@ const MainContent = styled.div`
 const ImageSection = styled.div`
   position: relative;
   background: white;
-  border-radius: 20px;
+  border-radius: 17px;
   overflow: visible;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
@@ -186,7 +186,7 @@ const ProductName = styled.h3`
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
-  color: #1a1a1a;
+  color: #101010;
   letter-spacing: 0.5px;
 `
 
@@ -202,7 +202,7 @@ const ProductBrand = styled.p`
 const ProductPrice = styled.p`
   font-size: 1.1rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #101010;
   margin: 0 0 1rem 0;
 `
 
@@ -251,7 +251,7 @@ const ClosePopup = styled.button`
 
 const InfoSection = styled.div`
   background: white;
-  border-radius: 20px;
+  border-radius: 17px;
   padding: 2rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -261,7 +261,7 @@ const OutfitTitle = styled.h1`
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 1rem 0;
-  color: #1a1a1a;
+  color: #101010;
   line-height: 1.2;
   letter-spacing: -0.5px;
   
@@ -301,7 +301,7 @@ const SectionTitle = styled.h2`
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0 0 2rem 0;
-  color: #1a1a1a;
+  color: #101010;
   letter-spacing: 0.5px;
   text-align: center;
   position: relative;
@@ -314,7 +314,7 @@ const SectionTitle = styled.h2`
     transform: translateX(-50%);
     width: 60px;
     height: 3px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+    background: linear-gradient(135deg, #101010 0%, #333 100%);
     border-radius: 2px;
   }
 `
@@ -404,7 +404,7 @@ const ProductCardName = styled.h3`
   font-size: 1rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
-  color: #1a1a1a;
+  color: #101010;
   line-height: 1.2;
 `
 
@@ -420,7 +420,7 @@ const ProductCardBrand = styled.p`
 const ProductCardPrice = styled.p`
   font-size: 1.1rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: #101010;
   margin: 0 0 1rem 0;
 `
 
@@ -513,7 +513,8 @@ const InfluencerName = styled.h3`
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 0.25rem 0;
-  color: #1a1a1a;
+  color: #101010;
+  font-family: serif;
 `
 
 const InfluencerBrand = styled.p`
@@ -604,7 +605,7 @@ const RecommendationsTitle = styled.h2`
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
-  color: #1a1a1a;
+  color: #101010;
   
   @media (max-width: 767px) {
     font-size: 1.1rem;
@@ -646,7 +647,7 @@ const GalleryGrid = styled.div`
 
 const RecommendationCard = styled(Link)`
   background: white;
-  border-radius: 8px;
+  border-radius: 6.8px;
   overflow: hidden;
   text-decoration: none;
   color: inherit;
