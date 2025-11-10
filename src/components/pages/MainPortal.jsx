@@ -14,7 +14,7 @@ const MainContainer = styled.div`
 `
 
 const Header = styled.header`
-  background: #E3DBCC;
+  background: #F3F0E9;
   backdrop-filter: blur(20px);
   padding: 1rem 1.5rem;
   display: flex;
