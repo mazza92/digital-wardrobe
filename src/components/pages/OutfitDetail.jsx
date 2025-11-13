@@ -20,7 +20,7 @@ const DetailContainer = styled.div`
 const Header = styled.header`
   background: #E3DBCC;
   backdrop-filter: blur(20px);
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -29,34 +29,53 @@ const Header = styled.header`
   top: 0;
   z-index: 100;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  
+  @media (min-width: 768px) {
+    padding: 0.75rem 1.5rem;
+  }
 `
 
 const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
+  
+  @media (min-width: 768px) {
+    gap: 1rem;
+  }
 `
 
 const HeaderRight = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
+  
+  @media (min-width: 768px) {
+    gap: 1rem;
+  }
 `
 
 
 const BackButton = styled.button`
   background: none;
   border: none;
-  font-size: 1rem;
+  font-size: 0.9rem;
   cursor: pointer;
   color: #666;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
   transition: all 0.3s ease;
   font-weight: 500;
+  
+  @media (min-width: 768px) {
+    font-size: 1rem;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+  }
   
   &:hover {
     color: #101010;
@@ -66,11 +85,16 @@ const BackButton = styled.button`
 `
 
 const BrandName = styled.h1`
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   margin: 0;
   color: #101010;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+  
+  @media (min-width: 768px) {
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
 `
 
 const MainContent = styled.div`

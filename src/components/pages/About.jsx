@@ -13,24 +13,33 @@ const AboutContainer = styled.div`
 
 const Header = styled.header`
   background: #E3DBCC;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(20px);
+  
+  @media (min-width: 768px) {
+    padding: 1rem 1.5rem;
+  }
 `
 
 const BackButton = styled(Link)`
   color: #666;
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
   padding: 0.5rem;
   border-radius: 8px;
   transition: all 0.3s ease;
+  
+  @media (min-width: 768px) {
+    font-size: 1rem;
+    gap: 0.5rem;
+  }
   
   &:hover {
     color: #101010;

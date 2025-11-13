@@ -18,7 +18,7 @@ const MainContainer = styled.div`
 const Header = styled.header`
   background: #F3F0E9;
   backdrop-filter: blur(20px);
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -27,32 +27,52 @@ const Header = styled.header`
   top: 0;
   z-index: 100;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  
+  @media (min-width: 768px) {
+    padding: 1rem 1.5rem;
+  }
 `
 
 const HeaderRight = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
+  
+  @media (min-width: 768px) {
+    gap: 1rem;
+  }
 `
 
 
 const BrandName = styled.h1`
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   margin: 0;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   color: #101010;
+  
+  @media (min-width: 768px) {
+    font-size: 1.25rem;
+    letter-spacing: 2px;
+  }
 `
 
 const NavLink = styled(Link)`
   color: #666;
   text-decoration: none;
   font-weight: 500;
-  font-size: 0.95rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 25px;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
   transition: all 0.3s ease;
   border: 1px solid transparent;
+  white-space: nowrap;
+  
+  @media (min-width: 768px) {
+    font-size: 0.95rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+  }
   
   &:hover {
     color: #101010;
@@ -169,8 +189,12 @@ const TabContainer = styled.div`
   background: white;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   position: sticky;
-  top: 80px;
+  top: 60px;
   z-index: 50;
+  
+  @media (min-width: 768px) {
+    top: 80px;
+  }
 `
 
 const TabMenu = styled.div`
@@ -183,14 +207,19 @@ const TabMenu = styled.div`
 const TabButton = styled.button`
   background: none;
   border: none;
-  padding: 1.5rem 2rem;
-  font-size: 1rem;
+  padding: 1rem 1.25rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: ${props => props.$active ? '#101010' : '#666'};
   cursor: pointer;
   border-bottom: 3px solid ${props => props.$active ? '#101010' : 'transparent'};
   transition: all 0.3s ease;
   position: relative;
+  
+  @media (min-width: 768px) {
+    padding: 1.5rem 2rem;
+    font-size: 1rem;
+  }
   
   &:hover {
     color: #101010;
