@@ -25,7 +25,7 @@
     "shopNow": "Shop Now",
     "addToFavorites": "Save",
     "removeFromFavorites": "Remove from favorites",
-    "recommendations": "Discover other outfits",
+    "recommendations": "You may also like",
     "viewAll": "View More",
     "noProducts": "Price not available"
   },
@@ -40,15 +40,15 @@
     "checkConnection": "Please check your connection and try again.",
     "generic": "An error occurred. Please try again."
   },
-  "outfit": {
-    "title": "Outfit",
-    "products": "Products",
-    "shopNow": "Shop Now",
-    "addToFavorites": "Add to favorites",
-    "removeFromFavorites": "Remove from favorites",
-    "recommendations": "Recommendations",
-    "viewAll": "View All",
-    "noProducts": "No products available"
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "weeksAgo_one": "{{count}} week ago",
+    "weeksAgo_other": "{{count}} weeks ago",
+    "publishedOn": "Published on {{date}}"
   },
   "favorites": {
     "title": "Favorites",
@@ -69,7 +69,9 @@
     "linkCopied": "Link copied!",
     "linkCopiedClipboard": "Link copied to clipboard",
     "linkCopiedInstagram": "Link copied! You can now paste it in your Instagram story.",
-    "share": "Share"
+    "share": "Share",
+    "shareWithFriend": "Share this look with a friend",
+    "shareTitle": "Share"
   },
   "accessibility": {
     "button": "Button {{context}}",

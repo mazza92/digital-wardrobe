@@ -40,15 +40,15 @@
     "checkConnection": "Veuillez vérifier votre connexion et réessayer.",
     "generic": "Une erreur s'est produite. Veuillez réessayer."
   },
-  "outfit": {
-    "title": "Tenue",
-    "products": "Produits",
-    "shopNow": "Acheter",
-    "addToFavorites": "Ajouter aux favoris",
-    "removeFromFavorites": "Retirer des favoris",
-    "recommendations": "Recommandations",
-    "viewAll": "Voir tout",
-    "noProducts": "Aucun produit disponible"
+  "time": {
+    "justNow": "À l'instant",
+    "minutesAgo": "Il y a {{count}} min",
+    "hoursAgo": "Il y a {{count}}h",
+    "daysAgo_one": "Il y a {{count}} jour",
+    "daysAgo_other": "Il y a {{count}} jours",
+    "weeksAgo_one": "Il y a {{count}} semaine",
+    "weeksAgo_other": "Il y a {{count}} semaines",
+    "publishedOn": "Publié le {{date}}"
   },
   "favorites": {
     "title": "Favoris",
@@ -69,7 +69,9 @@
     "linkCopied": "Lien copié !",
     "linkCopiedClipboard": "Lien copié dans le presse-papiers",
     "linkCopiedInstagram": "Lien copié ! Vous pouvez maintenant le coller dans votre story Instagram.",
-    "share": "Partager"
+    "share": "Partager",
+    "shareWithFriend": "Partager ce look à un ami",
+    "shareTitle": "Partager"
   },
   "accessibility": {
     "button": "Bouton {{context}}",

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import styled from 'styled-components'
+import { useTranslation } from 'react-i18next'
 import { 
   generateShareUrl, 
   generateShareText, 
@@ -143,6 +144,7 @@ const Overlay = styled.div`
 `
 
 export default function SubtleShareButton({ outfit, className }) {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   
   const shareUrl = generateShareUrl(outfit.id)
@@ -240,14 +242,14 @@ export default function SubtleShareButton({ outfit, className }) {
     <ShareContainer className={className}>
       <ShareIcon onClick={() => setIsOpen(!isOpen)}>
         🔗
-        <ShareText>Partager ce look à un ami</ShareText>
+        <ShareText>{t('sharing.shareWithFriend')}</ShareText>
       </ShareIcon>
       
       {isOpen && (
         <>
           <Overlay onClick={() => setIsOpen(false)} />
           <ShareDropdown>
-            <ShareTitle>Partager</ShareTitle>
+            <ShareTitle>{t('sharing.shareTitle')}</ShareTitle>
             <ShareGrid>
               {shareOptions.map((option) => (
                 <ShareOption

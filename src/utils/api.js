@@ -61,16 +61,37 @@ export const fetchProfile = async () => {
   }
 }
 
+import i18n from '../i18n/config'
+
 export const getRelativeTime = (dateString) => {
   const date = new Date(dateString)
   const now = new Date()
   const diffInSeconds = Math.floor((now - date) / 1000)
+  const t = i18n.getFixedT(i18n.language || 'fr')
   
-  if (diffInSeconds < 60) return 'À l\'instant'
-  if (diffInSeconds < 3600) return `Il y a ${Math.floor(diffInSeconds / 60)} min`
-  if (diffInSeconds < 86400) return `Il y a ${Math.floor(diffInSeconds / 3600)}h`
-  if (diffInSeconds < 604800) return `Il y a ${Math.floor(diffInSeconds / 86400)} jour${Math.floor(diffInSeconds / 86400) > 1 ? 's' : ''}`
-  if (diffInSeconds < 2592000) return `Il y a ${Math.floor(diffInSeconds / 604800)} semaine${Math.floor(diffInSeconds / 604800) > 1 ? 's' : ''}`
+  if (diffInSeconds < 60) return t('time.justNow')
   
-  return `Publié le ${date.toLocaleDateString('fr-FR')}`
+  if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60)
+    return t('time.minutesAgo', { count: minutes })
+  }
+  
+  if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600)
+    return t('time.hoursAgo', { count: hours })
+  }
+  
+  if (diffInSeconds < 604800) {
+    const days = Math.floor(diffInSeconds / 86400)
+    return t('time.daysAgo', { count: days })
+  }
+  
+  if (diffInSeconds < 2592000) {
+    const weeks = Math.floor(diffInSeconds / 604800)
+    return t('time.weeksAgo', { count: weeks })
+  }
+  
+  const locale = i18n.language === 'en' ? 'en-US' : 'fr-FR'
+  const formattedDate = date.toLocaleDateString(locale)
+  return t('time.publishedOn', { date: formattedDate })
 }
