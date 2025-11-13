@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import styled from 'styled-components'
+import { useTranslation } from 'react-i18next'
 import { handleAffiliateClick } from '../../utils/tracking'
 
 const FavoritesContainer = styled.div`
@@ -245,8 +246,10 @@ const Overlay = styled.div`
 `
 
 function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, onClearFavorites }) {
+  const { t } = useTranslation()
+  
   const formatPrice = (priceString) => {
-    if (!priceString) return 'Prix non disponible'
+    if (!priceString) return t('outfit.noProducts')
     
     // If price already contains currency symbol, return as-is
     if (priceString.includes('€') || priceString.includes('$') || priceString.includes('£')) {
@@ -285,7 +288,7 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
       <Overlay isOpen={isOpen} onClick={handleOverlayClick} />
       <FavoritesContainer isOpen={isOpen}>
         <FavoritesHeader>
-          <FavoritesTitle>Mes Favoris</FavoritesTitle>
+          <FavoritesTitle>{t('favorites.title')}</FavoritesTitle>
           <CloseButton onClick={onClose}>×</CloseButton>
         </FavoritesHeader>
         
@@ -293,9 +296,9 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
           {favorites.length === 0 ? (
             <EmptyState>
               <EmptyIcon>💔</EmptyIcon>
-              <EmptyTitle>Aucun favori pour le moment</EmptyTitle>
+              <EmptyTitle>{t('favorites.empty')}</EmptyTitle>
               <EmptyDescription>
-                Commencez à ajouter vos pièces préférées en cliquant sur l'icône cœur de n'importe quel produit
+                {t('favorites.emptyDescription')}
               </EmptyDescription>
             </EmptyState>
           ) : (
@@ -327,7 +330,7 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
                   </ProductInfo>
                   <RemoveButton 
                     onClick={(e) => handleRemoveClick(item.id, e)}
-                    title="Remove from favorites"
+                    title={t('favorites.remove')}
                   >
                     ❤️
                   </RemoveButton>
@@ -340,14 +343,14 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
         {favorites.length > 0 && (
           <FavoritesFooter>
             <FavoritesCount>
-              {favorites.length} favori{favorites.length !== 1 ? 's' : ''}
+              {favorites.length} {favorites.length === 1 ? t('favorites.item') : t('favorites.items')}
             </FavoritesCount>
             <ActionButtons>
               <ClearButton onClick={onClearFavorites}>
-                Tout Effacer
+                {t('favorites.clearAll')}
               </ClearButton>
               <ViewButton onClick={onClose}>
-                Fermer
+                {t('common.close')}
               </ViewButton>
             </ActionButtons>
           </FavoritesFooter>

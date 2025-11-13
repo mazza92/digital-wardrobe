@@ -1,11 +1,13 @@
 import { useState, useEffect, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import { useTranslation } from 'react-i18next'
 import { useOutfits } from '../../hooks/useOutfits'
 import { getRelativeTime } from '../../utils/api'
 import { useFavorites } from '../../hooks/useFavorites'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
 import { LazyFavoritesList, LazyCartButton, LoadingFallback, preloadResources } from '../../utils/performance'
+import LanguageSwitcher from '../ui/LanguageSwitcher'
 
 const MainContainer = styled.div`
   min-height: 100vh;
@@ -539,6 +541,7 @@ const LoadingText = styled.p`
 `
 
 function MainPortal() {
+  const { t } = useTranslation()
   const { outfits, influencer, isLoading, error } = useOutfits()
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('outfits')
@@ -573,7 +576,7 @@ function MainPortal() {
       <MainContainer>
         <LoadingContainer>
           <LoadingSpinner />
-          <LoadingText>Loading Digital Wardrobe...</LoadingText>
+          <LoadingText>{t('loading.app')}</LoadingText>
         </LoadingContainer>
       </MainContainer>
     )
@@ -583,8 +586,11 @@ function MainPortal() {
     return (
       <MainContainer>
         <Header>
-          <BrandName>Digital Wardrobe</BrandName>
-          <NavLink to="/about">À propos</NavLink>
+          <BrandName>{t('header.brand')}</BrandName>
+          <HeaderRight>
+            <LanguageSwitcher />
+            <NavLink to="/about">{t('nav.about')}</NavLink>
+          </HeaderRight>
         </Header>
         <div style={{ 
           display: 'flex', 
@@ -596,8 +602,8 @@ function MainPortal() {
           textAlign: 'center',
           padding: '2rem'
         }}>
-          <h2 style={{ color: '#666', margin: 0 }}>Unable to load content</h2>
-          <p style={{ color: '#999', margin: 0 }}>Please check your connection and try again.</p>
+          <h2 style={{ color: '#666', margin: 0 }}>{t('error.unableToLoad')}</h2>
+          <p style={{ color: '#999', margin: 0 }}>{t('error.checkConnection')}</p>
         </div>
       </MainContainer>
     )
@@ -608,13 +614,14 @@ function MainPortal() {
       <Header>
         <BrandName>Virtual Dressing</BrandName>
         <HeaderRight>
+          <LanguageSwitcher />
           <Suspense fallback={<div style={{width: '40px', height: '40px'}} />}>
             <LazyCartButton 
               onClick={() => setIsFavoritesOpen(true)} 
               favoritesCount={getFavoritesCount()} 
             />
           </Suspense>
-          <NavLink to="/about">À propos</NavLink>
+          <NavLink to="/about">{t('nav.about')}</NavLink>
         </HeaderRight>
       </Header>
       
@@ -633,13 +640,13 @@ function MainPortal() {
             $active={activeTab === 'outfits'} 
             onClick={() => setActiveTab('outfits')}
           >
-            Tenues
+            {t('nav.outfits')}
           </TabButton>
           <TabButton 
             $active={activeTab === 'wishlist'} 
             onClick={() => setActiveTab('wishlist')}
           >
-            Wishlist
+            {t('nav.wishlist')}
           </TabButton>
         </TabMenu>
       </TabContainer>
@@ -648,8 +655,8 @@ function MainPortal() {
         {activeTab === 'outfits' ? (
           <>
             <SectionHeader>
-              <SectionTitle>Dernières Tenues</SectionTitle>
-              <SectionSubtitle>Appuyez sur une tenue pour acheter le look complet</SectionSubtitle>
+              <SectionTitle>{t('hero.latestOutfits')}</SectionTitle>
+              <SectionSubtitle>{t('outfit.viewAll')}</SectionSubtitle>
             </SectionHeader>
             
             <OutfitsGrid>
@@ -667,20 +674,20 @@ function MainPortal() {
                         />
                       ))}
                     </ProductTags>
-                    <ProductCount>{outfit.products.length} articles</ProductCount>
+                    <ProductCount>{outfit.products.length} {outfit.products.length === 1 ? t('favorites.item') : t('favorites.items')}</ProductCount>
                     <OutfitOverlay>
                       <OutfitTitle>{outfit.title}</OutfitTitle>
                       <OutfitDescription>{outfit.description}</OutfitDescription>
                       <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
                       <ShopButton>
-                        Acheter le Look →
+                        {t('outfit.shopNow')} →
                       </ShopButton>
                     </OutfitOverlay>
                   </OutfitCard>
                 ))
               ) : (
                 <NoOutfitsMessage>
-                  Pas de tenues publiées pour le moment
+                  {t('outfit.noProducts')}
                 </NoOutfitsMessage>
               )}
             </OutfitsGrid>
@@ -688,8 +695,8 @@ function MainPortal() {
         ) : (
           <>
             <SectionHeader>
-              <SectionTitle>Wishlist</SectionTitle>
-              <SectionSubtitle>Mes sélections et produits favoris</SectionSubtitle>
+              <SectionTitle>{t('nav.wishlist')}</SectionTitle>
+              <SectionSubtitle>{t('favorites.emptyDescription')}</SectionSubtitle>
             </SectionHeader>
             
             <OutfitsGrid>
@@ -707,20 +714,20 @@ function MainPortal() {
                         />
                       ))}
                     </ProductTags>
-                    <ProductCount>{outfit.products.length} articles</ProductCount>
+                    <ProductCount>{outfit.products.length} {outfit.products.length === 1 ? t('favorites.item') : t('favorites.items')}</ProductCount>
                     <OutfitOverlay>
                       <OutfitTitle>{outfit.title}</OutfitTitle>
                       <OutfitDescription>{outfit.description}</OutfitDescription>
                       <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
                       <ShopButton>
-                        Acheter le Look →
+                        {t('outfit.shopNow')} →
                       </ShopButton>
                     </OutfitOverlay>
                   </OutfitCard>
                 ))
               ) : (
                 <NoOutfitsMessage>
-                  Pas de tenues publiées pour le moment
+                  {t('outfit.noProducts')}
                 </NoOutfitsMessage>
               )}
             </OutfitsGrid>
@@ -731,9 +738,9 @@ function MainPortal() {
       {influencer && (
         <Footer>
           <FooterContent>
-            <FooterTitle>Suivez {influencer.name}</FooterTitle>
+            <FooterTitle>{t('about.follow')} {influencer.name}</FooterTitle>
             <FooterText>
-              Restez à jour avec les dernières tendances mode et inspirations de tenues
+              {t('about.shopCollection')}
             </FooterText>
             <SocialLinks>
               <SocialLink href={influencer.socialMedia?.instagram} target="_blank">
@@ -750,13 +757,13 @@ function MainPortal() {
               </SocialLink>
             </SocialLinks>
             <FooterBottom>
-              © 2025 Virtual Dressing. Tous droits réservés.
+              {t('footer.copyright')}
             </FooterBottom>
           </FooterContent>
         </Footer>
       )}
       
-      <Suspense fallback={<LoadingFallback message="Chargement des favoris..." />}>
+      <Suspense fallback={<LoadingFallback message={t('loading.favorites')} />}>
         <LazyFavoritesList
           isOpen={isFavoritesOpen}
           onClose={() => setIsFavoritesOpen(false)}

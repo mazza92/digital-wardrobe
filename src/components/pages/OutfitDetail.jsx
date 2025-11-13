@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
+import { useTranslation } from 'react-i18next'
 import { useFavorites } from '../../hooks/useFavorites'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
 import { fetchOutfits, getRelativeTime } from '../../utils/api'
@@ -8,6 +9,7 @@ import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
 import SubtleShareButton from '../ui/SubtleShareButton'
 import { handleAffiliateClick } from '../../utils/tracking'
+import LanguageSwitcher from '../ui/LanguageSwitcher'
 
 const DetailContainer = styled.div`
   min-height: 100vh;
@@ -798,6 +800,7 @@ const ProductCount = styled.div`
 
 
 function OutfitDetail() {
+  const { t } = useTranslation()
   const { outfitId } = useParams()
   const navigate = useNavigate()
   const [outfit, setOutfit] = useState(null)
@@ -996,7 +999,7 @@ function OutfitDetail() {
   }
 
   const formatPrice = (priceString) => {
-    if (!priceString) return 'Prix non disponible'
+    if (!priceString) return t('outfit.noProducts')
     
     // If price already contains currency symbol, return as-is
     if (priceString.includes('€') || priceString.includes('$') || priceString.includes('£')) {
@@ -1014,7 +1017,7 @@ function OutfitDetail() {
     if (button) {
       const isCurrentlyFavorited = isFavorited(product.id)
       const originalText = button.textContent
-      button.textContent = isCurrentlyFavorited ? '♥ Sauvé!' : 'Ajouté!'
+      button.textContent = isCurrentlyFavorited ? `♥ ${t('favorites.remove')}!` : t('outfit.addToFavorites') + '!'
       
       setTimeout(() => {
         button.textContent = originalText
@@ -1027,7 +1030,7 @@ function OutfitDetail() {
       <DetailContainer>
         <LoadingContainer>
           <LoadingSpinner />
-          <LoadingText>Loading outfit...</LoadingText>
+          <LoadingText>{t('loading.outfit')}</LoadingText>
         </LoadingContainer>
       </DetailContainer>
     )
@@ -1038,7 +1041,7 @@ function OutfitDetail() {
       <DetailContainer>
         <Header>
           <BackButton onClick={() => navigate('/')}>
-            ← Retour
+            ← {t('common.back')}
           </BackButton>
           <BrandName>Outfit Not Found</BrandName>
         </Header>
@@ -1051,11 +1054,12 @@ function OutfitDetail() {
       <Header>
         <HeaderLeft>
           <BackButton onClick={() => navigate('/')}>
-            ← Retour
+            ← {t('common.back')}
           </BackButton>
           <BrandName>{influencer?.brand || 'Virtual Wardrobe'}</BrandName>
         </HeaderLeft>
         <HeaderRight>
+          <LanguageSwitcher />
           <FavoritesButton 
             onClick={() => setIsFavoritesOpen(true)} 
             favoritesCount={getFavoritesCount()} 
@@ -1100,7 +1104,7 @@ function OutfitDetail() {
                   rel="noopener noreferrer"
                   onClick={(e) => handleAffiliateClick(selectedProduct, outfit.id, e)}
                 >
-                  Acheter
+                  {t('outfit.shopNow')}
                 </ShopButton>
               </ProductPopup>
             )}
@@ -1116,7 +1120,7 @@ function OutfitDetail() {
           </PublicationDate>
           
           <ProductsSection>
-            <SectionTitle>Acheter ce Look</SectionTitle>
+            <SectionTitle>{t('outfit.products')}</SectionTitle>
             <ProductsGrid>
               {outfit.products.map((product) => (
                 <ProductCard 
@@ -1137,14 +1141,14 @@ function OutfitDetail() {
                         rel="noopener noreferrer"
                         onClick={(e) => handleAffiliateClick(product, outfit.id, e)}
                       >
-                        Acheter
+                        {t('outfit.shopNow')}
                       </ProductCardButton>
                       <AddToCartButton 
                         onClick={() => handleToggleFavorite(product)}
                         data-product-id={product.id}
                         $isFavorited={isFavorited(product.id)}
                       >
-                        {isFavorited(product.id) ? '♥ Sauvé' : 'Sauvegarder'}
+                        {isFavorited(product.id) ? `♥ ${t('favorites.remove')}` : t('outfit.addToFavorites')}
                       </AddToCartButton>
                     </ProductCardActions>
                   </ProductCardContent>
@@ -1161,9 +1165,9 @@ function OutfitDetail() {
         <RecommendationsSection>
           <RecommendationsContainer>
             <RecommendationsHeader>
-              <RecommendationsTitle>Découvrir les autres tenues</RecommendationsTitle>
+              <RecommendationsTitle>{t('outfit.recommendations')}</RecommendationsTitle>
               <ViewAllButton to="/">
-                Voir plus →
+                {t('outfit.viewAll')} →
               </ViewAllButton>
             </RecommendationsHeader>
             
@@ -1172,7 +1176,7 @@ function OutfitDetail() {
                 <RecommendationCard key={recommendedOutfit.id} to={`/outfits/${recommendedOutfit.id}`}>
                   <RecommendationImage image={recommendedOutfit.image} />
                   <ProductCount>
-                    {recommendedOutfit.products?.length || 0} articles
+                    {recommendedOutfit.products?.length || 0} {(recommendedOutfit.products?.length || 0) === 1 ? t('favorites.item') : t('favorites.items')}
                   </ProductCount>
                   <ProductTags>
                     {recommendedOutfit.products?.slice(0, 3).map((product) => (
@@ -1187,7 +1191,7 @@ function OutfitDetail() {
                     <GalleryTitle>{recommendedOutfit.title}</GalleryTitle>
                     <GalleryDescription>{recommendedOutfit.description}</GalleryDescription>
                     <GalleryShopButton>
-                      Acheter le Look →
+                      {t('outfit.shopNow')} →
                     </GalleryShopButton>
                   </GalleryOverlay>
                 </RecommendationCard>
@@ -1203,7 +1207,7 @@ function OutfitDetail() {
         favorites={favorites}
         onRemoveFavorite={removeFromFavorites}
         onClearFavorites={() => {
-          if (confirm('Are you sure you want to clear all favorites?')) {
+          if (confirm(t('favorites.clearAll') + '?')) {
             removeFromFavorites()
           }
         }}

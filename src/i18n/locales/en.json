@@ -1,0 +1,86 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "close": "Close",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "nav": {
+    "about": "About",
+    "outfits": "Outfits",
+    "wishlist": "Wishlist"
+  },
+  "header": {
+    "brand": "Digital Wardrobe"
+  },
+  "hero": {
+    "latestOutfits": "Latest Outfits"
+  },
+  "outfit": {
+    "title": "Outfit",
+    "products": "Products",
+    "shopNow": "Shop Now",
+    "addToFavorites": "Save",
+    "removeFromFavorites": "Remove from favorites",
+    "recommendations": "Discover other outfits",
+    "viewAll": "View More",
+    "noProducts": "Price not available"
+  },
+  "loading": {
+    "app": "Loading Digital Wardrobe...",
+    "outfit": "Loading outfit...",
+    "favorites": "Loading favorites...",
+    "about": "Loading About page..."
+  },
+  "error": {
+    "unableToLoad": "Unable to load content",
+    "checkConnection": "Please check your connection and try again.",
+    "generic": "An error occurred. Please try again."
+  },
+  "outfit": {
+    "title": "Outfit",
+    "products": "Products",
+    "shopNow": "Shop Now",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "recommendations": "Recommendations",
+    "viewAll": "View All",
+    "noProducts": "No products available"
+  },
+  "favorites": {
+    "title": "Favorites",
+    "empty": "No favorites",
+    "emptyDescription": "Start adding products to your favorites",
+    "remove": "Remove",
+    "clearAll": "Clear All",
+    "items": "items",
+    "item": "item"
+  },
+  "about": {
+    "title": "About",
+    "follow": "Follow me",
+    "shopCollection": "Shop My Style",
+    "shopMyStyle": "Discover all my favorite pieces and recreate these looks for yourself. Click on any outfit to shop the individual items."
+  },
+  "sharing": {
+    "linkCopied": "Link copied!",
+    "linkCopiedClipboard": "Link copied to clipboard",
+    "linkCopiedInstagram": "Link copied! You can now paste it in your Instagram story.",
+    "share": "Share"
+  },
+  "accessibility": {
+    "button": "Button {{context}}",
+    "link": "Link to {{context}}",
+    "image": "Image: {{context}}",
+    "input": "Field {{context}}",
+    "select": "Selection {{context}}",
+    "textarea": "Text area {{context}}"
+  },
+  "footer": {
+    "copyright": "© 2025 Virtual Dressing. All rights reserved."
+  }
+}
+

@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import { useTranslation } from 'react-i18next'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
 import outfitsData from '../../data/outfits.json'
+import LanguageSwitcher from '../ui/LanguageSwitcher'
 
 const AboutContainer = styled.div`
   min-height: 100vh;
@@ -178,6 +180,7 @@ const ShopButton = styled(Link)`
 `
 
 function About() {
+  const { t } = useTranslation()
   const { influencer, socialMedia } = outfitsData
 
   // SEO optimization
@@ -187,9 +190,10 @@ function About() {
     <AboutContainer>
       <Header>
         <BackButton to="/">
-          ← Retour
+          ← {t('common.back')}
         </BackButton>
         <BrandName>{influencer.brand}</BrandName>
+        <LanguageSwitcher />
       </Header>
       
       <Content>
@@ -198,7 +202,7 @@ function About() {
         <Bio>{influencer.bio}</Bio>
         
         <SocialSection>
-          <SectionTitle>Follow Me</SectionTitle>
+          <SectionTitle>{t('about.follow')}</SectionTitle>
           <SocialLinks>
             <SocialLink href={socialMedia.instagram} target="_blank" rel="noopener noreferrer">
               <SocialIcon>IG</SocialIcon>
@@ -220,12 +224,11 @@ function About() {
         </SocialSection>
         
         <CTA>
-          <CTATitle>Shop My Style</CTATitle>
+          <CTATitle>{t('about.shopCollection')}</CTATitle>
           <CTAText>
-            Discover all my favorite pieces and recreate these looks for yourself. 
-            Click on any outfit to shop the individual items.
+            {t('about.shopMyStyle')}
           </CTAText>
-          <ShopButton to="/">View Outfits</ShopButton>
+          <ShopButton to="/">{t('nav.outfits')}</ShopButton>
         </CTA>
       </Content>
     </AboutContainer>

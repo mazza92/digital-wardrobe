@@ -1,0 +1,86 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "retry": "Réessayer",
+    "close": "Fermer",
+    "back": "Retour",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  },
+  "nav": {
+    "about": "À propos",
+    "outfits": "Tenues",
+    "wishlist": "Wishlist"
+  },
+  "header": {
+    "brand": "Digital Wardrobe"
+  },
+  "hero": {
+    "latestOutfits": "Dernières Tenues"
+  },
+  "outfit": {
+    "title": "Tenue",
+    "products": "Produits",
+    "shopNow": "Acheter",
+    "addToFavorites": "Sauvegarder",
+    "removeFromFavorites": "Retirer des favoris",
+    "recommendations": "Découvrir les autres tenues",
+    "viewAll": "Voir plus",
+    "noProducts": "Prix non disponible"
+  },
+  "loading": {
+    "app": "Chargement de l'application...",
+    "outfit": "Chargement de la tenue...",
+    "favorites": "Chargement des favoris...",
+    "about": "Chargement de la page À propos..."
+  },
+  "error": {
+    "unableToLoad": "Impossible de charger le contenu",
+    "checkConnection": "Veuillez vérifier votre connexion et réessayer.",
+    "generic": "Une erreur s'est produite. Veuillez réessayer."
+  },
+  "outfit": {
+    "title": "Tenue",
+    "products": "Produits",
+    "shopNow": "Acheter",
+    "addToFavorites": "Ajouter aux favoris",
+    "removeFromFavorites": "Retirer des favoris",
+    "recommendations": "Recommandations",
+    "viewAll": "Voir tout",
+    "noProducts": "Aucun produit disponible"
+  },
+  "favorites": {
+    "title": "Favoris",
+    "empty": "Aucun favori",
+    "emptyDescription": "Commencez à ajouter des produits à vos favoris",
+    "remove": "Retirer",
+    "clearAll": "Tout effacer",
+    "items": "articles",
+    "item": "article"
+  },
+  "about": {
+    "title": "À propos",
+    "follow": "Suivez-moi",
+    "shopCollection": "Découvrir la collection",
+    "shopMyStyle": "Découvrez toutes mes pièces préférées et recréez ces looks pour vous-même. Cliquez sur n'importe quelle tenue pour acheter les articles individuels."
+  },
+  "sharing": {
+    "linkCopied": "Lien copié !",
+    "linkCopiedClipboard": "Lien copié dans le presse-papiers",
+    "linkCopiedInstagram": "Lien copié ! Vous pouvez maintenant le coller dans votre story Instagram.",
+    "share": "Partager"
+  },
+  "accessibility": {
+    "button": "Bouton {{context}}",
+    "link": "Lien vers {{context}}",
+    "image": "Image: {{context}}",
+    "input": "Champ {{context}}",
+    "select": "Sélection {{context}}",
+    "textarea": "Zone de texte {{context}}"
+  },
+  "footer": {
+    "copyright": "© 2025 Virtual Dressing. Tous droits réservés."
+  }
+}
+

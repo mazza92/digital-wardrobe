@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 
 // Import design system components
 import { LoadingFallback, PerformanceErrorBoundary } from './utils/performance.js'
@@ -9,6 +10,8 @@ import { LazyMainPortal, LazyOutfitDetail, LazyAbout } from './utils/performance
 import './styles/globals.css'
 
 function App() {
+  const { t } = useTranslation()
+  
   return (
     <PerformanceErrorBoundary>
       <div className="app-container">
@@ -25,7 +28,7 @@ function App() {
             <Route 
               path="/about" 
               element={
-                <Suspense fallback={<LoadingFallback message="Chargement de la page À propos..." />}>
+                <Suspense fallback={<LoadingFallback message={t('loading.about')} />}>
                   <LazyAbout />
                 </Suspense>
               } 

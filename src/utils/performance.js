@@ -19,7 +19,7 @@ export const LazyCartButton = lazy(() => import('../components/ui/CartButton'))
 import React from 'react'
 
 // Loading component for Suspense fallback
-export const LoadingFallback = ({ message = "Chargement..." }) => {
+export const LoadingFallback = ({ message = "Loading..." }) => {
   return React.createElement('div', {
     style: {
       display: 'flex',
