@@ -12,4 +12,34 @@ if (import.meta.env.DEV && (!supabaseUrl || !supabaseAnonKey)) {
 const safeUrl = supabaseUrl || 'https://placeholder.supabase.co'
 const safeKey = supabaseAnonKey || 'placeholder-key'
 
-export const supabase = createClient(safeUrl, safeKey)
+// Check if localStorage is available
+const isLocalStorageAvailable = () => {
+  try {
+    const test = '__supabase_storage_test__'
+    localStorage.setItem(test, test)
+    localStorage.removeItem(test)
+    return true
+  } catch {
+    return false
+  }
+}
+
+// Custom storage that falls back to memory when localStorage is blocked
+const memoryStorage = {
+  storage: {},
+  getItem: (key) => memoryStorage.storage[key] || null,
+  setItem: (key, value) => { memoryStorage.storage[key] = value },
+  removeItem: (key) => { delete memoryStorage.storage[key] }
+}
+
+// Use localStorage if available, otherwise use memory storage
+const customStorage = isLocalStorageAvailable() ? localStorage : memoryStorage
+
+export const supabase = createClient(safeUrl, safeKey, {
+  auth: {
+    storage: customStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+})
