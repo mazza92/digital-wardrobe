@@ -25,36 +25,18 @@ export const supabase = createClient(safeUrl, safeKey, {
   }
 })
 
-// Safe wrapper for getSession that suppresses storage errors and prevents hanging
+// Safe wrapper for getSession that suppresses storage errors
 export const safeGetSession = async () => {
-  console.log('[safeGetSession] Starting session retrieval...');
-
   try {
-    // Race the getSession call against a 3-second timeout
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('getSession timeout after 3s')), 3000);
-    });
-
-    const sessionPromise = supabase.auth.getSession();
-
-    const result = await Promise.race([sessionPromise, timeoutPromise]);
-
-    console.log('[safeGetSession] Session retrieved:', {
-      hasSession: !!result?.data?.session,
-      hasUser: !!result?.data?.session?.user
-    });
-
+    const result = await supabase.auth.getSession();
     return result;
   } catch (error) {
-    console.warn('[safeGetSession] Error:', error.message);
-
-    // Suppress storage-related errors and timeouts
+    // Suppress storage-related errors
     const msg = error?.message || '';
     if (msg.includes('storage') ||
         msg.includes('Storage') ||
-        msg.includes('Access to storage') ||
-        msg.includes('timeout')) {
-      console.log('[safeGetSession] Using null session fallback due to:', msg);
+        msg.includes('Access to storage')) {
+      console.log('[safeGetSession] Storage blocked, using null session');
       return { data: { session: null }, error: null };
     }
     throw error;
