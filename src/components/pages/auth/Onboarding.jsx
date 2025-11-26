@@ -377,24 +377,37 @@ const Onboarding = () => {
     setErrorMsg('');
     
     // Set a timeout to redirect no matter what happens
+    // Increase timeout to 10 seconds to allow database save to complete
     const redirectTimeout = setTimeout(() => {
-      console.log('Redirect timeout triggered');
+      console.log('Redirect timeout triggered after 10s');
       window.location.href = '/profile';
-    }, 2000);
-    
-    // Try to save preferences (fire and forget)
-    updateProfile({ 
+    }, 10000);
+
+    // Try to save preferences
+    console.log('Saving preferences:', {
       styleInterests: selectedStyles,
       favoriteBrands: favoriteBrands,
       onboardingCompleted: true
-    }).then(() => {
-      console.log('Profile updated successfully');
+    });
+
+    updateProfile({
+      styleInterests: selectedStyles,
+      favoriteBrands: favoriteBrands,
+      onboardingCompleted: true
+    }).then((result) => {
+      console.log('Profile updated successfully:', result);
       clearTimeout(redirectTimeout);
-      window.location.href = '/profile';
+      // Wait a bit to ensure data is saved
+      setTimeout(() => {
+        window.location.href = '/profile';
+      }, 500);
     }).catch(err => {
-      console.log('Profile update failed (redirecting anyway):', err);
+      console.error('Profile update failed:', err);
       clearTimeout(redirectTimeout);
-      window.location.href = '/profile';
+      // Still redirect but log the error
+      setTimeout(() => {
+        window.location.href = '/profile';
+      }, 500);
     });
   };
 
