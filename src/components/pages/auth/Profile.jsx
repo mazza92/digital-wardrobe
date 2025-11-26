@@ -725,46 +725,63 @@ const Profile = () => {
     loadOutfits();
   }, []);
 
-  const [sessionChecked, setSessionChecked] = useState(false);
-  const [hasSession, setHasSession] = useState(false);
+  const [pageReady, setPageReady] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
 
-  // Check for session directly (bypass context which may have storage issues)
+  // Check for session and set page ready after timeout
   useEffect(() => {
-    const checkSession = async () => {
+    let mounted = true;
+    
+    const checkAndSetReady = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        setHasSession(!!session);
+        if (mounted) {
+          if (!session && !isAuthenticated) {
+            setShouldRedirect(true);
+          }
+          setPageReady(true);
+        }
       } catch (err) {
         console.log('Session check error:', err);
-        setHasSession(false);
+        if (mounted) {
+          // On error, still show the page (don't redirect)
+          setPageReady(true);
+        }
       }
-      setSessionChecked(true);
     };
-    checkSession();
-  }, []);
+    
+    // Check session
+    checkAndSetReady();
+    
+    // Fallback: show page after 2 seconds no matter what
+    const timeout = setTimeout(() => {
+      if (mounted && !pageReady) {
+        console.log('Profile page timeout - showing page');
+        setPageReady(true);
+      }
+    }, 2000);
+    
+    return () => {
+      mounted = false;
+      clearTimeout(timeout);
+    };
+  }, [isAuthenticated]);
 
+  // Handle redirect
   useEffect(() => {
-    // Don't redirect if we're in the process of logging out
-    // The logout handler will do a full page redirect
-    // Wait for both context loading AND our session check
-    if (!loading && sessionChecked && !isAuthenticated && !hasSession && !loggingOut) {
-      navigate('/login');
+    if (shouldRedirect && !loggingOut) {
+      window.location.href = '/login';
     }
-  }, [loading, isAuthenticated, hasSession, sessionChecked, navigate, loggingOut]);
+  }, [shouldRedirect, loggingOut]);
 
-  // Show loading state only during initial load
-  if (loading || !sessionChecked) {
+  // Show loading state briefly
+  if (!pageReady) {
     return <LoadingContainer>{t('common.loading')}</LoadingContainer>;
   }
 
   // If logging out, show a brief message then the redirect will happen
   if (loggingOut) {
     return <LoadingContainer>{t('auth.logout.loggingOut', 'Logging out...')}</LoadingContainer>;
-  }
-
-  // If not authenticated (from context) AND no session (from direct check), redirect
-  if (!isAuthenticated && !hasSession) {
-    return <LoadingContainer>{t('common.loading')}</LoadingContainer>;
   }
 
   const handleLogout = async (e) => {
