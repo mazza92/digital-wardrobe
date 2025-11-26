@@ -94,90 +94,133 @@ const getProfile = async (userId) => {
 
 // --- User Profile & CRM Endpoints ---
 
+// In-memory storage for pending preferences (fallback when localStorage is blocked)
+let pendingPreferencesMemory = {};
+
 // Local storage key for pending preferences (before email confirmation)
 const PENDING_PREFERENCES_KEY = 'wardrobe_pending_preferences';
 
-export const savePendingPreferences = (preferences) => {
+const isStorageAvailable = () => {
   try {
-    const existing = JSON.parse(localStorage.getItem(PENDING_PREFERENCES_KEY) || '{}');
-    const merged = { ...existing, ...preferences };
-    localStorage.setItem(PENDING_PREFERENCES_KEY, JSON.stringify(merged));
-    return { success: true, preferences: merged };
-  } catch (err) {
-    console.error('Error saving pending preferences:', err);
-    return { success: false };
+    const test = '__storage_test__';
+    localStorage.setItem(test, test);
+    localStorage.removeItem(test);
+    return true;
+  } catch {
+    return false;
   }
+};
+
+export const savePendingPreferences = (preferences) => {
+  const merged = { ...pendingPreferencesMemory, ...preferences };
+  pendingPreferencesMemory = merged;
+  
+  // Try localStorage as backup, but don't fail if blocked
+  if (isStorageAvailable()) {
+    try {
+      const existing = JSON.parse(localStorage.getItem(PENDING_PREFERENCES_KEY) || '{}');
+      const fullMerged = { ...existing, ...merged };
+      localStorage.setItem(PENDING_PREFERENCES_KEY, JSON.stringify(fullMerged));
+    } catch (err) {
+      // Storage blocked, using memory only
+    }
+  }
+  
+  return { success: true, preferences: merged };
 };
 
 export const getPendingPreferences = () => {
-  try {
-    return JSON.parse(localStorage.getItem(PENDING_PREFERENCES_KEY) || '{}');
-  } catch {
-    return {};
+  let prefs = { ...pendingPreferencesMemory };
+  
+  if (isStorageAvailable()) {
+    try {
+      const stored = JSON.parse(localStorage.getItem(PENDING_PREFERENCES_KEY) || '{}');
+      prefs = { ...stored, ...prefs };
+    } catch {
+      // Storage blocked
+    }
   }
+  
+  return prefs;
 };
 
 export const clearPendingPreferences = () => {
-  localStorage.removeItem(PENDING_PREFERENCES_KEY);
+  pendingPreferencesMemory = {};
+  if (isStorageAvailable()) {
+    try {
+      localStorage.removeItem(PENDING_PREFERENCES_KEY);
+    } catch {
+      // Storage blocked
+    }
+  }
 };
 
 export const updatePreferences = async (userId, preferences) => {
-  // Get current authenticated user
-  const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+  // Always save to memory first (in case DB fails)
+  savePendingPreferences(preferences);
   
-  // If not authenticated or session missing, save locally for later sync
-  // This is expected when user hasn't confirmed email yet - not an error
-  if (authError || !authUser) {
-    return savePendingPreferences(preferences);
-  }
-  
-  // Use authUser.id to ensure it matches auth.uid() for RLS
-  const authenticatedUserId = authUser.id;
-  
-  // Get current preferences to merge (if profile exists)
-  const { data: currentProfile } = await supabase
-    .from('user_profiles')
-    .select('preferences, email, marketing_opt_in')
-    .eq('id', authenticatedUserId)
-    .maybeSingle();
-  
-  // Also merge any pending local preferences
-  const pendingPrefs = getPendingPreferences();
+  try {
+    // Get current authenticated user
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
     
-  const newPreferences = {
-    ...(currentProfile?.preferences || {}),
-    ...pendingPrefs,
-    ...preferences
-  };
-
-  // Use upsert with the authenticated user's ID
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .upsert({
-      id: authenticatedUserId,
-      email: currentProfile?.email || authUser.email || null,
-      marketing_opt_in: currentProfile?.marketing_opt_in ?? false,
-      preferences: newPreferences,
-      updated_at: new Date().toISOString()
-    })
-    .select()
-    .single();
-
-  if (error) {
-    // If it's an auth error (401), save locally - this is expected before email confirmation
-    if (error.code === '42501' || error.message?.includes('row-level security')) {
-      return savePendingPreferences(preferences);
+    // If not authenticated or session missing, preferences are saved in memory
+    if (authError || !authUser) {
+      console.log('No authenticated user, preferences saved in memory');
+      return { success: true, preferences, savedLocally: true };
     }
-    console.error('Error updating preferences:', error);
-    // For other errors, still save locally as fallback
-    savePendingPreferences(preferences);
-    throw error;
+    
+    // Use authUser.id to ensure it matches auth.uid() for RLS
+    const authenticatedUserId = authUser.id;
+    
+    // Get current preferences to merge (if profile exists)
+    let currentProfile = null;
+    try {
+      const { data } = await supabase
+        .from('user_profiles')
+        .select('preferences, email, marketing_opt_in')
+        .eq('id', authenticatedUserId)
+        .maybeSingle();
+      currentProfile = data;
+    } catch (err) {
+      console.log('Could not fetch current profile:', err.message);
+    }
+    
+    // Merge all preferences
+    const pendingPrefs = getPendingPreferences();
+    const newPreferences = {
+      ...(currentProfile?.preferences || {}),
+      ...pendingPrefs,
+      ...preferences
+    };
+
+    // Use upsert with the authenticated user's ID
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .upsert({
+        id: authenticatedUserId,
+        email: currentProfile?.email || authUser.email || null,
+        marketing_opt_in: currentProfile?.marketing_opt_in ?? false,
+        preferences: newPreferences,
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.log('Error saving to database:', error.message);
+      // Preferences are already in memory, so this is still a "success" for the user
+      return { success: true, preferences: newPreferences, savedLocally: true };
+    }
+    
+    // Clear pending preferences after successful sync
+    clearPendingPreferences();
+    
+    return { success: true, user: data, savedToDb: true };
+  } catch (err) {
+    console.log('updatePreferences error:', err.message);
+    // Preferences are in memory, return success
+    return { success: true, preferences, savedLocally: true };
   }
-  
-  // Clear pending preferences after successful sync
-  clearPendingPreferences();
-  
-  return { success: true, user: data };
 };
 
 // Sync pending preferences when user logs in
