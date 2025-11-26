@@ -165,7 +165,9 @@ export const updatePreferences = async (userId, preferences) => {
 
   try {
     // Get current authenticated user using getSession (more reliable than getUser)
+    console.log('About to call safeGetSession...');
     const { data: { session }, error: sessionError } = await safeGetSession();
+    console.log('safeGetSession completed!');
 
     console.log('Session check:', {
       hasSession: !!session,

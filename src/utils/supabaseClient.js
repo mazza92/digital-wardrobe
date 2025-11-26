@@ -12,53 +12,51 @@ if (import.meta.env.DEV && (!supabaseUrl || !supabaseAnonKey)) {
 const safeUrl = supabaseUrl || 'https://placeholder.supabase.co'
 const safeKey = supabaseAnonKey || 'placeholder-key'
 
-// Custom storage that falls back to memory when localStorage is blocked
-const memoryStorage = {
-  storage: {},
-  getItem: (key) => {
-    return memoryStorage.storage[key] || null
-  },
-  setItem: (key, value) => {
-    memoryStorage.storage[key] = value
-  },
-  removeItem: (key) => {
-    delete memoryStorage.storage[key]
-  }
-}
-
-// Check if localStorage is available (synchronously at module load)
-let customStorage = memoryStorage
-try {
-  const test = '__supabase_storage_test__'
-  localStorage.setItem(test, test)
-  localStorage.removeItem(test)
-  customStorage = localStorage
-} catch (e) {
-  // localStorage blocked, will use memory storage
-  console.log('localStorage not available, using memory storage for auth')
-}
+// Use window.localStorage directly - it's been replaced with hybrid storage in index.html
+// that handles native vs memory fallback automatically
+console.log('Supabase client using window.localStorage (hybrid storage from index.html)');
 
 export const supabase = createClient(safeUrl, safeKey, {
   auth: {
-    storage: customStorage,
+    storage: window.localStorage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true
   }
 })
 
-// Safe wrapper for getSession that suppresses storage errors
+// Safe wrapper for getSession that suppresses storage errors and prevents hanging
 export const safeGetSession = async () => {
+  console.log('[safeGetSession] Starting session retrieval...');
+
   try {
-    const result = await supabase.auth.getSession()
-    return result
+    // Race the getSession call against a 3-second timeout
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('getSession timeout after 3s')), 3000);
+    });
+
+    const sessionPromise = supabase.auth.getSession();
+
+    const result = await Promise.race([sessionPromise, timeoutPromise]);
+
+    console.log('[safeGetSession] Session retrieved:', {
+      hasSession: !!result?.data?.session,
+      hasUser: !!result?.data?.session?.user
+    });
+
+    return result;
   } catch (error) {
-    // Suppress storage-related errors
-    const msg = error?.message || ''
-    if (msg.includes('storage') || msg.includes('Storage') || msg.includes('Access to storage')) {
-      console.log('Storage access blocked, using memory session')
-      return { data: { session: null }, error: null }
+    console.warn('[safeGetSession] Error:', error.message);
+
+    // Suppress storage-related errors and timeouts
+    const msg = error?.message || '';
+    if (msg.includes('storage') ||
+        msg.includes('Storage') ||
+        msg.includes('Access to storage') ||
+        msg.includes('timeout')) {
+      console.log('[safeGetSession] Using null session fallback due to:', msg);
+      return { data: { session: null }, error: null };
     }
-    throw error
+    throw error;
   }
 }
