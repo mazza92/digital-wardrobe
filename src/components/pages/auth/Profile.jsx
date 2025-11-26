@@ -6,6 +6,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useFavorites } from '../../../hooks/useFavorites';
 import { fetchOutfits } from '../../../utils/api';
 import { theme } from '../../../design-system/theme';
+import { supabase } from '../../../utils/supabaseClient';
 
 // Animations
 const fadeIn = keyframes`
@@ -724,16 +725,35 @@ const Profile = () => {
     loadOutfits();
   }, []);
 
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const [hasSession, setHasSession] = useState(false);
+
+  // Check for session directly (bypass context which may have storage issues)
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setHasSession(!!session);
+      } catch (err) {
+        console.log('Session check error:', err);
+        setHasSession(false);
+      }
+      setSessionChecked(true);
+    };
+    checkSession();
+  }, []);
+
   useEffect(() => {
     // Don't redirect if we're in the process of logging out
     // The logout handler will do a full page redirect
-    if (!loading && !isAuthenticated && !loggingOut) {
+    // Wait for both context loading AND our session check
+    if (!loading && sessionChecked && !isAuthenticated && !hasSession && !loggingOut) {
       navigate('/login');
     }
-  }, [loading, isAuthenticated, navigate, loggingOut]);
+  }, [loading, isAuthenticated, hasSession, sessionChecked, navigate, loggingOut]);
 
   // Show loading state only during initial load
-  if (loading) {
+  if (loading || !sessionChecked) {
     return <LoadingContainer>{t('common.loading')}</LoadingContainer>;
   }
 
@@ -742,8 +762,8 @@ const Profile = () => {
     return <LoadingContainer>{t('auth.logout.loggingOut', 'Logging out...')}</LoadingContainer>;
   }
 
-  // If not authenticated and not logging out, the useEffect will handle redirect
-  if (!isAuthenticated) {
+  // If not authenticated (from context) AND no session (from direct check), redirect
+  if (!isAuthenticated && !hasSession) {
     return <LoadingContainer>{t('common.loading')}</LoadingContainer>;
   }
 
