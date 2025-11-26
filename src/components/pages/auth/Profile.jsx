@@ -784,21 +784,21 @@ const Profile = () => {
     return <LoadingContainer>{t('auth.logout.loggingOut', 'Logging out...')}</LoadingContainer>;
   }
 
-  const handleLogout = async (e) => {
+  const handleLogout = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
     if (loggingOut) return;
     
     setLoggingOut(true);
-    try {
-      await logout();
-      // Redirect immediately using window.location for a full page refresh
-      window.location.href = '/';
-    } catch (err) {
-      console.error('Logout error:', err);
-      setLoggingOut(false);
-    }
+    
+    // Fire and forget - don't wait for logout to complete
+    logout().catch(err => console.log('Logout error:', err));
+    
+    // Redirect immediately with cache-busting
+    setTimeout(() => {
+      window.location.href = '/?t=' + Date.now();
+    }, 500);
   };
 
   const brandCount = user?.preferences?.favoriteBrands?.length || 0;
