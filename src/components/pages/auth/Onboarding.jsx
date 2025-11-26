@@ -372,25 +372,30 @@ const Onboarding = () => {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     setSubmitting(true);
     setErrorMsg('');
     
-    try {
-      // Try to save preferences
-      await updateProfile({ 
-        styleInterests: selectedStyles,
-        favoriteBrands: favoriteBrands,
-        onboardingCompleted: true
-      });
-    } catch (err) {
-      console.error('Onboarding save error (continuing anyway):', err);
-      // Don't block navigation - preferences can be saved later
-    }
+    // Set a timeout to redirect no matter what happens
+    const redirectTimeout = setTimeout(() => {
+      console.log('Redirect timeout triggered');
+      window.location.href = '/profile';
+    }, 2000);
     
-    // Always navigate to profile, even if save failed
-    // Use window.location for reliable navigation
-    window.location.href = '/profile';
+    // Try to save preferences (fire and forget)
+    updateProfile({ 
+      styleInterests: selectedStyles,
+      favoriteBrands: favoriteBrands,
+      onboardingCompleted: true
+    }).then(() => {
+      console.log('Profile updated successfully');
+      clearTimeout(redirectTimeout);
+      window.location.href = '/profile';
+    }).catch(err => {
+      console.log('Profile update failed (redirecting anyway):', err);
+      clearTimeout(redirectTimeout);
+      window.location.href = '/profile';
+    });
   };
 
   const handleSkip = () => {
