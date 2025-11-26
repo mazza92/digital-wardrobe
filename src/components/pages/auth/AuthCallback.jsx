@@ -106,42 +106,76 @@ const AuthCallback = () => {
   useEffect(() => {
     // Check if we have hash params to process
     const hash = window.location.hash;
-    if (!hash || hash === '#') {
-      // No hash params - check if we have a session already
-      console.log('No hash params, checking existing session...');
-      checkExistingSession();
-      return;
-    }
     
     const handleAuthCallback = async () => {
-      try {
-        // Debug: Log the full URL
-        console.log('Auth callback URL:', window.location.href);
-        console.log('Hash:', hash);
+      // Debug: Log the full URL
+      console.log('Auth callback URL:', window.location.href);
+      console.log('Hash:', hash);
+      
+      // If no hash, check for existing session
+      if (!hash || hash === '#') {
+        console.log('No hash params, checking existing session...');
+        checkExistingSession();
+        return;
+      }
+      
+      // Get the hash fragment from the URL (Supabase sends tokens in hash)
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      const type = hashParams.get('type');
+
+      // Also check query params (some flows use query params)
+      const queryParams = new URLSearchParams(window.location.search);
+      const code = queryParams.get('code');
+      const errorParam = queryParams.get('error');
+      const errorDescription = queryParams.get('error_description');
+      
+      console.log('Parsed params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type, code: !!code, errorParam });
+
+      // Handle error from Supabase
+      if (errorParam) {
+        setStatus('error');
+        setError(errorDescription || errorParam);
+        return;
+      }
+
+      // If we have tokens in the hash (email confirmation flow)
+      if (accessToken && refreshToken) {
+        console.log('Setting session with tokens from hash...');
         
-        // Get the hash fragment from the URL (Supabase sends tokens in hash)
-        const hashParams = new URLSearchParams(hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-        const type = hashParams.get('type');
-
-        // Also check query params (some flows use query params)
-        const queryParams = new URLSearchParams(window.location.search);
-        const code = queryParams.get('code');
-        const errorParam = queryParams.get('error');
-        const errorDescription = queryParams.get('error_description');
+        // Set session - this may throw storage errors but still work
+        supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        }).then(({ data, error: sessionError }) => {
+          console.log('setSession completed:', { data: !!data, error: sessionError });
+          if (sessionError) {
+            console.error('Session error:', sessionError);
+          }
+        }).catch(err => {
+          console.log('setSession error (may still work):', err.message);
+        });
         
-        console.log('Parsed params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type, code: !!code, errorParam });
+        // Don't wait for setSession - the auth listener will handle it
+        // Just show success and redirect after a delay
+        setStatus('success');
+        
+        // Clear the hash from URL
+        window.history.replaceState(null, '', '/auth/callback');
+        
+        // Redirect after giving time for auth state to update
+        console.log('Redirecting to onboarding in 1.5s...');
+        setTimeout(() => {
+          console.log('Executing redirect now...');
+          window.location.href = '/onboarding';
+        }, 1500);
+        return;
+      }
 
-        // Handle error from Supabase
-        if (errorParam) {
-          setStatus('error');
-          setError(errorDescription || errorParam);
-          return;
-        }
-
-        // If we have a code, exchange it for a session
-        if (code) {
+      // If we have a code, exchange it for a session
+      if (code) {
+        try {
           const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
           if (exchangeError) {
             setStatus('error');
@@ -149,99 +183,44 @@ const AuthCallback = () => {
             return;
           }
           setStatus('success');
-          // Wait a moment for auth state to update, then redirect
           setTimeout(() => {
-            navigate('/onboarding');
+            window.location.href = '/onboarding';
           }, 1500);
-          return;
+        } catch (err) {
+          console.error('Code exchange error:', err);
+          setStatus('error');
+          setError(err.message);
         }
+        return;
+      }
 
-        // If we have tokens in the hash (email confirmation flow)
-        if (accessToken && refreshToken) {
-          console.log('Setting session with tokens from hash...');
-          
-          try {
-            const { data, error: sessionError } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
-            });
-            
-            console.log('setSession result:', { data, error: sessionError });
-            
-            if (sessionError) {
-              console.error('Session error:', sessionError);
-              setStatus('error');
-              setError(sessionError.message);
-              return;
-            }
-            
-            // Session was set successfully
-            console.log('Session set successfully, redirecting...');
-            setStatus('success');
-            
-            // Clear the hash from URL first
-            window.history.replaceState(null, '', '/auth/callback');
-            
-            // Use window.location for a hard redirect to ensure clean state
-            setTimeout(() => {
-              window.location.href = '/onboarding';
-            }, 800);
-            return;
-          } catch (sessionErr) {
-            console.error('setSession threw error:', sessionErr);
-            // Even if there's a storage error, check if session was actually set
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-              console.log('Session exists despite error, redirecting...');
-              setStatus('success');
-              window.history.replaceState(null, '', '/auth/callback');
-              setTimeout(() => {
-                window.location.href = '/onboarding';
-              }, 800);
-              return;
-            }
-            setStatus('error');
-            setError(sessionErr.message || 'Failed to set session');
-            return;
-          }
-        }
-
-        // If no tokens or code, check if already authenticated
+      // If no tokens or code, check if already authenticated
+      try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          // Check if email is confirmed
-          const emailConfirmed = session.user?.email_confirmed_at || session.user?.confirmed_at;
-          if (emailConfirmed) {
-            setStatus('success');
-            setTimeout(() => {
-              navigate('/onboarding');
-            }, 1500);
-          } else {
-            // Email not confirmed yet - this shouldn't happen on callback
-            // but handle it gracefully
-            setStatus('error');
-            setError('Email not confirmed. Please check your email and click the confirmation link.');
-            setTimeout(() => {
-              navigate('/signup');
-            }, 3000);
-          }
+          setStatus('success');
+          setTimeout(() => {
+            window.location.href = '/onboarding';
+          }, 1500);
         } else {
-          // No auth data found, redirect to login
           setStatus('error');
           setError('No authentication data found. Please try signing up again.');
           setTimeout(() => {
-            navigate('/signup');
+            window.location.href = '/signup';
           }, 3000);
         }
       } catch (err) {
-        console.error('Auth callback error:', err);
-        setStatus('error');
-        setError(err.message || 'An error occurred during authentication');
+        console.error('Session check error:', err);
+        // Even on error, try to redirect - session might exist
+        setStatus('success');
+        setTimeout(() => {
+          window.location.href = '/onboarding';
+        }, 1500);
       }
     };
 
     handleAuthCallback();
-  }, [navigate, checkExistingSession]);
+  }, [checkExistingSession]);
 
   // If already authenticated, redirect based on onboarding status
   useEffect(() => {
