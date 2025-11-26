@@ -375,22 +375,22 @@ const Onboarding = () => {
   const handleSubmit = async () => {
     setSubmitting(true);
     setErrorMsg('');
+    
     try {
+      // Try to save preferences
       await updateProfile({ 
         styleInterests: selectedStyles,
         favoriteBrands: favoriteBrands,
         onboardingCompleted: true
       });
-      // Navigate to profile after completing onboarding
-      navigate('/profile');
     } catch (err) {
-      console.error('Onboarding error:', err);
-      setErrorMsg(t('error.generic'));
-      setTimeout(() => {
-        // Still go to profile even on error - preferences saved locally
-        navigate('/profile');
-      }, 2000);
+      console.error('Onboarding save error (continuing anyway):', err);
+      // Don't block navigation - preferences can be saved later
     }
+    
+    // Always navigate to profile, even if save failed
+    // Use window.location for reliable navigation
+    window.location.href = '/profile';
   };
 
   const handleSkip = () => {
