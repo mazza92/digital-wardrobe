@@ -375,15 +375,16 @@ const Onboarding = () => {
   const handleSubmit = () => {
     setSubmitting(true);
     setErrorMsg('');
-    
+
     // Set a timeout to redirect no matter what happens
     // Increase timeout to 10 seconds to allow database save to complete
     const redirectTimeout = setTimeout(() => {
-      console.log('Redirect timeout triggered after 10s');
+      console.warn('⚠️ Redirect timeout triggered after 10s - forcing redirect');
       window.location.href = '/profile';
     }, 10000);
 
     // Try to save preferences
+    console.log('=== ONBOARDING SUBMIT ===');
     console.log('Saving preferences:', {
       styleInterests: selectedStyles,
       favoriteBrands: favoriteBrands,
@@ -395,14 +396,28 @@ const Onboarding = () => {
       favoriteBrands: favoriteBrands,
       onboardingCompleted: true
     }).then((result) => {
-      console.log('Profile updated successfully:', result);
+      console.log('=== PROFILE UPDATE RESULT ===');
+      console.log('Result:', JSON.stringify(result, null, 2));
+
+      if (result.savedToDb) {
+        console.log('✅ Data saved to database successfully!');
+      } else if (result.savedLocally) {
+        console.warn('⚠️ Data saved locally only, NOT to database!');
+        if (result.error) {
+          console.error('Reason:', result.error);
+        }
+      }
+
       clearTimeout(redirectTimeout);
       // Wait a bit to ensure data is saved
       setTimeout(() => {
+        console.log('Redirecting to profile...');
         window.location.href = '/profile';
       }, 500);
     }).catch(err => {
-      console.error('Profile update failed:', err);
+      console.error('❌ Profile update failed with exception:', err);
+      console.error('Error message:', err.message);
+      console.error('Error stack:', err.stack);
       clearTimeout(redirectTimeout);
       // Still redirect but log the error
       setTimeout(() => {

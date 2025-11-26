@@ -156,22 +156,34 @@ export const clearPendingPreferences = () => {
 };
 
 export const updatePreferences = async (userId, preferences) => {
+  console.log('=== updatePreferences called ===');
+  console.log('userId:', userId);
+  console.log('preferences:', JSON.stringify(preferences, null, 2));
+
   // Always save to memory first (in case DB fails)
   savePendingPreferences(preferences);
-  
+
   try {
-    // Get current authenticated user
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-    
+    // Get current authenticated user using getSession (more reliable than getUser)
+    const { data: { session }, error: sessionError } = await safeGetSession();
+
+    console.log('Session check:', {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: session?.user?.id,
+      sessionError: sessionError?.message
+    });
+
     // If not authenticated or session missing, preferences are saved in memory
-    if (authError || !authUser) {
-      console.log('No authenticated user, preferences saved in memory');
+    if (sessionError || !session?.user) {
+      console.warn('⚠️ No authenticated session, preferences saved in memory only');
       return { success: true, preferences, savedLocally: true };
     }
-    
-    // Use authUser.id to ensure it matches auth.uid() for RLS
-    const authenticatedUserId = authUser.id;
-    
+
+    // Use session user ID to ensure it matches auth.uid() for RLS
+    const authenticatedUserId = session.user.id;
+    console.log('Using authenticated user ID:', authenticatedUserId);
+
     // Get current preferences to merge (if profile exists)
     let currentProfile = null;
     try {
@@ -181,10 +193,11 @@ export const updatePreferences = async (userId, preferences) => {
         .eq('id', authenticatedUserId)
         .maybeSingle();
       currentProfile = data;
+      console.log('Current profile fetched:', currentProfile ? 'exists' : 'null');
     } catch (err) {
-      console.log('Could not fetch current profile:', err.message);
+      console.warn('Could not fetch current profile:', err.message);
     }
-    
+
     // Merge all preferences
     const pendingPrefs = getPendingPreferences();
     const newPreferences = {
@@ -193,33 +206,47 @@ export const updatePreferences = async (userId, preferences) => {
       ...preferences
     };
 
+    console.log('Merged preferences to save:', JSON.stringify(newPreferences, null, 2));
+
     // Use upsert with the authenticated user's ID
+    const upsertPayload = {
+      id: authenticatedUserId,
+      email: currentProfile?.email || session.user.email || null,
+      marketing_opt_in: currentProfile?.marketing_opt_in ?? false,
+      preferences: newPreferences,
+      updated_at: new Date().toISOString()
+    };
+
+    console.log('Upserting to database:', JSON.stringify(upsertPayload, null, 2));
+
     const { data, error } = await supabase
       .from('user_profiles')
-      .upsert({
-        id: authenticatedUserId,
-        email: currentProfile?.email || authUser.email || null,
-        marketing_opt_in: currentProfile?.marketing_opt_in ?? false,
-        preferences: newPreferences,
-        updated_at: new Date().toISOString()
-      })
+      .upsert(upsertPayload)
       .select()
       .single();
 
     if (error) {
-      console.log('Error saving to database:', error.message);
+      console.error('❌ DATABASE SAVE ERROR:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Error details:', error.details);
+      console.error('Error hint:', error.hint);
       // Preferences are already in memory, so this is still a "success" for the user
-      return { success: true, preferences: newPreferences, savedLocally: true };
+      return { success: true, preferences: newPreferences, savedLocally: true, error: error.message };
     }
-    
+
+    console.log('✅ Successfully saved to database:', data);
+
     // Clear pending preferences after successful sync
     clearPendingPreferences();
-    
+
     return { success: true, user: data, savedToDb: true };
   } catch (err) {
-    console.log('updatePreferences error:', err.message);
+    console.error('❌ updatePreferences exception:', err);
+    console.error('Exception message:', err.message);
+    console.error('Exception stack:', err.stack);
     // Preferences are in memory, return success
-    return { success: true, preferences, savedLocally: true };
+    return { success: true, preferences, savedLocally: true, error: err.message };
   }
 };
 
