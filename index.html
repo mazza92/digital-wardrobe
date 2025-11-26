@@ -47,16 +47,20 @@
     <!-- Preconnect to external domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://digital-wardrobe-admin.vercel.app" />
+    <link rel="preconnect" href="https://ycxfqhuwtlujuumgejlo.supabase.co" />
     <link rel="preconnect" href="https://www.google-analytics.com" />
     <link rel="preconnect" href="https://www.googletagmanager.com" />
     
     <!-- DNS Prefetch -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//digital-wardrobe-admin.vercel.app" />
+    <link rel="dns-prefetch" href="//ycxfqhuwtlujuumgejlo.supabase.co" />
     <link rel="dns-prefetch" href="//www.google-analytics.com" />
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
     
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- Fonts - Optimized with display=swap for faster text rendering -->
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -136,10 +140,41 @@
     </script>
     
     <!-- Security Headers -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://digital-wardrobe-admin.vercel.app https://www.google-analytics.com https://www.googletagmanager.com;" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://digital-wardrobe-admin.vercel.app https://www.google-analytics.com https://www.googletagmanager.com https://ycxfqhuwtlujuumgejlo.supabase.co https://*.supabase.co;" />
     
     <!-- Performance Hints -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&display=swap" as="style" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" as="style" />
+    
+    <!-- Critical CSS inline for faster first paint -->
+    <style>
+      /* Critical CSS - Inline for faster FCP */
+      body { 
+        margin: 0; 
+        font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #FDFCF8;
+        -webkit-font-smoothing: antialiased;
+      }
+      #root { min-height: 100vh; }
+      .initial-loader {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: #FDFCF8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.3s ease;
+      }
+      .initial-loader.hidden { opacity: 0; pointer-events: none; }
+      .loader-spinner {
+        width: 32px; height: 32px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #1a1a1a;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
     
     <!-- Cache Busting - v2.0.0 -->
     <meta name="version" content="2.0.0" />
@@ -148,8 +183,23 @@
     <!-- Skip Link for Accessibility -->
     <a href="#main-content" class="skip-link">Aller au contenu principal</a>
     
+    <!-- Initial loader shown while JS loads -->
+    <div class="initial-loader" id="initial-loader">
+      <div class="loader-spinner"></div>
+    </div>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Hide loader once React mounts -->
+    <script>
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var loader = document.getElementById('initial-loader');
+          if (loader) loader.classList.add('hidden');
+        }, 100);
+      });
+    </script>
     
     <!-- Google Analytics (if enabled) -->
     <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>

@@ -1,13 +1,20 @@
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, memo, useCallback, useMemo, lazy } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useOutfits } from '../../hooks/useOutfits'
 import { getRelativeTime } from '../../utils/api'
 import { useFavorites } from '../../hooks/useFavorites'
+import { useAuth } from '../../context/AuthContext'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
 import { LazyFavoritesList, LazyCartButton, LoadingFallback, preloadResources } from '../../utils/performance'
 import LanguageSwitcher from '../ui/LanguageSwitcher'
+import { PageSkeleton } from '../ui/Skeleton'
+import OptimizedImage, { usePreloadImages } from '../ui/OptimizedImage'
+
+// Lazy load non-critical components
+const SignupPrompt = lazy(() => import('../ui/SignupPrompt'))
+const LoginModal = lazy(() => import('../ui/LoginModal'))
 
 const MainContainer = styled.div`
   min-height: 100vh;
@@ -81,6 +88,31 @@ const NavLink = styled(Link)`
   }
 `
 
+const NavButton = styled.button`
+  color: #666;
+  background: none;
+  font-weight: 500;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  cursor: pointer;
+  
+  @media (min-width: 768px) {
+    font-size: 0.95rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+  }
+  
+  &:hover {
+    color: #101010;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+`
+
 const HeroSection = styled.section`
   background: #E3DBCC;
   color: #101010;
@@ -112,7 +144,7 @@ const InfluencerImage = styled.div`
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background-image: url(${props => props.image});
+  background-image: url(${props => props.$image});
   background-size: cover;
   background-position: center;
   margin: 0 auto 1.5rem;
@@ -296,10 +328,37 @@ const OutfitCard = styled(Link)`
   }
 `
 
+const OutfitImageWrapper = styled.div`
+  width: 100%;
+  aspect-ratio: 3/4;
+  position: relative;
+  overflow: hidden;
+  background: #f5f5f5;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.7));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  ${OutfitCard}:hover &::after {
+    opacity: 1;
+  }
+`
+
+// Legacy support for background-image based approach (fallback)
 const OutfitImage = styled.div`
   width: 100%;
   aspect-ratio: 3/4;
-  background-image: url(${props => props.image});
+  background-image: url(${props => props.$image});
   background-size: cover;
   background-position: center;
   position: relative;
@@ -569,46 +628,79 @@ const LoadingText = styled.p`
   font-weight: 500;
 `
 
+// Memoized OutfitCard component to prevent unnecessary re-renders
+const MemoizedOutfitCard = memo(({ outfit, index, isEager, t }) => (
+  <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
+    <OutfitImageWrapper>
+      <OptimizedImage
+        src={outfit.image}
+        alt={outfit.title}
+        aspectRatio="3/4"
+        loading={isEager ? 'eager' : 'lazy'}
+        fetchPriority={index < 2 ? 'high' : undefined}
+      />
+    </OutfitImageWrapper>
+    <ProductTags>
+      {outfit.products.map((product) => (
+        <ProductTag
+          key={product.id}
+          x={product.x}
+          y={product.y}
+          title={`${product.name} - ${product.brand}`}
+        />
+      ))}
+    </ProductTags>
+    <ProductCount>{outfit.products.length} {outfit.products.length === 1 ? t('favorites.item') : t('favorites.items')}</ProductCount>
+    <OutfitOverlay>
+      <OutfitTitle>{outfit.title}</OutfitTitle>
+      <OutfitDescription>{outfit.description}</OutfitDescription>
+      <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
+      <ShopButton>
+        {t('outfit.shopNow')} →
+      </ShopButton>
+    </OutfitOverlay>
+  </OutfitCard>
+))
+
+MemoizedOutfitCard.displayName = 'MemoizedOutfitCard'
+
 function MainPortal() {
   const { t } = useTranslation()
   const { outfits, influencer, isLoading, error } = useOutfits()
+  const { user, isAuthenticated, logout } = useAuth()
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('outfits')
   
   const {
     favorites,
     removeFromFavorites,
     clearFavorites,
-    getFavoritesCount
+    getFavoritesCount,
+    showSignupPrompt,
+    closeSignupPrompt,
+    pendingProduct,
+    addToFavoritesAsGuest
   } = useFavorites()
 
   // SEO optimization
   useSEO(seoConfig.home)
 
-  // Preload critical images for better performance
-  useEffect(() => {
-    if (outfits.length > 0) {
-      // Preload first 4 outfit images (above the fold)
-      const criticalImages = outfits
-        .slice(0, 4)
-        .map(outfit => outfit.image)
-        .filter(Boolean)
-      
-      if (criticalImages.length > 0) {
-        preloadResources.preloadImages(criticalImages)
-      }
-    }
-  }, [outfits])
+  // Memoize filtered outfits to prevent recalculation on every render
+  const outfitsByCategory = useMemo(() => ({
+    outfit: outfits.filter(outfit => outfit.category === 'outfit'),
+    wishlist: outfits.filter(outfit => outfit.category === 'wishlist')
+  }), [outfits])
+
+  // Preload first 4 images for faster LCP
+  const criticalImages = useMemo(() => 
+    outfitsByCategory.outfit.slice(0, 4).map(outfit => outfit.image).filter(Boolean),
+    [outfitsByCategory.outfit]
+  )
+  usePreloadImages(criticalImages)
 
   if (isLoading) {
-    return (
-      <MainContainer>
-        <LoadingContainer>
-          <LoadingSpinner />
-          <LoadingText>{t('loading.app')}</LoadingText>
-        </LoadingContainer>
-      </MainContainer>
-    )
+    return <PageSkeleton />
   }
 
   if (error) {
@@ -644,6 +736,15 @@ function MainPortal() {
         <BrandName>Virtual Dressing</BrandName>
         <HeaderRight>
           <LanguageSwitcher />
+          {isAuthenticated ? (
+            <NavLink to="/profile">
+              {t('nav.account') || 'My Account'}
+            </NavLink>
+          ) : (
+            <NavButton onClick={() => setIsLoginModalOpen(true)}>
+              {t('nav.login') || 'Login'}
+            </NavButton>
+          )}
           <Suspense fallback={<div style={{width: '40px', height: '40px'}} />}>
             <LazyCartButton 
               onClick={() => setIsFavoritesOpen(true)} 
@@ -656,7 +757,7 @@ function MainPortal() {
       
       <HeroSection>
         <HeroContent>
-          <InfluencerImage image={influencer?.heroImage} />
+          <InfluencerImage $image={influencer?.heroImage} />
           <InfluencerName>{influencer?.name}</InfluencerName>
           <InfluencerBrand>{influencer?.brand}</InfluencerBrand>
           <InfluencerBio>{influencer?.bio}</InfluencerBio>
@@ -689,30 +790,15 @@ function MainPortal() {
             </SectionHeader>
             
             <OutfitsGrid>
-              {outfits.filter(outfit => outfit.category === 'outfit').length > 0 ? (
-                outfits.filter(outfit => outfit.category === 'outfit').map((outfit) => (
-                  <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
-                    <OutfitImage image={outfit.image} />
-                    <ProductTags>
-                      {outfit.products.map((product) => (
-                        <ProductTag
-                          key={product.id}
-                          x={product.x}
-                          y={product.y}
-                          title={`${product.name} - ${product.brand}`}
-                        />
-                      ))}
-                    </ProductTags>
-                    <ProductCount>{outfit.products.length} {outfit.products.length === 1 ? t('favorites.item') : t('favorites.items')}</ProductCount>
-                    <OutfitOverlay>
-                      <OutfitTitle>{outfit.title}</OutfitTitle>
-                      <OutfitDescription>{outfit.description}</OutfitDescription>
-                      <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
-                      <ShopButton>
-                        {t('outfit.shopNow')} →
-                      </ShopButton>
-                    </OutfitOverlay>
-                  </OutfitCard>
+              {outfitsByCategory.outfit.length > 0 ? (
+                outfitsByCategory.outfit.map((outfit, index) => (
+                  <MemoizedOutfitCard 
+                    key={outfit.id} 
+                    outfit={outfit} 
+                    index={index} 
+                    isEager={index < 4}
+                    t={t}
+                  />
                 ))
               ) : (
                 <NoOutfitsMessage>
@@ -729,30 +815,15 @@ function MainPortal() {
             </SectionHeader>
             
             <OutfitsGrid>
-              {outfits.filter(outfit => outfit.category === 'wishlist').length > 0 ? (
-                outfits.filter(outfit => outfit.category === 'wishlist').map((outfit) => (
-                  <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
-                    <OutfitImage image={outfit.image} />
-                    <ProductTags>
-                      {outfit.products.map((product) => (
-                        <ProductTag
-                          key={product.id}
-                          x={product.x}
-                          y={product.y}
-                          title={`${product.name} - ${product.brand}`}
-                        />
-                      ))}
-                    </ProductTags>
-                    <ProductCount>{outfit.products.length} {outfit.products.length === 1 ? t('favorites.item') : t('favorites.items')}</ProductCount>
-                    <OutfitOverlay>
-                      <OutfitTitle>{outfit.title}</OutfitTitle>
-                      <OutfitDescription>{outfit.description}</OutfitDescription>
-                      <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
-                      <ShopButton>
-                        {t('outfit.shopNow')} →
-                      </ShopButton>
-                    </OutfitOverlay>
-                  </OutfitCard>
+              {outfitsByCategory.wishlist.length > 0 ? (
+                outfitsByCategory.wishlist.map((outfit, index) => (
+                  <MemoizedOutfitCard 
+                    key={outfit.id} 
+                    outfit={outfit} 
+                    index={index} 
+                    isEager={false}
+                    t={t}
+                  />
                 ))
               ) : (
                 <NoOutfitsMessage>
@@ -801,8 +872,34 @@ function MainPortal() {
           onClearFavorites={clearFavorites}
         />
       </Suspense>
+
+      {/* Signup prompt for guest users - lazy loaded */}
+      {showSignupPrompt && (
+        <Suspense fallback={null}>
+          <SignupPrompt
+            isOpen={showSignupPrompt}
+            onClose={closeSignupPrompt}
+            onContinueAsGuest={addToFavoritesAsGuest}
+            itemName={pendingProduct?.name}
+          />
+        </Suspense>
+      )}
+
+      {/* Login modal - lazy loaded */}
+      {isLoginModalOpen && (
+        <Suspense fallback={null}>
+          <LoginModal
+            isOpen={isLoginModalOpen}
+            onClose={() => setIsLoginModalOpen(false)}
+            onSwitchToSignup={() => {
+              setIsLoginModalOpen(false)
+              window.location.href = '/signup'
+            }}
+          />
+        </Suspense>
+      )}
     </MainContainer>
   )
 }
 
-export default MainPortal
+export default memo(MainPortal)

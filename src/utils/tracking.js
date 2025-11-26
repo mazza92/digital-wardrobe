@@ -1,7 +1,7 @@
 // Click tracking utilities for affiliate links
 import React from 'react'
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://digital-wardrobe-admin.vercel.app'
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://digital-wardrobe-admin.vercel.app'
 
 export const trackClick = async (productId, outfitId, productName, brand, affiliateLink) => {
   try {

@@ -1,64 +1,158 @@
 // API utility functions for the Digital Wardrobe frontend
+// With caching for better performance
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://digital-wardrobe-admin.vercel.app/api'
 
-export const fetchOutfits = async () => {
-  try {
-    const url = `${API_BASE_URL}/outfits/export?${Date.now()}`
-    console.log('🔍 Fetching outfits from:', url)
-    console.log('🔍 API_BASE_URL:', API_BASE_URL)
-    console.log('🔍 VITE_API_URL env:', import.meta.env.VITE_API_URL)
+// Cache configuration
+const CACHE_DURATION = 10 * 60 * 1000 // 10 minutes - increased for better performance
+const STALE_WHILE_REVALIDATE = 60 * 60 * 1000 // 1 hour - serve stale while revalidating
+const cache = new Map()
+
+// In-flight request deduplication
+const pendingRequests = new Map()
+
+const getCachedData = (key) => {
+  const cached = cache.get(key)
+  if (!cached) return { data: null, isStale: false }
+  
+  const age = Date.now() - cached.timestamp
+  if (age < CACHE_DURATION) {
+    return { data: cached.data, isStale: false }
+  }
+  if (age < STALE_WHILE_REVALIDATE) {
+    return { data: cached.data, isStale: true }
+  }
+  return { data: null, isStale: false }
+}
+
+const setCachedData = (key, data) => {
+  cache.set(key, { data, timestamp: Date.now() })
+}
+
+export const fetchOutfits = async (forceRefresh = false) => {
+  const cacheKey = 'outfits'
+  
+  // Return cached data if available and not forcing refresh
+  if (!forceRefresh) {
+    const { data: cachedData, isStale } = getCachedData(cacheKey)
+    if (cachedData && !isStale) {
+      return cachedData
+    }
+    // Return stale data immediately, revalidate in background
+    if (cachedData && isStale) {
+      // Revalidate in background (don't await)
+      fetchOutfitsFromNetwork(cacheKey).catch(() => {})
+      return cachedData
+    }
+  }
+  
+  return fetchOutfitsFromNetwork(cacheKey)
+}
+
+// Separate network fetch with request deduplication
+const fetchOutfitsFromNetwork = async (cacheKey) => {
+  // Deduplicate in-flight requests
+  if (pendingRequests.has(cacheKey)) {
+    return pendingRequests.get(cacheKey)
+  }
+  
+  const fetchPromise = (async () => {
+    try {
+      const url = `${API_BASE_URL}/outfits/export`
     
     const response = await fetch(url, {
       mode: 'cors',
       headers: {
         'Accept': 'application/json',
-      },
-      cache: 'no-cache'
+        }
     })
-    
-    console.log('📡 Response status:', response.status)
-    console.log('📡 Response headers:', response.headers)
     
     if (response.ok) {
       const data = await response.json()
-      console.log('✅ API data received:', data)
+        setCachedData(cacheKey, data)
       return data
     } else {
       throw new Error(`API not available: ${response.status}`)
     }
   } catch (error) {
-    console.error('❌ API fetch failed:', error.message)
+      // Return cached data even if expired on error
+      const cached = cache.get(cacheKey)
+      if (cached) {
+        return cached.data
+      }
     throw error
-  }
+    } finally {
+      pendingRequests.delete(cacheKey)
+    }
+  })()
+  
+  pendingRequests.set(cacheKey, fetchPromise)
+  return fetchPromise
 }
 
-export const fetchProfile = async () => {
-  try {
-    const url = `${API_BASE_URL}/profile?${Date.now()}`
-    console.log('🔍 Fetching profile from:', url)
+export const fetchProfile = async (forceRefresh = false) => {
+  const cacheKey = 'profile'
+  
+  // Return cached data if available and not forcing refresh
+  if (!forceRefresh) {
+    const { data: cachedData, isStale } = getCachedData(cacheKey)
+    if (cachedData && !isStale) {
+      return cachedData
+    }
+    // Return stale data immediately, revalidate in background
+    if (cachedData && isStale) {
+      fetchProfileFromNetwork(cacheKey).catch(() => {})
+      return cachedData
+    }
+  }
+  
+  return fetchProfileFromNetwork(cacheKey)
+}
+
+// Separate network fetch with request deduplication
+const fetchProfileFromNetwork = async (cacheKey) => {
+  // Deduplicate in-flight requests
+  if (pendingRequests.has(cacheKey)) {
+    return pendingRequests.get(cacheKey)
+  }
+  
+  const fetchPromise = (async () => {
+    try {
+      const url = `${API_BASE_URL}/profile`
     
     const response = await fetch(url, {
       mode: 'cors',
       headers: {
         'Accept': 'application/json',
-      },
-      cache: 'no-cache'
+        }
     })
-    
-    console.log('📡 Profile response status:', response.status)
     
     if (response.ok) {
       const data = await response.json()
-      console.log('✅ Profile data received:', data)
+        setCachedData(cacheKey, data)
       return data
     } else {
       throw new Error(`Profile API not available: ${response.status}`)
     }
   } catch (error) {
-    console.error('❌ Profile fetch failed:', error.message)
+      // Return cached data even if expired on error
+      const cached = cache.get(cacheKey)
+      if (cached) {
+        return cached.data
+      }
     throw error
-  }
+    } finally {
+      pendingRequests.delete(cacheKey)
+    }
+  })()
+  
+  pendingRequests.set(cacheKey, fetchPromise)
+  return fetchPromise
+}
+
+// Clear cache (useful for forced refresh)
+export const clearCache = () => {
+  cache.clear()
 }
 
 import i18n from '../i18n/config'

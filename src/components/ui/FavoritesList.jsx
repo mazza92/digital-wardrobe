@@ -13,7 +13,7 @@ const FavoritesContainer = styled.div`
   background: white;
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  transform: translateX(${props => props.isOpen ? '0' : '100%'});
+  transform: translateX(${props => props.$isOpen ? '0' : '100%'});
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -100,7 +100,7 @@ const FavoriteItem = styled.div`
   border-radius: 12px;
   border: 1px solid #e9ecef;
   transition: all 0.3s ease;
-  cursor: ${props => props.hasLink ? 'pointer' : 'default'};
+  cursor: ${props => props.$hasLink ? 'pointer' : 'default'};
   
   &:hover {
     background: #e9ecef;
@@ -109,7 +109,9 @@ const FavoriteItem = styled.div`
   }
 `
 
-const ProductImage = styled.div`
+const ProductImage = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'imageUrl'
+})`
   width: 60px;
   height: 60px;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -240,8 +242,8 @@ const Overlay = styled.div`
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
-  opacity: ${props => props.isOpen ? 1 : 0};
-  visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
+  opacity: ${props => props.$isOpen ? 1 : 0};
+  visibility: ${props => props.$isOpen ? 'visible' : 'hidden'};
   transition: all 0.3s ease;
 `
 
@@ -285,8 +287,8 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
 
   return (
     <>
-      <Overlay isOpen={isOpen} onClick={handleOverlayClick} />
-      <FavoritesContainer isOpen={isOpen}>
+      <Overlay $isOpen={isOpen} onClick={handleOverlayClick} />
+      <FavoritesContainer $isOpen={isOpen}>
         <FavoritesHeader>
           <FavoritesTitle>{t('favorites.title')}</FavoritesTitle>
           <CloseButton onClick={onClose}>×</CloseButton>
@@ -306,7 +308,7 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
               {favorites.map((item) => (
                 <FavoriteItem 
                   key={item.id}
-                  hasLink={!!item.link}
+                  $hasLink={!!item.link}
                   onClick={(e) => handleItemClick(item, e)}
                 >
                   <ProductImage imageUrl={item.imageUrl}>

@@ -39,7 +39,7 @@ const HeartIcon = styled.div`
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 16px;
-    color: ${props => props.isFavorited ? '#1a1a1a' : 'currentColor'};
+    color: ${props => props.$isFavorited ? '#1a1a1a' : 'currentColor'};
     font-weight: 300;
     
     @media (min-width: 768px) {
@@ -62,7 +62,7 @@ const FavoritesBadge = styled.div`
   justify-content: center;
   font-size: 0.65rem;
   font-weight: 600;
-  transform: scale(${props => props.count > 0 ? 1 : 0});
+  transform: scale(${props => props.$count > 0 ? 1 : 0});
   transition: transform 0.3s ease;
   
   @media (min-width: 768px) {
@@ -77,8 +77,8 @@ const FavoritesBadge = styled.div`
 function FavoritesButton({ onClick, favoritesCount, isFavorited = false }) {
   return (
     <FavoritesButtonContainer onClick={onClick} title="Voir les Favoris">
-      <HeartIcon isFavorited={isFavorited} />
-      <FavoritesBadge count={favoritesCount}>
+      <HeartIcon $isFavorited={isFavorited} />
+      <FavoritesBadge $count={favoritesCount}>
         {favoritesCount > 99 ? '99+' : favoritesCount}
       </FavoritesBadge>
     </FavoritesButtonContainer>

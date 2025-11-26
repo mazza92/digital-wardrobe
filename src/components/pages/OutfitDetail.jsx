@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo, useMemo, useCallback, lazy, Suspense } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useFavorites } from '../../hooks/useFavorites'
+import { useAuth } from '../../context/AuthContext'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
 import { fetchOutfits, getRelativeTime } from '../../utils/api'
 import FavoritesList from '../ui/FavoritesList'
@@ -10,6 +11,11 @@ import FavoritesButton from '../ui/CartButton'
 import SubtleShareButton from '../ui/SubtleShareButton'
 import { handleAffiliateClick } from '../../utils/tracking'
 import LanguageSwitcher from '../ui/LanguageSwitcher'
+import OptimizedImage from '../ui/OptimizedImage'
+
+// Lazy load modal components
+const SignupPrompt = lazy(() => import('../ui/SignupPrompt'))
+const LoginModal = lazy(() => import('../ui/LoginModal'))
 
 const DetailContainer = styled.div`
   min-height: 100vh;
@@ -97,6 +103,55 @@ const BrandName = styled.h1`
   }
 `
 
+const NavLink = styled(Link)`
+  color: #666;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  
+  @media (min-width: 768px) {
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+    border-radius: 20px;
+  }
+  
+  &:hover {
+    color: #101010;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+`
+
+const NavButton = styled.button`
+  color: #666;
+  background: none;
+  font-weight: 500;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  cursor: pointer;
+  
+  @media (min-width: 768px) {
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+    border-radius: 20px;
+  }
+  
+  &:hover {
+    color: #101010;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+`
+
 const MainContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
@@ -129,7 +184,7 @@ const ImageContainer = styled.div`
   position: relative;
   background: #f8f8f8;
   cursor: crosshair;
-  background-image: url(${props => props.image});
+  background-image: url(${props => props.$image});
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -397,7 +452,9 @@ const ProductCard = styled.div`
   }
 `
 
-const ProductThumbnail = styled.div`
+const ProductThumbnail = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'imageUrl'
+})`
   width: 100%;
   height: 140px;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -524,7 +581,7 @@ const InfluencerAvatar = styled.div`
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-image: url(${props => props.image});
+  background-image: url(${props => props.$image});
   background-size: cover;
   background-position: center;
   border: 2px solid white;
@@ -690,7 +747,7 @@ const RecommendationCard = styled(Link)`
 const RecommendationImage = styled.div`
   width: 100%;
   height: 100%;
-  background-image: url(${props => props.image});
+  background-image: url(${props => props.$image});
   background-size: cover;
   background-position: center;
   position: relative;
@@ -827,6 +884,7 @@ function OutfitDetail() {
   const { t } = useTranslation()
   const { outfitId } = useParams()
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
   const [outfit, setOutfit] = useState(null)
   const [influencer, setInfluencer] = useState(null)
   const [allOutfits, setAllOutfits] = useState([])
@@ -836,6 +894,7 @@ function OutfitDetail() {
   const [isLoading, setIsLoading] = useState(true)
   const [hoveredProductId, setHoveredProductId] = useState(null)
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
   // SEO optimization
   useSEO(outfit ? seoConfig.outfit(outfit) : seoConfig.home)
@@ -846,7 +905,11 @@ function OutfitDetail() {
     removeFromFavorites,
     toggleFavorite,
     isFavorited,
-    getFavoritesCount
+    getFavoritesCount,
+    showSignupPrompt,
+    closeSignupPrompt,
+    pendingProduct,
+    addToFavoritesAsGuest
   } = useFavorites()
 
   useEffect(() => {
@@ -1035,7 +1098,12 @@ function OutfitDetail() {
   }
 
   const handleToggleFavorite = (product) => {
-    toggleFavorite(product)
+    // Include outfitId so we can navigate back to this outfit from favorites
+    const productWithOutfit = {
+      ...product,
+      outfitId: outfit?.id || outfitId
+    }
+    toggleFavorite(productWithOutfit)
     // Simple feedback without inline styles - let styled-components handle the styling
     const button = document.querySelector(`[data-product-id="${product.id}"]`)
     if (button) {
@@ -1084,6 +1152,15 @@ function OutfitDetail() {
         </HeaderLeft>
         <HeaderRight>
           <LanguageSwitcher />
+          {isAuthenticated ? (
+            <NavLink to="/profile">
+              {t('nav.account')}
+            </NavLink>
+          ) : (
+            <NavButton onClick={() => setIsLoginModalOpen(true)}>
+              {t('nav.login')}
+            </NavButton>
+          )}
           <FavoritesButton 
             onClick={() => setIsFavoritesOpen(true)} 
             favoritesCount={getFavoritesCount()} 
@@ -1093,7 +1170,7 @@ function OutfitDetail() {
       
       <MainContent>
         <ImageSection>
-          <ImageContainer image={outfit.image} onClick={handleImageClick}>
+          <ImageContainer $image={outfit.image} onClick={handleImageClick}>
             {outfit.products.map((product) => {
               const smartPos = getSmartPosition(product.x, product.y)
               return (
@@ -1198,7 +1275,7 @@ function OutfitDetail() {
             <GalleryGrid>
               {recommendedOutfits.slice(0, 4).map((recommendedOutfit) => (
                 <RecommendationCard key={recommendedOutfit.id} to={`/outfits/${recommendedOutfit.id}`}>
-                  <RecommendationImage image={recommendedOutfit.image} />
+                  <RecommendationImage $image={recommendedOutfit.image} />
                   <ProductCount>
                     {recommendedOutfit.products?.length || 0} {(recommendedOutfit.products?.length || 0) === 1 ? t('favorites.item') : t('favorites.items')}
                   </ProductCount>
@@ -1236,8 +1313,34 @@ function OutfitDetail() {
           }
         }}
       />
+
+      {/* Signup prompt for guest users - lazy loaded */}
+      {showSignupPrompt && (
+        <Suspense fallback={null}>
+          <SignupPrompt
+            isOpen={showSignupPrompt}
+            onClose={closeSignupPrompt}
+            onContinueAsGuest={addToFavoritesAsGuest}
+            itemName={pendingProduct?.name}
+          />
+        </Suspense>
+      )}
+
+      {/* Login modal - lazy loaded */}
+      {isLoginModalOpen && (
+        <Suspense fallback={null}>
+          <LoginModal
+            isOpen={isLoginModalOpen}
+            onClose={() => setIsLoginModalOpen(false)}
+            onSwitchToSignup={() => {
+              setIsLoginModalOpen(false)
+              navigate('/signup')
+            }}
+          />
+        </Suspense>
+      )}
     </DetailContainer>
   )
 }
 
-export default OutfitDetail
+export default memo(OutfitDetail)

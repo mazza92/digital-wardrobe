@@ -267,7 +267,7 @@ export const preloadResources = {
 export const bundleAnalyzer = {
   // Log bundle information
   logBundleInfo: () => {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log('Bundle Analysis:')
       console.log('- React version:', React.version)
       console.log('- Build time:', new Date().toISOString())

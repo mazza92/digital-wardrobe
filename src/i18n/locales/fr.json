@@ -6,12 +6,24 @@
     "close": "Fermer",
     "back": "Retour",
     "save": "Enregistrer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "continue": "Continuer",
+    "skip": "Passer",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "finish": "Terminer",
+    "or": "ou",
+    "edit": "Modifier"
   },
   "nav": {
     "about": "À propos",
     "outfits": "Tenues",
-    "wishlist": "Wishlist"
+    "wishlist": "Wishlist",
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "account": "Mon Compte",
+    "signup": "S'inscrire",
+    "profile": "Profil"
   },
   "header": {
     "brand": "Digital Wardrobe"
@@ -57,7 +69,12 @@
     "remove": "Retirer",
     "clearAll": "Tout effacer",
     "items": "articles",
-    "item": "article"
+    "item": "article",
+    "added": "Ajouté aux favoris !",
+    "remaining_one": "{{count}} sauvegarde gratuite restante",
+    "remaining_other": "{{count}} sauvegardes gratuites restantes",
+    "lastFree": "Dernière sauvegarde gratuite ! Créez un compte pour en sauvegarder plus",
+    "signupToSaveMore": "Créez un compte gratuit pour sauvegarder des favoris illimités"
   },
   "about": {
     "title": "À propos",
@@ -83,6 +100,167 @@
   },
   "footer": {
     "copyright": "© 2025 Virtual Dressing. Tous droits réservés."
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Connectez-vous pour accéder à votre espace personnel shopping",
+      "email": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "submit": "Se connecter",
+      "submitting": "Connexion...",
+      "noAccount": "Pas encore de compte ?",
+      "signupLink": "Créer un compte",
+      "forgotPassword": "Mot de passe oublié ?",
+      "error": {
+        "invalidCredentials": "Email ou mot de passe incorrect",
+        "generic": "Une erreur s'est produite. Veuillez réessayer."
+      }
+    },
+    "signup": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez-nous pour profiter de tous les avantages shopping et recommandations mode personnalisées",
+      "email": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Créer un mot de passe",
+      "passwordHint": "Au moins 6 caractères",
+      "marketing": "Je souhaite recevoir des conseils de style et des offres exclusives",
+      "submit": "Créer mon compte",
+      "submitting": "Création du compte...",
+      "hasAccount": "Déjà un compte ?",
+      "loginLink": "Se connecter",
+      "success": "Compte créé ! Veuillez vérifier votre email pour confirmer votre compte, puis connectez-vous.",
+      "confirmEmail": {
+        "title": "Vérifiez votre email",
+        "sentTo": "Nous avons envoyé un lien de confirmation à",
+        "step1": "Ouvrez l'email de Virtual Dressing",
+        "step2": "Cliquez sur le lien de confirmation",
+        "step3": "Vous serez redirigé pour personnaliser votre style",
+        "checkSpam": "Vous ne le voyez pas ? Vérifiez vos spams.",
+        "wrongEmail": "Mauvais email ? Retournez en arrière"
+      },
+      "error": {
+        "emailInUse": "Cet email est déjà utilisé",
+        "weakPassword": "Le mot de passe doit contenir au moins 6 caractères",
+        "generic": "Une erreur s'est produite. Veuillez réessayer."
+      }
+    },
+    "logout": {
+      "button": "Déconnexion",
+      "signingOut": "Déconnexion...",
+      "loggingOut": "Déconnexion en cours..."
+    },
+    "callback": {
+      "verifying": "Vérification de votre email...",
+      "pleaseWait": "Veuillez patienter pendant la confirmation de votre compte.",
+      "success": "Email confirmé !",
+      "redirecting": "Redirection vers votre profil...",
+      "error": "Échec de la vérification",
+      "errorMessage": "Un problème est survenu lors de la vérification de votre email."
+    }
+  },
+  "onboarding": {
+    "steps": {
+      "style": "Style",
+      "brands": "Marques",
+      "finish": "Terminer"
+    },
+    "welcome": {
+      "title": "Bienvenue !",
+      "subtitle": "Personnalisons votre expérience"
+    },
+    "style": {
+      "title": "Quel est votre style ?",
+      "subtitle": "Sélectionnez les styles qui vous inspirent",
+      "options": {
+        "casual": "Décontracté",
+        "elegant": "Élégant",
+        "bohemian": "Bohème",
+        "minimalist": "Minimaliste",
+        "streetwear": "Streetwear",
+        "vintage": "Vintage",
+        "sporty": "Sportif",
+        "romantic": "Romantique"
+      }
+    },
+    "brands": {
+      "title": "Vos marques préférées ?",
+      "subtitle": "Parlez-nous de vos marques favorites",
+      "placeholder": "Entrez les noms de marques séparés par des virgules",
+      "hint": "ex: Zara, Mango, Sézane, &Other Stories"
+    },
+    "complete": {
+      "title": "C'est prêt !",
+      "subtitle": "Votre expérience personnalisée vous attend",
+      "button": "Découvrir Mon Style"
+    },
+    "skip": "Passer pour l'instant",
+    "progress": "Étape {{current}} sur {{total}}"
+  },
+  "profile": {
+    "title": "Mon Profil",
+    "welcomeBack": "Bienvenue, {{name}} !",
+    "greeting": "Bonjour, {{name}} !",
+    "memberSince": "Membre depuis {{date}}",
+    "sections": {
+      "preferences": "Préférences de style",
+      "favorites": "Mes Favoris",
+      "settings": "Paramètres",
+      "styleProfile": "Mon Profil Style"
+    },
+    "stats": {
+      "favorites": "Favoris",
+      "styles": "Styles",
+      "brands": "Marques"
+    },
+    "actions": {
+      "explore": "Explorer",
+      "updateStyle": "Modifier Style",
+      "viewFavorites": "Favoris",
+      "followUs": "Suivez-nous"
+    },
+    "banner": {
+      "discoverTitle": "Découvrez de nouveaux styles",
+      "discoverText": "Parcourez nos dernières tenues et sauvegardez vos favoris !",
+      "discoverButton": "Explorer"
+    },
+    "inspiration": {
+      "title": "7 jours d'inspiration",
+      "subtitle": "Looks sélectionnés selon votre style",
+      "today": "Aujourd'hui",
+      "seeAll": "Voir tout",
+      "forYou": "Pour vous",
+      "empty": "Configurez vos préférences de style pour recevoir des recommandations personnalisées",
+      "setupPreferences": "Configurer mon style"
+    },
+    "styles": "Mes Styles",
+    "brands": "Marques Favorites",
+    "noStyles": "Aucun style sélectionné",
+    "noBrands": "Aucune marque ajoutée",
+    "editPreferences": "Modifier mes préférences",
+    "backToOutfits": "Retour aux tenues",
+    "addMore": "Ajouter",
+    "emptyFavorites": {
+      "title": "Aucun favori",
+      "description": "Sauvegardez les articles que vous aimez et ils apparaîtront ici",
+      "button": "Commencer à explorer"
+    }
+  },
+  "signupPrompt": {
+    "title": "Sauvegardez vos favoris",
+    "description": "Créez un compte gratuit pour sauvegarder « {{itemName}} » et recevoir toutes les offres personnalisées.",
+    "descriptionGeneric": "Créez un compte gratuit pour sauvegarder vos favoris et ne jamais les perdre.",
+    "benefits": {
+      "sync": "Sauvegardez des favoris illimités sur tous vos appareils",
+      "alerts": "Recevez des alertes quand les articles sont en solde",
+      "similar": "Soyez notifié quand des articles similaires sont ajoutés",
+      "recommendations": "Recommandations de style personnalisées"
+    },
+    "createAccount": "Créer un compte gratuit",
+    "hasAccount": "J'ai déjà un compte",
+    "continueAsGuest": "Continuer en tant qu'invité (favoris non synchronisés)"
   }
 }
-

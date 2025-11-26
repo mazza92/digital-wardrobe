@@ -6,12 +6,24 @@
     "close": "Close",
     "back": "Back",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "skip": "Skip",
+    "next": "Next",
+    "previous": "Previous",
+    "finish": "Finish",
+    "or": "or",
+    "edit": "Edit"
   },
   "nav": {
     "about": "About",
     "outfits": "Outfits",
-    "wishlist": "Wishlist"
+    "wishlist": "Wishlist",
+    "login": "Login",
+    "logout": "Logout",
+    "account": "My Account",
+    "signup": "Sign Up",
+    "profile": "Profile"
   },
   "header": {
     "brand": "Digital Wardrobe"
@@ -57,7 +69,12 @@
     "remove": "Remove",
     "clearAll": "Clear All",
     "items": "items",
-    "item": "item"
+    "item": "item",
+    "added": "Added to favorites!",
+    "remaining_one": "{{count}} free save remaining",
+    "remaining_other": "{{count}} free saves remaining",
+    "lastFree": "Last free save! Create an account to save more",
+    "signupToSaveMore": "Create a free account to save unlimited favorites"
   },
   "about": {
     "title": "About",
@@ -83,6 +100,167 @@
   },
   "footer": {
     "copyright": "© 2025 Virtual Dressing. All rights reserved."
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to access your favorites and personalized recommendations",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "signupLink": "Create one",
+      "forgotPassword": "Forgot password?",
+      "error": {
+        "invalidCredentials": "Invalid email or password",
+        "generic": "An error occurred. Please try again."
+      }
+    },
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Join to save your favorites and get personalized style recommendations",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Create a password",
+      "passwordHint": "At least 6 characters",
+      "marketing": "I want to receive style tips and exclusive offers",
+      "submit": "Create Account",
+      "submitting": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "success": "Account created! Please check your email to confirm your account, then log in.",
+      "confirmEmail": {
+        "title": "Check your email",
+        "sentTo": "We've sent a confirmation link to",
+        "step1": "Open the email from Virtual Dressing",
+        "step2": "Click the confirmation link",
+        "step3": "You'll be redirected to personalize your style",
+        "checkSpam": "Don't see it? Check your spam folder.",
+        "wrongEmail": "Wrong email? Go back and try again"
+      },
+      "error": {
+        "emailInUse": "This email is already registered",
+        "weakPassword": "Password must be at least 6 characters",
+        "generic": "An error occurred. Please try again."
+      }
+    },
+    "logout": {
+      "button": "Sign Out",
+      "signingOut": "Signing out...",
+      "loggingOut": "Logging out..."
+    },
+    "callback": {
+      "verifying": "Verifying your email...",
+      "pleaseWait": "Please wait while we confirm your account.",
+      "success": "Email confirmed!",
+      "redirecting": "Redirecting you to complete your profile...",
+      "error": "Verification failed",
+      "errorMessage": "There was a problem verifying your email."
+    }
+  },
+  "onboarding": {
+    "steps": {
+      "style": "Style",
+      "brands": "Brands",
+      "finish": "Finish"
+    },
+    "welcome": {
+      "title": "Welcome!",
+      "subtitle": "Let's personalize your experience"
+    },
+    "style": {
+      "title": "What's your style?",
+      "subtitle": "Select the styles that inspire you",
+      "options": {
+        "casual": "Casual",
+        "elegant": "Elegant",
+        "bohemian": "Bohemian",
+        "minimalist": "Minimalist",
+        "streetwear": "Streetwear",
+        "vintage": "Vintage",
+        "sporty": "Sporty",
+        "romantic": "Romantic"
+      }
+    },
+    "brands": {
+      "title": "Favorite brands?",
+      "subtitle": "Tell us about your favorite brands",
+      "placeholder": "Enter brand names separated by commas",
+      "hint": "e.g., Zara, Mango, Sézane, &Other Stories"
+    },
+    "complete": {
+      "title": "You're all set!",
+      "subtitle": "Your personalized experience awaits",
+      "button": "Discover My Style"
+    },
+    "skip": "Skip for now",
+    "progress": "Step {{current}} of {{total}}"
+  },
+  "profile": {
+    "title": "My Profile",
+    "welcomeBack": "Welcome back, {{name}}!",
+    "greeting": "Hello, {{name}}!",
+    "memberSince": "Member since {{date}}",
+    "sections": {
+      "preferences": "Style Preferences",
+      "favorites": "My Favorites",
+      "settings": "Settings",
+      "styleProfile": "My Style Profile"
+    },
+    "stats": {
+      "favorites": "Favorites",
+      "styles": "Styles",
+      "brands": "Brands"
+    },
+    "actions": {
+      "explore": "Explore",
+      "updateStyle": "Update Style",
+      "viewFavorites": "Favorites",
+      "followUs": "Follow Us"
+    },
+    "banner": {
+      "discoverTitle": "Discover new styles",
+      "discoverText": "Browse our latest outfits and save your favorites!",
+      "discoverButton": "Explore"
+    },
+    "inspiration": {
+      "title": "7 Days of Inspiration",
+      "subtitle": "Curated looks based on your style",
+      "today": "Today",
+      "seeAll": "See all",
+      "forYou": "For you",
+      "empty": "Set up your style preferences to get personalized recommendations",
+      "setupPreferences": "Set Up My Style"
+    },
+    "styles": "My Styles",
+    "brands": "Favorite Brands",
+    "noStyles": "No styles selected yet",
+    "noBrands": "No brands added yet",
+    "editPreferences": "Edit Preferences",
+    "backToOutfits": "Back to Outfits",
+    "addMore": "Add more",
+    "emptyFavorites": {
+      "title": "No favorites yet",
+      "description": "Save items you love and they'll appear here",
+      "button": "Start Exploring"
+    }
+  },
+  "signupPrompt": {
+    "title": "Save Your Favorites",
+    "description": "Create a free account to save \"{{itemName}}\" and access your favorites across all devices.",
+    "descriptionGeneric": "Create a free account to save your favorites and never lose them.",
+    "benefits": {
+      "sync": "Save unlimited favorites across devices",
+      "alerts": "Get alerts when items go on sale",
+      "similar": "Get notified when similar items are uploaded",
+      "recommendations": "Personalized style recommendations"
+    },
+    "createAccount": "Create Free Account",
+    "hasAccount": "I Already Have an Account",
+    "continueAsGuest": "Continue as guest (favorites won't sync)"
   }
 }
-

@@ -5,27 +5,44 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 import frTranslations from './locales/fr.json'
 import enTranslations from './locales/en.json'
 
+// Get initial language synchronously to avoid flash
+const getInitialLanguage = () => {
+  const stored = localStorage.getItem('i18nextLng')
+  if (stored && ['fr', 'en'].includes(stored)) return stored
+  
+  // Check navigator language
+  const navLang = navigator.language?.split('-')[0]
+  if (navLang === 'en') return 'en'
+  
+  return 'fr' // Default to French
+}
+
 i18n
-  .use(LanguageDetector) // Detects user language
-  .use(initReactI18next) // Passes i18n down to react-i18next
+  .use(LanguageDetector)
+  .use(initReactI18next)
   .init({
     resources: {
-      fr: {
-        translation: frTranslations
-      },
-      en: {
-        translation: enTranslations
-      }
+      fr: { translation: frTranslations },
+      en: { translation: enTranslations }
     },
-    fallbackLng: 'fr', // Default language
-    lng: localStorage.getItem('i18nextLng') || 'fr', // Initial language
+    fallbackLng: 'fr',
+    lng: getInitialLanguage(),
     interpolation: {
       escapeValue: false // React already escapes values
     },
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage']
-    }
+    },
+    // Performance optimizations
+    react: {
+      useSuspense: false, // Disable suspense for faster initial render
+      bindI18n: 'languageChanged', // Only re-render on language change
+      bindI18nStore: false // Don't re-render on store updates
+    },
+    // Reduce bundle size
+    returnNull: false,
+    returnEmptyString: false
   })
 
 export default i18n

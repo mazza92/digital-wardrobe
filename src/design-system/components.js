@@ -27,7 +27,9 @@ export const Section = styled.section`
   }
 `
 
-export const Grid = styled.div`
+export const Grid = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['cols', 'colsMd', 'colsLg', 'gap', 'gapMd', 'gapLg'].includes(prop),
+})`
   display: grid;
   grid-template-columns: repeat(${props => props.cols || 1}, 1fr);
   gap: ${props => theme.spacing[props.gap] || theme.spacing[4]};
@@ -43,7 +45,9 @@ export const Grid = styled.div`
   }
 `
 
-export const Flex = styled.div`
+export const Flex = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['direction', 'align', 'justify', 'gap', 'wrap'].includes(prop),
+})`
   display: flex;
   flex-direction: ${props => props.direction || 'row'};
   align-items: ${props => props.align || 'stretch'};
@@ -52,7 +56,9 @@ export const Flex = styled.div`
   flex-wrap: ${props => props.wrap || 'nowrap'};
 `
 
-export const Stack = styled.div`
+export const Stack = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['gap'].includes(prop),
+})`
   display: flex;
   flex-direction: column;
   gap: ${props => theme.spacing[props.gap] || theme.spacing[4]};
@@ -62,7 +68,9 @@ export const Stack = styled.div`
 // TYPOGRAPHY COMPONENTS
 // ============================================================================
 
-export const Heading = styled.h1`
+export const Heading = styled.h1.withConfig({
+  shouldForwardProp: (prop) => !['size', 'weight', 'lineHeight', 'color', 'letterSpacing', 'sizeMobile'].includes(prop),
+})`
   font-family: ${theme.typography.fontFamily.primary};
   font-size: ${props => theme.typography.fontSize[props.size] || theme.typography.fontSize['3xl']};
   font-weight: ${props => theme.typography.fontWeight[props.weight] || theme.typography.fontWeight.bold};
@@ -76,7 +84,9 @@ export const Heading = styled.h1`
   }
 `
 
-export const Subheading = styled.h2`
+export const Subheading = styled.h2.withConfig({
+  shouldForwardProp: (prop) => !['size', 'weight', 'lineHeight', 'color', 'sizeMobile'].includes(prop),
+})`
   font-family: ${theme.typography.fontFamily.primary};
   font-size: ${props => theme.typography.fontSize[props.size] || theme.typography.fontSize['2xl']};
   font-weight: ${props => theme.typography.fontWeight[props.weight] || theme.typography.fontWeight.semibold};
@@ -89,7 +99,9 @@ export const Subheading = styled.h2`
   }
 `
 
-export const Text = styled.p`
+export const Text = styled.p.withConfig({
+  shouldForwardProp: (prop) => !['size', 'weight', 'lineHeight', 'color'].includes(prop),
+})`
   font-family: ${theme.typography.fontFamily.primary};
   font-size: ${props => theme.typography.fontSize[props.size] || theme.typography.fontSize.base};
   font-weight: ${props => theme.typography.fontWeight[props.weight] || theme.typography.fontWeight.normal};
@@ -98,7 +110,9 @@ export const Text = styled.p`
   margin: 0;
 `
 
-export const Caption = styled.span`
+export const Caption = styled.span.withConfig({
+  shouldForwardProp: (prop) => !['size', 'weight', 'color', 'uppercase'].includes(prop),
+})`
   font-family: ${theme.typography.fontFamily.primary};
   font-size: ${props => theme.typography.fontSize[props.size] || theme.typography.fontSize.sm};
   font-weight: ${props => theme.typography.fontWeight[props.weight] || theme.typography.fontWeight.medium};
@@ -111,7 +125,9 @@ export const Caption = styled.span`
 // BUTTON COMPONENTS
 // ============================================================================
 
-export const Button = styled.button`
+export const Button = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['size', 'variant'].includes(prop),
+})`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -391,7 +407,9 @@ export const Select = styled.select`
 // LOADING COMPONENTS
 // ============================================================================
 
-export const Spinner = styled.div`
+export const Spinner = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['size', 'color'].includes(prop),
+})`
   width: ${props => props.size || '24px'};
   height: ${props => props.size || '24px'};
   border: 2px solid ${theme.colors.neutral[200]};
@@ -405,7 +423,9 @@ export const Spinner = styled.div`
   }
 `
 
-export const LoadingContainer = styled.div`
+export const LoadingContainer = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['minHeight'].includes(prop),
+})`
   display: flex;
   flex-direction: column;
   align-items: center;

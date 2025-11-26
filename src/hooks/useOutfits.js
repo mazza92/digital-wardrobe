@@ -1,45 +1,86 @@
 // Custom hook for managing outfits data
+// Optimized with caching and SWR-like behavior
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { fetchOutfits, fetchProfile } from '../utils/api'
 
-export const useOutfits = () => {
-  const [outfits, setOutfits] = useState([])
-  const [influencer, setInfluencer] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
+// Module-level cache for instant subsequent renders
+let cachedData = null
 
-  const loadData = useCallback(async () => {
+export const useOutfits = () => {
+  // Initialize with cached data for instant render
+  const [outfits, setOutfits] = useState(cachedData?.outfits || [])
+  const [influencer, setInfluencer] = useState(cachedData?.influencer || null)
+  const [isLoading, setIsLoading] = useState(!cachedData)
+  const [error, setError] = useState(null)
+  const isMounted = useRef(true)
+
+  const loadData = useCallback(async (forceRefresh = false) => {
     try {
-      setIsLoading(true)
+      // Only show loading if no cached data
+      if (!cachedData || forceRefresh) {
+        setIsLoading(true)
+      }
       setError(null)
       
-      // Fetch fresh data in parallel
+      // Fetch data in parallel
       const [outfitsData, profileData] = await Promise.all([
-        fetchOutfits(),
-        fetchProfile()
+        fetchOutfits(forceRefresh),
+        fetchProfile(forceRefresh)
       ])
       
-      setOutfits(outfitsData.outfits)
-      setInfluencer(profileData)
+      if (isMounted.current) {
+        const newOutfits = outfitsData.outfits || []
+        setOutfits(newOutfits)
+        setInfluencer(profileData)
+        
+        // Update cache
+        cachedData = {
+          outfits: newOutfits,
+          influencer: profileData
+        }
+      }
       
     } catch (err) {
-      setError(err.message)
-      console.error('Failed to load data:', err)
+      if (isMounted.current) {
+        setError(err.message)
+        console.error('Failed to load data:', err)
+      }
     } finally {
-      setIsLoading(false)
+      if (isMounted.current) {
+        setIsLoading(false)
+      }
     }
   }, [])
 
   useEffect(() => {
-    loadData()
-  }, [])
+    isMounted.current = true
+    
+    // If we have cached data, show it immediately and refresh in background
+    if (cachedData) {
+      // Optional: refresh in background (stale-while-revalidate)
+      loadData(false)
+    } else {
+      loadData()
+    }
+    
+    return () => {
+      isMounted.current = false
+    }
+  }, [loadData])
 
   return {
     outfits,
     influencer,
     isLoading,
     error,
-    refetch: loadData
+    refetch: () => loadData(true)
+  }
+}
+
+// Pre-fetch data utility - can be called on hover/anticipation
+export const prefetchOutfits = () => {
+  if (!cachedData) {
+    Promise.all([fetchOutfits(), fetchProfile()]).catch(() => {})
   }
 }
