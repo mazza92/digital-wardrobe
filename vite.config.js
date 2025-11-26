@@ -29,8 +29,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Core React - loaded first
-          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+          // Core React and react-i18next together - react-i18next needs React
+          if (id.includes('node_modules/react/') || 
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/react-i18next')) {
             return 'react-vendor'
           }
           // Router - needed for navigation
@@ -45,8 +47,8 @@ export default defineConfig({
           if (id.includes('node_modules/@supabase')) {
             return 'supabase'
           }
-          // i18n - needed early
-          if (id.includes('node_modules/i18next') || id.includes('node_modules/react-i18next')) {
+          // i18next core (without react-i18next)
+          if (id.includes('node_modules/i18next') || id.includes('node_modules/i18next-browser-languagedetector')) {
             return 'i18n'
           }
           // Auth pages - loaded on demand
