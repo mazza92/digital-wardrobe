@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, safeGetSession } from './supabaseClient';
 
 // --- Auth Endpoints ---
 
@@ -65,12 +65,12 @@ export const logout = async () => {
 };
 
 export const getCurrentUser = async () => {
-  const { data: { session }, error } = await supabase.auth.getSession();
+  const { data: { session }, error } = await safeGetSession();
   if (error) throw error;
   if (!session) return null;
 
   const profile = await getProfile(session.user.id);
-  
+
   return {
     ...session.user,
     ...profile

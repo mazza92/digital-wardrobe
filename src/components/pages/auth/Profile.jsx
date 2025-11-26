@@ -6,7 +6,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useFavorites } from '../../../hooks/useFavorites';
 import { fetchOutfits } from '../../../utils/api';
 import { theme } from '../../../design-system/theme';
-import { supabase } from '../../../utils/supabaseClient';
+import { safeGetSession } from '../../../utils/supabaseClient';
 
 // Animations
 const fadeIn = keyframes`
@@ -734,7 +734,7 @@ const Profile = () => {
     
     const checkAndSetReady = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await safeGetSession();
         if (mounted) {
           if (!session && !isAuthenticated) {
             setShouldRedirect(true);

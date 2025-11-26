@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '../../../utils/supabaseClient';
+import { supabase, safeGetSession } from '../../../utils/supabaseClient';
 
 const spin = keyframes`
   0% { transform: rotate(0deg); }
@@ -141,8 +141,8 @@ const AuthCallback = () => {
     // No tokens - check if we already have a session
     if (!hash || hash === '#') {
       console.log('No hash, checking for existing session...');
-      
-      supabase.auth.getSession().then(({ data }) => {
+
+      safeGetSession().then(({ data }) => {
         if (data?.session) {
           console.log('Found existing session');
           setStatus('success');

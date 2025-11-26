@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import * as api from '../utils/supabaseApi';
-import { supabase } from '../utils/supabaseClient';
+import { supabase, safeGetSession } from '../utils/supabaseClient';
 
 // Check if Supabase is properly initialized before using it
 const isSupabaseConfigured = !!supabase;
@@ -35,8 +35,8 @@ export const AuthProvider = ({ children }) => {
       try {
         const currentPath = window.location.pathname;
         const isOnSignupPage = currentPath === '/signup';
-        
-        const { data: { session } } = await supabase.auth.getSession();
+
+        const { data: { session } } = await safeGetSession();
         if (session?.user && !isOnSignupPage) {
           // If we have a session and we're not on signup page, set the user
           try {

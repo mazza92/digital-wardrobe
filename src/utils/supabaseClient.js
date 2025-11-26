@@ -46,3 +46,19 @@ export const supabase = createClient(safeUrl, safeKey, {
     detectSessionInUrl: true
   }
 })
+
+// Safe wrapper for getSession that suppresses storage errors
+export const safeGetSession = async () => {
+  try {
+    const result = await supabase.auth.getSession()
+    return result
+  } catch (error) {
+    // Suppress storage-related errors
+    const msg = error?.message || ''
+    if (msg.includes('storage') || msg.includes('Storage') || msg.includes('Access to storage')) {
+      console.log('Storage access blocked, using memory session')
+      return { data: { session: null }, error: null }
+    }
+    throw error
+  }
+}
