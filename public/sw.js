@@ -1,7 +1,7 @@
 // Service Worker for Digital Wardrobe
 // Implements cache-first strategy for static assets and network-first for API calls
 
-const CACHE_VERSION = 'v1.0.0'
+const CACHE_VERSION = 'v3.0.1'
 const STATIC_CACHE = `static-${CACHE_VERSION}`
 const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`
 const IMAGE_CACHE = `images-${CACHE_VERSION}`
@@ -78,7 +78,8 @@ function isImageRequest(url, request) {
 }
 
 function isStaticAsset(url) {
-  return /\.(js|css|woff2?|ttf|eot)$/i.test(url.pathname)
+  // Only cache fonts, not JS/CSS (they have hash-based names for cache busting)
+  return /\.(woff2?|ttf|eot)$/i.test(url.pathname)
 }
 
 // Cache-first strategy

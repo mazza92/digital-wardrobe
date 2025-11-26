@@ -12,28 +12,31 @@ if (import.meta.env.DEV && (!supabaseUrl || !supabaseAnonKey)) {
 const safeUrl = supabaseUrl || 'https://placeholder.supabase.co'
 const safeKey = supabaseAnonKey || 'placeholder-key'
 
-// Check if localStorage is available
-const isLocalStorageAvailable = () => {
-  try {
-    const test = '__supabase_storage_test__'
-    localStorage.setItem(test, test)
-    localStorage.removeItem(test)
-    return true
-  } catch {
-    return false
-  }
-}
-
 // Custom storage that falls back to memory when localStorage is blocked
 const memoryStorage = {
   storage: {},
-  getItem: (key) => memoryStorage.storage[key] || null,
-  setItem: (key, value) => { memoryStorage.storage[key] = value },
-  removeItem: (key) => { delete memoryStorage.storage[key] }
+  getItem: (key) => {
+    return memoryStorage.storage[key] || null
+  },
+  setItem: (key, value) => {
+    memoryStorage.storage[key] = value
+  },
+  removeItem: (key) => {
+    delete memoryStorage.storage[key]
+  }
 }
 
-// Use localStorage if available, otherwise use memory storage
-const customStorage = isLocalStorageAvailable() ? localStorage : memoryStorage
+// Check if localStorage is available (synchronously at module load)
+let customStorage = memoryStorage
+try {
+  const test = '__supabase_storage_test__'
+  localStorage.setItem(test, test)
+  localStorage.removeItem(test)
+  customStorage = localStorage
+} catch (e) {
+  // localStorage blocked, will use memory storage
+  console.log('localStorage not available, using memory storage for auth')
+}
 
 export const supabase = createClient(safeUrl, safeKey, {
   auth: {
