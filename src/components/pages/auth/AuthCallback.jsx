@@ -1,9 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../../utils/supabaseClient';
-import { useAuth } from '../../../context/AuthContext';
 
 const spin = keyframes`
   0% { transform: rotate(0deg); }
@@ -70,189 +68,96 @@ const ErrorMessage = styled.p`
 
 const AuthCallback = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { isAuthenticated, needsOnboarding, clearPendingSignup } = useAuth();
-  const [status, setStatus] = useState('loading'); // loading, success, error
+  const [status, setStatus] = useState('loading');
   const [error, setError] = useState(null);
-
-  // Clear pending signup flag when we reach this page
-  useEffect(() => {
-    clearPendingSignup();
-  }, [clearPendingSignup]);
-
-  const checkExistingSession = useCallback(async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.log('Found existing session, redirecting...');
-        setStatus('success');
-        setTimeout(() => {
-          navigate('/onboarding', { replace: true });
-        }, 500);
-      } else {
-        setStatus('error');
-        setError('No session found. Please try signing up again.');
-        setTimeout(() => {
-          navigate('/signup', { replace: true });
-        }, 2000);
-      }
-    } catch (err) {
-      console.error('Error checking session:', err);
-      setStatus('error');
-      setError(err.message);
-    }
-  }, [navigate]);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
-    // Check if we have hash params to process
+    // Prevent double execution
+    if (redirecting) return;
+
     const hash = window.location.hash;
-    
-    const handleAuthCallback = async () => {
-      // Debug: Log the full URL
-      console.log('Auth callback URL:', window.location.href);
-      console.log('Hash:', hash);
-      
-      // If no hash, check for existing session
-      if (!hash || hash === '#') {
-        console.log('No hash params, checking existing session...');
-        checkExistingSession();
-        return;
+    console.log('AuthCallback mounted. Hash:', hash);
+
+    // Parse hash parameters
+    const hashParams = new URLSearchParams(hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    const hashError = hashParams.get('error');
+    const hashErrorCode = hashParams.get('error_code');
+    const hashErrorDescription = hashParams.get('error_description');
+
+    console.log('Parsed:', { 
+      hasAccessToken: !!accessToken, 
+      hasRefreshToken: !!refreshToken, 
+      error: hashError,
+      errorCode: hashErrorCode 
+    });
+
+    // Handle errors
+    if (hashError) {
+      setStatus('error');
+      let errorMsg = hashErrorDescription || hashError;
+      if (hashErrorCode === 'otp_expired') {
+        errorMsg = 'This verification link has expired. Please sign up again.';
       }
+      setError(errorMsg);
       
-      // Get the hash fragment from the URL (Supabase sends tokens in hash)
-      const hashParams = new URLSearchParams(hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
-      const type = hashParams.get('type');
-      
-      // Check for errors in hash (Supabase sends errors here too)
-      const hashError = hashParams.get('error');
-      const hashErrorCode = hashParams.get('error_code');
-      const hashErrorDescription = hashParams.get('error_description');
+      setTimeout(() => {
+        window.location.href = '/signup';
+      }, 4000);
+      return;
+    }
 
-      // Also check query params (some flows use query params)
-      const queryParams = new URLSearchParams(window.location.search);
-      const code = queryParams.get('code');
-      const queryError = queryParams.get('error');
-      const queryErrorDescription = queryParams.get('error_description');
-      
-      const errorParam = hashError || queryError;
-      const errorDescription = hashErrorDescription || queryErrorDescription;
-      
-      console.log('Parsed params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type, code: !!code, errorParam, hashErrorCode });
+    // If we have tokens, set session and redirect
+    if (accessToken && refreshToken) {
+      console.log('Have tokens, setting session...');
+      setStatus('success');
+      setRedirecting(true);
 
-      // Handle error from Supabase (link expired, access denied, etc.)
-      if (errorParam) {
-        setStatus('error');
-        let errorMessage = errorDescription || errorParam;
-        
-        // Provide user-friendly error messages
-        if (hashErrorCode === 'otp_expired') {
-          errorMessage = 'This verification link has expired. Please sign up again to receive a new link.';
-        } else if (hashErrorCode === 'access_denied') {
-          errorMessage = 'Access was denied. Please try signing up again.';
-        }
-        
-        setError(errorMessage);
-        
-        // Redirect to signup after showing error
-        setTimeout(() => {
-          window.location.href = '/signup';
-        }, 4000);
-        return;
-      }
+      // Clear hash immediately
+      window.history.replaceState(null, '', '/auth/callback');
 
-      // If we have tokens in the hash (email confirmation flow)
-      if (accessToken && refreshToken) {
-        console.log('Setting session with tokens from hash...');
-        
-        // Set session - this may throw storage errors but still work
-        supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken
-        }).then(({ data, error: sessionError }) => {
-          console.log('setSession completed:', { data: !!data, error: sessionError });
-          if (sessionError) {
-            console.error('Session error:', sessionError);
-          }
-        }).catch(err => {
-          console.log('setSession error (may still work):', err.message);
-        });
-        
-        // Don't wait for setSession - the auth listener will handle it
-        // Just show success and redirect after a delay
-        setStatus('success');
-        
-        // Clear the hash from URL
-        window.history.replaceState(null, '', '/auth/callback');
-        
-        // Redirect after giving time for auth state to update
-        console.log('Redirecting to onboarding in 1.5s...');
-        setTimeout(() => {
-          console.log('Executing redirect now...');
+      // Try to set session (may fail due to storage restrictions, but that's ok)
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      }).finally(() => {
+        console.log('Session set attempt complete, redirecting...');
+        // Always redirect regardless of success/failure
+        window.location.href = '/onboarding';
+      });
+
+      return;
+    }
+
+    // No tokens - check if we already have a session
+    if (!hash || hash === '#') {
+      console.log('No hash, checking for existing session...');
+      
+      supabase.auth.getSession().then(({ data }) => {
+        if (data?.session) {
+          console.log('Found existing session');
+          setStatus('success');
+          setRedirecting(true);
           window.location.href = '/onboarding';
-        }, 1500);
-        return;
-      }
-
-      // If we have a code, exchange it for a session
-      if (code) {
-        try {
-          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          if (exchangeError) {
-            setStatus('error');
-            setError(exchangeError.message);
-            return;
-          }
-          setStatus('success');
-          setTimeout(() => {
-            window.location.href = '/onboarding';
-          }, 1500);
-        } catch (err) {
-          console.error('Code exchange error:', err);
-          setStatus('error');
-          setError(err.message);
-        }
-        return;
-      }
-
-      // If no tokens or code, check if already authenticated
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          setStatus('success');
-          setTimeout(() => {
-            window.location.href = '/onboarding';
-          }, 1500);
         } else {
+          console.log('No session found');
           setStatus('error');
-          setError('No authentication data found. Please try signing up again.');
+          setError('No authentication data found. Please sign up again.');
           setTimeout(() => {
             window.location.href = '/signup';
           }, 3000);
         }
-      } catch (err) {
-        console.error('Session check error:', err);
-        // Even on error, try to redirect - session might exist
+      }).catch(err => {
+        console.error('Session check failed:', err);
+        // Try redirecting anyway
         setStatus('success');
-        setTimeout(() => {
-          window.location.href = '/onboarding';
-        }, 1500);
-      }
-    };
-
-    handleAuthCallback();
-  }, [checkExistingSession]);
-
-  // If already authenticated, redirect based on onboarding status
-  useEffect(() => {
-    if (isAuthenticated && status === 'success') {
-      // Use hard redirect to ensure clean navigation
-      const destination = needsOnboarding ? '/onboarding' : '/profile';
-      console.log('Authenticated, redirecting to:', destination);
-      window.location.href = destination;
+        setRedirecting(true);
+        window.location.href = '/onboarding';
+      });
     }
-  }, [isAuthenticated, needsOnboarding, status]);
+  }, [redirecting]);
 
   return (
     <PageWrapper>
@@ -287,4 +192,3 @@ const AuthCallback = () => {
 };
 
 export default AuthCallback;
-
