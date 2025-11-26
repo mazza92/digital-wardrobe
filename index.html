@@ -176,8 +176,11 @@
       @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     
-    <!-- Cache Busting - v2.0.0 -->
-    <meta name="version" content="2.0.0" />
+    <!-- Cache Busting - v3.0.0 -->
+    <meta name="version" content="3.0.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
   </head>
   <body>
     <!-- Skip Link for Accessibility -->
@@ -192,23 +195,41 @@
     
     <!-- Suppress storage errors globally - must be before any scripts -->
     <script>
-      // Suppress storage access errors immediately
+      // Aggressively suppress ALL storage-related errors
+      const suppressStorageError = (error) => {
+        const msg = error?.message || error?.toString() || '';
+        return msg.includes('storage') || 
+               msg.includes('Storage') || 
+               msg.includes('localStorage') ||
+               msg.includes('sessionStorage') ||
+               msg.includes('Access to storage');
+      };
+      
+      // Catch sync errors
       window.addEventListener('error', function(event) {
-        if (event.message && event.message.includes('storage')) {
+        if (suppressStorageError(event.error || { message: event.message })) {
           event.preventDefault();
+          event.stopPropagation();
           return true;
         }
       }, true);
       
+      // Catch async errors (promises)
       window.addEventListener('unhandledrejection', function(event) {
-        if (event.reason && (
-          event.reason.message && event.reason.message.includes('storage') ||
-          event.reason.message && event.reason.message.includes('Access to storage')
-        )) {
+        if (suppressStorageError(event.reason)) {
           event.preventDefault();
-          console.log('Storage access blocked (suppressed)');
+          event.stopPropagation();
         }
       });
+      
+      // Also override console.error to filter storage errors
+      const originalConsoleError = console.error;
+      console.error = function(...args) {
+        const message = args.join(' ');
+        if (!suppressStorageError({ message })) {
+          originalConsoleError.apply(console, args);
+        }
+      };
     </script>
     
     <script type="module" src="/src/main.jsx"></script>
