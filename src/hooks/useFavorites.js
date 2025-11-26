@@ -55,7 +55,12 @@ export const useFavorites = () => {
   useEffect(() => {
     const syncWithServer = async () => {
       if (isAuthenticated && user) {
-        const localFavorites = JSON.parse(localStorage.getItem('digital-wardrobe-favorites') || '[]');
+        let localFavorites = [];
+        try {
+          localFavorites = JSON.parse(localStorage.getItem('digital-wardrobe-favorites') || '[]');
+        } catch (e) {
+          // localStorage blocked
+        }
         
         try {
           const result = await api.syncFavorites(user.id, localFavorites);
@@ -72,9 +77,13 @@ export const useFavorites = () => {
     syncWithServer();
   }, [isAuthenticated, user?.id]); 
 
-  // Persist to local storage always
+  // Persist to local storage always (if available)
   useEffect(() => {
-    localStorage.setItem('digital-wardrobe-favorites', JSON.stringify(favorites))
+    try {
+      localStorage.setItem('digital-wardrobe-favorites', JSON.stringify(favorites))
+    } catch (e) {
+      // localStorage blocked, favorites will only persist in memory
+    }
   }, [favorites])
 
   const addToFavorites = useCallback(async (product) => {

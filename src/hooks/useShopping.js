@@ -6,26 +6,38 @@ export const useShopping = () => {
   const [cart, setCart] = useState([])
   const [wishlist, setWishlist] = useState([])
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount (if available)
   useEffect(() => {
-    const savedCart = localStorage.getItem('digital-wardrobe-cart')
-    const savedWishlist = localStorage.getItem('digital-wardrobe-wishlist')
-    
-    if (savedCart) {
-      setCart(JSON.parse(savedCart))
-    }
-    if (savedWishlist) {
-      setWishlist(JSON.parse(savedWishlist))
+    try {
+      const savedCart = localStorage.getItem('digital-wardrobe-cart')
+      const savedWishlist = localStorage.getItem('digital-wardrobe-wishlist')
+      
+      if (savedCart) {
+        setCart(JSON.parse(savedCart))
+      }
+      if (savedWishlist) {
+        setWishlist(JSON.parse(savedWishlist))
+      }
+    } catch (e) {
+      // localStorage blocked
     }
   }, [])
 
-  // Save to localStorage whenever cart or wishlist changes
+  // Save to localStorage whenever cart or wishlist changes (if available)
   useEffect(() => {
-    localStorage.setItem('digital-wardrobe-cart', JSON.stringify(cart))
+    try {
+      localStorage.setItem('digital-wardrobe-cart', JSON.stringify(cart))
+    } catch (e) {
+      // localStorage blocked
+    }
   }, [cart])
 
   useEffect(() => {
-    localStorage.setItem('digital-wardrobe-wishlist', JSON.stringify(wishlist))
+    try {
+      localStorage.setItem('digital-wardrobe-wishlist', JSON.stringify(wishlist))
+    } catch (e) {
+      // localStorage blocked
+    }
   }, [wishlist])
 
   const addToCart = (product) => {

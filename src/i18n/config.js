@@ -7,8 +7,12 @@ import enTranslations from './locales/en.json'
 
 // Get initial language synchronously to avoid flash
 const getInitialLanguage = () => {
-  const stored = localStorage.getItem('i18nextLng')
-  if (stored && ['fr', 'en'].includes(stored)) return stored
+  try {
+    const stored = localStorage.getItem('i18nextLng')
+    if (stored && ['fr', 'en'].includes(stored)) return stored
+  } catch (e) {
+    // localStorage blocked, continue with navigator detection
+  }
   
   // Check navigator language
   const navLang = navigator.language?.split('-')[0]
@@ -31,8 +35,8 @@ i18n
       escapeValue: false // React already escapes values
     },
     detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage']
+      order: ['navigator'], // Skip localStorage to avoid storage errors
+      caches: [] // Don't cache language selection
     },
     // Performance optimizations
     react: {
