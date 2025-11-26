@@ -1,131 +1,138 @@
 <!doctype html>
 <html lang="fr">
   <head>
-    <!-- CRITICAL: Storage polyfill MUST be absolute first to prevent errors -->
+    <!-- CRITICAL: Storage polyfill - NO TESTING, just wrap and suppress -->
     <script>
       (function() {
         'use strict';
 
-        // Suppress ALL storage errors FIRST, before any storage access
-        var suppressStorageError = function(error) {
-          var msg = (error && error.message) ? error.message.toString() : '';
-          if (!msg && error) msg = error.toString();
-          return msg.indexOf('storage') > -1 ||
-                 msg.indexOf('Storage') > -1 ||
-                 msg.indexOf('localStorage') > -1 ||
-                 msg.indexOf('sessionStorage') > -1 ||
-                 msg.indexOf('Access to storage') > -1;
-        };
-
-        // Install error handlers IMMEDIATELY
-        window.addEventListener('error', function(event) {
-          if (suppressStorageError(event.error || { message: event.message || '' })) {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            return false;
-          }
-        }, true);
-
-        window.addEventListener('unhandledrejection', function(event) {
-          if (suppressStorageError(event.reason)) {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-          }
-        }, true);
-
         // Memory storage implementation
         function MemoryStorage() {
           var data = {};
-
-          this.getItem = function(key) {
-            return data.hasOwnProperty(key) ? data[key] : null;
-          };
-
-          this.setItem = function(key, value) {
-            data[key] = String(value);
-          };
-
-          this.removeItem = function(key) {
-            delete data[key];
-          };
-
-          this.clear = function() {
-            data = {};
-          };
-
+          this.getItem = function(key) { return data.hasOwnProperty(key) ? data[key] : null; };
+          this.setItem = function(key, value) { data[key] = String(value); };
+          this.removeItem = function(key) { delete data[key]; };
+          this.clear = function() { data = {}; };
+          this.key = function(index) { return Object.keys(data)[index] || null; };
           Object.defineProperty(this, 'length', {
-            get: function() {
-              return Object.keys(data).length;
-            }
+            get: function() { return Object.keys(data).length; }
           });
-
-          this.key = function(index) {
-            var keys = Object.keys(data);
-            return keys[index] || null;
-          };
         }
 
-        // Create safe storage wrapper that catches all errors
-        function createSafeStorage(originalStorage, storageName) {
+        // Create error-suppressing wrapper around storage
+        function createSafeStorageWrapper(storageName) {
           var memStorage = new MemoryStorage();
-          var useMemory = false;
+          var nativeStorage = null;
+          var usingMemory = false;
 
-          // Try to detect if storage works, but suppress errors
+          // Try to access native storage WITHOUT testing it
           try {
-            if (originalStorage) {
-              var testKey = '__test_' + Math.random();
-              originalStorage.setItem(testKey, 'test');
-              originalStorage.removeItem(testKey);
-              // Storage works!
-              return originalStorage;
-            }
-          } catch (e) {
-            // Storage blocked, will use memory
-            useMemory = true;
-            console.log(storageName + ' blocked, using memory storage');
+            nativeStorage = storageName === 'localStorage' ? window.localStorage : window.sessionStorage;
+          } catch(e) {
+            usingMemory = true;
           }
 
-          return memStorage;
+          // Return wrapper that tries native first, falls back to memory, never throws
+          return {
+            getItem: function(key) {
+              if (!usingMemory && nativeStorage) {
+                try {
+                  return nativeStorage.getItem(key);
+                } catch(e) {
+                  usingMemory = true;
+                  if (!e.message || e.message.indexOf('storage') === -1) throw e;
+                }
+              }
+              return memStorage.getItem(key);
+            },
+            setItem: function(key, value) {
+              if (!usingMemory && nativeStorage) {
+                try {
+                  nativeStorage.setItem(key, value);
+                  return;
+                } catch(e) {
+                  usingMemory = true;
+                  if (!e.message || e.message.indexOf('storage') === -1) throw e;
+                  console.log(storageName + ' blocked, using memory');
+                }
+              }
+              memStorage.setItem(key, value);
+            },
+            removeItem: function(key) {
+              if (!usingMemory && nativeStorage) {
+                try {
+                  nativeStorage.removeItem(key);
+                  return;
+                } catch(e) {
+                  usingMemory = true;
+                  if (!e.message || e.message.indexOf('storage') === -1) throw e;
+                }
+              }
+              memStorage.removeItem(key);
+            },
+            clear: function() {
+              if (!usingMemory && nativeStorage) {
+                try {
+                  nativeStorage.clear();
+                  return;
+                } catch(e) {
+                  usingMemory = true;
+                  if (!e.message || e.message.indexOf('storage') === -1) throw e;
+                }
+              }
+              memStorage.clear();
+            },
+            key: function(index) {
+              if (!usingMemory && nativeStorage) {
+                try {
+                  return nativeStorage.key(index);
+                } catch(e) {
+                  usingMemory = true;
+                  if (!e.message || e.message.indexOf('storage') === -1) throw e;
+                }
+              }
+              return memStorage.key(index);
+            },
+            get length() {
+              if (!usingMemory && nativeStorage) {
+                try {
+                  return nativeStorage.length;
+                } catch(e) {
+                  usingMemory = true;
+                  if (!e.message || e.message.indexOf('storage') === -1) throw e;
+                }
+              }
+              return memStorage.length;
+            }
+          };
         }
 
-        // Save references to original storage (might throw, that's ok)
-        var originalLocalStorage = null;
-        var originalSessionStorage = null;
-        try { originalLocalStorage = window.localStorage; } catch(e) {}
-        try { originalSessionStorage = window.sessionStorage; } catch(e) {}
+        // Suppress unhandled promise rejections for storage errors
+        window.addEventListener('unhandledrejection', function(event) {
+          var msg = event.reason && event.reason.message ? event.reason.message.toString() : '';
+          if (msg.indexOf('storage') > -1 || msg.indexOf('Storage') > -1) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+          }
+        }, true);
 
-        // Replace with safe versions
+        // Replace storage objects with safe wrappers
         try {
           Object.defineProperty(window, 'localStorage', {
-            value: createSafeStorage(originalLocalStorage, 'localStorage'),
-            writable: false,
+            value: createSafeStorageWrapper('localStorage'),
             configurable: true,
             enumerable: true
           });
-        } catch(e) {
-          try {
-            window.localStorage = createSafeStorage(originalLocalStorage, 'localStorage');
-          } catch(e2) {
-            // Can't replace, but errors are suppressed
-          }
-        }
+        } catch(e) { window.localStorage = createSafeStorageWrapper('localStorage'); }
 
         try {
           Object.defineProperty(window, 'sessionStorage', {
-            value: createSafeStorage(originalSessionStorage, 'sessionStorage'),
-            writable: false,
+            value: createSafeStorageWrapper('sessionStorage'),
             configurable: true,
             enumerable: true
           });
-        } catch(e) {
-          try {
-            window.sessionStorage = createSafeStorage(originalSessionStorage, 'sessionStorage');
-          } catch(e2) {
-            // Can't replace, but errors are suppressed
-          }
-        }
+        } catch(e) { window.sessionStorage = createSafeStorageWrapper('sessionStorage'); }
       })();
     </script>
 
@@ -304,8 +311,8 @@
       @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     
-    <!-- Cache Busting - v3.0.4 -->
-    <meta name="version" content="3.0.4" />
+    <!-- Cache Busting - v3.0.5 -->
+    <meta name="version" content="3.0.5" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />

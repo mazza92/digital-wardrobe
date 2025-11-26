@@ -1,7 +1,7 @@
 // Service Worker for Digital Wardrobe
 // Implements cache-first strategy for static assets and network-first for API calls
 
-const CACHE_VERSION = 'v3.0.4'
+const CACHE_VERSION = 'v3.0.5'
 const STATIC_CACHE = `static-${CACHE_VERSION}`
 const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`
 const IMAGE_CACHE = `images-${CACHE_VERSION}`
