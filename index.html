@@ -176,8 +176,8 @@
       @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     
-    <!-- Cache Busting - v3.0.2 -->
-    <meta name="version" content="3.0.2" />
+    <!-- Cache Busting - v3.0.3 -->
+    <meta name="version" content="3.0.3" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -193,102 +193,131 @@
     
     <div id="root"></div>
     
-    <!-- Polyfill storage BEFORE any scripts load -->
+    <!-- Storage polyfill and error suppression - MUST BE FIRST -->
     <script>
       (function() {
-        // Test if storage is actually available
-        function isStorageAvailable(type) {
-          try {
-            var storage = window[type];
-            var x = '__storage_test__';
-            storage.setItem(x, x);
-            storage.removeItem(x);
-            return true;
-          } catch(e) {
-            return false;
-          }
-        }
+        'use strict';
 
-        // Create memory storage fallback
-        function createMemoryStorage() {
-          var data = {};
-          return {
-            getItem: function(key) {
-              return data.hasOwnProperty(key) ? data[key] : null;
-            },
-            setItem: function(key, value) {
-              data[key] = String(value);
-            },
-            removeItem: function(key) {
-              delete data[key];
-            },
-            clear: function() {
-              data = {};
-            },
-            get length() {
-              return Object.keys(data).length;
-            },
-            key: function(index) {
-              var keys = Object.keys(data);
-              return keys[index] || null;
-            }
-          };
-        }
-
-        // Replace localStorage if not available
-        if (!isStorageAvailable('localStorage')) {
-          console.log('localStorage not available, using memory fallback');
-          try {
-            Object.defineProperty(window, 'localStorage', {
-              value: createMemoryStorage(),
-              writable: false,
-              configurable: true
-            });
-          } catch(e) {
-            window.localStorage = createMemoryStorage();
-          }
-        }
-
-        // Replace sessionStorage if not available
-        if (!isStorageAvailable('sessionStorage')) {
-          console.log('sessionStorage not available, using memory fallback');
-          try {
-            Object.defineProperty(window, 'sessionStorage', {
-              value: createMemoryStorage(),
-              writable: false,
-              configurable: true
-            });
-          } catch(e) {
-            window.sessionStorage = createMemoryStorage();
-          }
-        }
-
-        // Suppress any remaining storage errors
-        const suppressStorageError = (error) => {
-          const msg = error?.message || error?.toString() || '';
-          return msg.includes('storage') ||
-                 msg.includes('Storage') ||
-                 msg.includes('localStorage') ||
-                 msg.includes('sessionStorage') ||
-                 msg.includes('Access to storage');
+        // Suppress ALL storage errors FIRST, before any storage access
+        var suppressStorageError = function(error) {
+          var msg = (error && error.message) ? error.message.toString() : '';
+          if (!msg && error) msg = error.toString();
+          return msg.indexOf('storage') > -1 ||
+                 msg.indexOf('Storage') > -1 ||
+                 msg.indexOf('localStorage') > -1 ||
+                 msg.indexOf('sessionStorage') > -1 ||
+                 msg.indexOf('Access to storage') > -1;
         };
 
-        // Catch sync errors
+        // Install error handlers IMMEDIATELY
         window.addEventListener('error', function(event) {
-          if (suppressStorageError(event.error || { message: event.message })) {
+          if (suppressStorageError(event.error || { message: event.message || '' })) {
             event.preventDefault();
             event.stopPropagation();
-            return true;
+            event.stopImmediatePropagation();
+            return false;
           }
         }, true);
 
-        // Catch async errors (promises)
         window.addEventListener('unhandledrejection', function(event) {
           if (suppressStorageError(event.reason)) {
             event.preventDefault();
             event.stopPropagation();
+            event.stopImmediatePropagation();
           }
-        });
+        }, true);
+
+        // Memory storage implementation
+        function MemoryStorage() {
+          var data = {};
+
+          this.getItem = function(key) {
+            return data.hasOwnProperty(key) ? data[key] : null;
+          };
+
+          this.setItem = function(key, value) {
+            data[key] = String(value);
+          };
+
+          this.removeItem = function(key) {
+            delete data[key];
+          };
+
+          this.clear = function() {
+            data = {};
+          };
+
+          Object.defineProperty(this, 'length', {
+            get: function() {
+              return Object.keys(data).length;
+            }
+          });
+
+          this.key = function(index) {
+            var keys = Object.keys(data);
+            return keys[index] || null;
+          };
+        }
+
+        // Create safe storage wrapper that catches all errors
+        function createSafeStorage(originalStorage, storageName) {
+          var memStorage = new MemoryStorage();
+          var useMemory = false;
+
+          // Try to detect if storage works, but suppress errors
+          try {
+            if (originalStorage) {
+              var testKey = '__test_' + Math.random();
+              originalStorage.setItem(testKey, 'test');
+              originalStorage.removeItem(testKey);
+              // Storage works!
+              return originalStorage;
+            }
+          } catch (e) {
+            // Storage blocked, will use memory
+            useMemory = true;
+            console.log(storageName + ' blocked, using memory storage');
+          }
+
+          return memStorage;
+        }
+
+        // Save references to original storage (might throw, that's ok)
+        var originalLocalStorage = null;
+        var originalSessionStorage = null;
+        try { originalLocalStorage = window.localStorage; } catch(e) {}
+        try { originalSessionStorage = window.sessionStorage; } catch(e) {}
+
+        // Replace with safe versions
+        try {
+          Object.defineProperty(window, 'localStorage', {
+            value: createSafeStorage(originalLocalStorage, 'localStorage'),
+            writable: false,
+            configurable: true,
+            enumerable: true
+          });
+        } catch(e) {
+          try {
+            window.localStorage = createSafeStorage(originalLocalStorage, 'localStorage');
+          } catch(e2) {
+            // Can't replace, but errors are suppressed
+          }
+        }
+
+        try {
+          Object.defineProperty(window, 'sessionStorage', {
+            value: createSafeStorage(originalSessionStorage, 'sessionStorage'),
+            writable: false,
+            configurable: true,
+            enumerable: true
+          });
+        } catch(e) {
+          try {
+            window.sessionStorage = createSafeStorage(originalSessionStorage, 'sessionStorage');
+          } catch(e2) {
+            // Can't replace, but errors are suppressed
+          }
+        }
       })();
     </script>
     
