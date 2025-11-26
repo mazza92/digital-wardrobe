@@ -7,16 +7,7 @@ export default defineConfig({
   plugins: [
     react({
       // Optimize JSX runtime
-      jsxRuntime: 'automatic',
-      // Babel optimizations
-      babel: {
-        plugins: [
-          // Remove console.log in production
-          ...(process.env.NODE_ENV === 'production' ? [
-            ['transform-remove-console', { exclude: ['error', 'warn'] }]
-          ] : [])
-        ]
-      }
+      jsxRuntime: 'automatic'
     })
   ],
   resolve: {
@@ -129,5 +120,7 @@ export default defineConfig({
     legalComments: 'none',
     // Target modern browsers
     target: 'es2020'
+    // Note: Console statements are kept for debugging in production
+    // To remove console.log, install babel-plugin-transform-remove-console as a dev dependency
   }
 })
