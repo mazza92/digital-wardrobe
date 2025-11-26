@@ -124,19 +124,41 @@ const AuthCallback = () => {
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
       const type = hashParams.get('type');
+      
+      // Check for errors in hash (Supabase sends errors here too)
+      const hashError = hashParams.get('error');
+      const hashErrorCode = hashParams.get('error_code');
+      const hashErrorDescription = hashParams.get('error_description');
 
       // Also check query params (some flows use query params)
       const queryParams = new URLSearchParams(window.location.search);
       const code = queryParams.get('code');
-      const errorParam = queryParams.get('error');
-      const errorDescription = queryParams.get('error_description');
+      const queryError = queryParams.get('error');
+      const queryErrorDescription = queryParams.get('error_description');
       
-      console.log('Parsed params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type, code: !!code, errorParam });
+      const errorParam = hashError || queryError;
+      const errorDescription = hashErrorDescription || queryErrorDescription;
+      
+      console.log('Parsed params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type, code: !!code, errorParam, hashErrorCode });
 
-      // Handle error from Supabase
+      // Handle error from Supabase (link expired, access denied, etc.)
       if (errorParam) {
         setStatus('error');
-        setError(errorDescription || errorParam);
+        let errorMessage = errorDescription || errorParam;
+        
+        // Provide user-friendly error messages
+        if (hashErrorCode === 'otp_expired') {
+          errorMessage = 'This verification link has expired. Please sign up again to receive a new link.';
+        } else if (hashErrorCode === 'access_denied') {
+          errorMessage = 'Access was denied. Please try signing up again.';
+        }
+        
+        setError(errorMessage);
+        
+        // Redirect to signup after showing error
+        setTimeout(() => {
+          window.location.href = '/signup';
+        }, 4000);
         return;
       }
 
