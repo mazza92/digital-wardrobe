@@ -4,6 +4,15 @@ import './index.css'
 import './i18n/config' // Initialize i18n
 import App from './App.jsx'
 
+// Suppress storage access errors globally
+window.addEventListener('unhandledrejection', (event) => {
+  if (event.reason?.message?.includes('storage') || 
+      event.reason?.message?.includes('Access to storage')) {
+    event.preventDefault() // Suppress the error
+    console.log('Storage access blocked (handled)')
+  }
+})
+
 // Hide initial loader once React mounts
 const hideInitialLoader = () => {
   const loader = document.getElementById('initial-loader')

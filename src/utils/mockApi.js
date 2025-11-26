@@ -20,29 +20,85 @@ const mockRequest = (data, shouldFail = false) => {
 const DB_USERS = 'dw_users_db';
 const DB_CURRENT_USER = 'dw_current_user_session';
 
+// Check if localStorage is available
+const isStorageAvailable = () => {
+  try {
+    const test = '__test__';
+    localStorage.setItem(test, test);
+    localStorage.removeItem(test);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// In-memory fallback
+let memoryUsers = [];
+let memoryCurrentUser = null;
+
 // --- Database Helpers ---
 
 const getUsers = () => {
+  if (!isStorageAvailable()) return memoryUsers;
   try {
     return JSON.parse(localStorage.getItem(DB_USERS) || '[]');
   } catch {
-    return [];
+    return memoryUsers;
   }
 };
 
 const saveUsers = (users) => {
-  localStorage.setItem(DB_USERS, JSON.stringify(users));
+  memoryUsers = users;
+  if (isStorageAvailable()) {
+    try {
+      localStorage.setItem(DB_USERS, JSON.stringify(users));
+    } catch {
+      // Storage blocked
+    }
+  }
 };
 
 // --- Auth Endpoints ---
 
+const saveCurrentUser = (user) => {
+  memoryCurrentUser = user;
+  if (isStorageAvailable()) {
+    try {
+      localStorage.setItem(DB_CURRENT_USER, JSON.stringify(user));
+    } catch {
+      // Storage blocked
+    }
+  }
+};
+
+const getCurrentUserFromStorage = () => {
+  if (!isStorageAvailable()) return memoryCurrentUser;
+  try {
+    const session = localStorage.getItem(DB_CURRENT_USER);
+    return session ? JSON.parse(session) : memoryCurrentUser;
+  } catch {
+    return memoryCurrentUser;
+  }
+};
+
+const clearCurrentUser = () => {
+  memoryCurrentUser = null;
+  if (isStorageAvailable()) {
+    try {
+      localStorage.removeItem(DB_CURRENT_USER);
+    } catch {
+      // Storage blocked
+    }
+  }
+};
+
 export const login = async (email, password) => {
   const users = getUsers();
-  const user = users.find(u => u.email === email && u.password === password); // In real app, verify hash
+  const user = users.find(u => u.email === email && u.password === password);
 
   if (user) {
     const { password, ...safeUser } = user;
-    localStorage.setItem(DB_CURRENT_USER, JSON.stringify(safeUser));
+    saveCurrentUser(safeUser);
     return mockRequest({ user: safeUser, token: 'mock-jwt-token' });
   }
   
@@ -59,7 +115,7 @@ export const signup = async (email, password, marketingOptIn = false) => {
   const newUser = {
     id: 'user_' + Date.now(),
     email,
-    password, // In real app, hash this!
+    password,
     marketingOptIn,
     preferences: {},
     favorites: [],
@@ -70,20 +126,20 @@ export const signup = async (email, password, marketingOptIn = false) => {
   saveUsers(users);
 
   const { password: _, ...safeUser } = newUser;
-  localStorage.setItem(DB_CURRENT_USER, JSON.stringify(safeUser));
+  saveCurrentUser(safeUser);
   
   return mockRequest({ user: safeUser, token: 'mock-jwt-token' });
 };
 
 export const logout = async () => {
-  localStorage.removeItem(DB_CURRENT_USER);
+  clearCurrentUser();
   return mockRequest({ success: true });
 };
 
 export const getCurrentUser = async () => {
-  const session = localStorage.getItem(DB_CURRENT_USER);
+  const session = getCurrentUserFromStorage();
   if (session) {
-    return mockRequest(JSON.parse(session));
+    return mockRequest(session);
   }
   return Promise.reject('No session');
 };
@@ -99,10 +155,10 @@ export const updatePreferences = async (userId, preferences) => {
     saveUsers(users);
     
     // Update session if it's current user
-    const currentUser = JSON.parse(localStorage.getItem(DB_CURRENT_USER) || '{}');
+    const currentUser = getCurrentUserFromStorage() || {};
     if (currentUser.id === userId) {
       currentUser.preferences = users[index].preferences;
-      localStorage.setItem(DB_CURRENT_USER, JSON.stringify(currentUser));
+      saveCurrentUser(currentUser);
     }
 
     return mockRequest({ success: true, user: users[index] });
