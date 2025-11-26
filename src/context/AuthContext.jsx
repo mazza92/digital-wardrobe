@@ -39,17 +39,32 @@ export const AuthProvider = ({ children }) => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user && !isOnSignupPage) {
           // If we have a session and we're not on signup page, set the user
-          const profile = await api.getCurrentUser();
-          setUser(profile);
-          setNeedsOnboarding(checkNeedsOnboarding(profile));
+          try {
+            const profile = await api.getCurrentUser();
+            setUser(profile);
+            setNeedsOnboarding(checkNeedsOnboarding(profile));
+          } catch (profileErr) {
+            // Profile fetch failed, but we have a session - use basic user info
+            console.log('Profile fetch failed, using session user:', profileErr.message);
+            setUser(session.user);
+            setNeedsOnboarding(true);
+          }
         }
       } catch (err) {
         console.error("Auth init error:", err);
-      } finally {
-        setLoading(false);
+        // Even on error, we should stop loading
       }
+      // Always set loading to false
+      setLoading(false);
     };
+    
+    // Run init with a timeout fallback in case it hangs
     initAuth();
+    
+    // Fallback: ensure loading is false after 3 seconds no matter what
+    const loadingTimeout = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -100,6 +115,7 @@ export const AuthProvider = ({ children }) => {
 
     return () => {
       subscription.unsubscribe();
+      clearTimeout(loadingTimeout);
     };
   }, [pendingSignup]);
 
