@@ -179,15 +179,27 @@ const AuthCallback = () => {
             console.log('Session set successfully, redirecting...');
             setStatus('success');
             
-            // Clear the hash from URL and redirect
+            // Clear the hash from URL first
             window.history.replaceState(null, '', '/auth/callback');
             
+            // Use window.location for a hard redirect to ensure clean state
             setTimeout(() => {
-              navigate('/onboarding', { replace: true });
-            }, 500);
+              window.location.href = '/onboarding';
+            }, 800);
             return;
           } catch (sessionErr) {
             console.error('setSession threw error:', sessionErr);
+            // Even if there's a storage error, check if session was actually set
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+              console.log('Session exists despite error, redirecting...');
+              setStatus('success');
+              window.history.replaceState(null, '', '/auth/callback');
+              setTimeout(() => {
+                window.location.href = '/onboarding';
+              }, 800);
+              return;
+            }
             setStatus('error');
             setError(sessionErr.message || 'Failed to set session');
             return;
@@ -234,13 +246,12 @@ const AuthCallback = () => {
   // If already authenticated, redirect based on onboarding status
   useEffect(() => {
     if (isAuthenticated && status === 'success') {
-      if (needsOnboarding) {
-        navigate('/onboarding');
-      } else {
-        navigate('/profile');
-      }
+      // Use hard redirect to ensure clean navigation
+      const destination = needsOnboarding ? '/onboarding' : '/profile';
+      console.log('Authenticated, redirecting to:', destination);
+      window.location.href = destination;
     }
-  }, [isAuthenticated, needsOnboarding, navigate, status]);
+  }, [isAuthenticated, needsOnboarding, status]);
 
   return (
     <PageWrapper>
