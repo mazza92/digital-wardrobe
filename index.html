@@ -1,15 +1,14 @@
 <!doctype html>
 <html lang="fr">
   <head>
-    <!-- NUCLEAR OPTION: Suppress ALL storage errors, use ONLY memory storage -->
+    <!-- Hybrid storage: Native first, memory fallback, aggressive error suppression -->
     <script>
-      // Install error suppression IMMEDIATELY - before anything else
+      // Suppress ALL storage errors (from extensions, early code, etc)
       window.addEventListener('unhandledrejection', function(e) {
         var msg = e.reason && e.reason.message ? String(e.reason.message) : '';
         if (msg.indexOf('storage') > -1 || msg.indexOf('Storage') > -1) {
           e.preventDefault();
           e.stopImmediatePropagation();
-          return false;
         }
       }, true);
 
@@ -18,13 +17,13 @@
         if (msg.indexOf('storage') > -1 || msg.indexOf('Storage') > -1) {
           e.preventDefault();
           e.stopImmediatePropagation();
-          return false;
         }
       }, true);
 
       (function() {
         'use strict';
-        // Simple memory storage - NEVER touch native storage
+
+        // Memory storage fallback
         function MemStorage() {
           var d = {};
           this.getItem = function(k) { return d[k] || null; };
@@ -35,19 +34,90 @@
           Object.defineProperty(this, 'length', { get: function() { return Object.keys(d).length; }});
         }
 
-        var ls = new MemStorage();
-        var ss = new MemStorage();
+        // Create hybrid storage that tries native, falls back to memory
+        function createHybridStorage(storageType) {
+          var memStorage = new MemStorage();
+          var native = null;
+          var usingMemory = false;
 
-        // Replace storage - NEVER access native storage
+          // Try to get native storage reference
+          try {
+            native = window[storageType];
+            // Quick test
+            var test = '__test__';
+            native.setItem(test, test);
+            native.removeItem(test);
+          } catch(e) {
+            native = null;
+            usingMemory = true;
+            console.log(storageType + ' blocked, using memory fallback');
+          }
+
+          // Return proxy that tries native first
+          return {
+            getItem: function(k) {
+              if (!usingMemory && native) {
+                try { return native.getItem(k); }
+                catch(e) { usingMemory = true; }
+              }
+              return memStorage.getItem(k);
+            },
+            setItem: function(k, v) {
+              if (!usingMemory && native) {
+                try { native.setItem(k, v); return; }
+                catch(e) { usingMemory = true; }
+              }
+              memStorage.setItem(k, v);
+            },
+            removeItem: function(k) {
+              if (!usingMemory && native) {
+                try { native.removeItem(k); return; }
+                catch(e) { usingMemory = true; }
+              }
+              memStorage.removeItem(k);
+            },
+            clear: function() {
+              if (!usingMemory && native) {
+                try { native.clear(); return; }
+                catch(e) { usingMemory = true; }
+              }
+              memStorage.clear();
+            },
+            key: function(i) {
+              if (!usingMemory && native) {
+                try { return native.key(i); }
+                catch(e) { usingMemory = true; }
+              }
+              return memStorage.key(i);
+            },
+            get length() {
+              if (!usingMemory && native) {
+                try { return native.length; }
+                catch(e) { usingMemory = true; }
+              }
+              return memStorage.length;
+            }
+          };
+        }
+
+        // Replace with hybrid storage
         try {
-          Object.defineProperty(window, 'localStorage', { value: ls, configurable: true, enumerable: true });
-        } catch(e) { window.localStorage = ls; }
+          Object.defineProperty(window, 'localStorage', {
+            value: createHybridStorage('localStorage'),
+            configurable: true,
+            enumerable: true
+          });
+        } catch(e) { window.localStorage = createHybridStorage('localStorage'); }
 
         try {
-          Object.defineProperty(window, 'sessionStorage', { value: ss, configurable: true, enumerable: true });
-        } catch(e) { window.sessionStorage = ss; }
+          Object.defineProperty(window, 'sessionStorage', {
+            value: createHybridStorage('sessionStorage'),
+            configurable: true,
+            enumerable: true
+          });
+        } catch(e) { window.sessionStorage = createHybridStorage('sessionStorage'); }
 
-        console.log('Storage polyfill active - using memory only');
+        console.log('Hybrid storage active - native with memory fallback');
       })();
     </script>
 
@@ -226,9 +296,9 @@
       @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     
-    <!-- Cache Busting - v4.0.0 - MAJOR STORAGE FIX -->
-    <meta name="version" content="4.0.0" />
-    <meta name="build-time" content="2025-01-26T19:00:00Z" />
+    <!-- Cache Busting - v4.1.0 - Hybrid Storage (Native + Memory Fallback) -->
+    <meta name="version" content="4.1.0" />
+    <meta name="build-time" content="2025-01-26T20:30:00Z" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="-1" />

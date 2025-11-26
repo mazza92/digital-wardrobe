@@ -22,21 +22,24 @@ const hideInitialLoader = () => {
   }
 }
 
-// Register service worker for caching (production only)
-const registerServiceWorker = async () => {
-  if ('serviceWorker' in navigator && import.meta.env.PROD) {
+// UNREGISTER all service workers to clear cache
+const unregisterServiceWorkers = async () => {
+  if ('serviceWorker' in navigator) {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
-      })
-      
-      // Check for updates periodically
-      setInterval(() => {
-        registration.update()
-      }, 60 * 60 * 1000) // Check every hour
-      
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      for (const registration of registrations) {
+        await registration.unregister()
+        console.log('Service worker unregistered:', registration.scope)
+      }
+
+      // Clear all caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys()
+        await Promise.all(cacheNames.map(name => caches.delete(name)))
+        console.log('All caches cleared')
+      }
     } catch (error) {
-      // Service worker registration failed, app will work without caching
+      console.log('Service worker cleanup error:', error)
     }
   }
 }
@@ -53,7 +56,7 @@ root.render(
 requestAnimationFrame(() => {
   requestAnimationFrame(() => {
     hideInitialLoader()
-    // Register service worker after initial render
-    registerServiceWorker()
+    // UNREGISTER service worker to clear old cache
+    unregisterServiceWorkers()
   })
 })
