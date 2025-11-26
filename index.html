@@ -189,6 +189,28 @@
     </div>
     
     <div id="root"></div>
+    
+    <!-- Suppress storage errors globally - must be before any scripts -->
+    <script>
+      // Suppress storage access errors immediately
+      window.addEventListener('error', function(event) {
+        if (event.message && event.message.includes('storage')) {
+          event.preventDefault();
+          return true;
+        }
+      }, true);
+      
+      window.addEventListener('unhandledrejection', function(event) {
+        if (event.reason && (
+          event.reason.message && event.reason.message.includes('storage') ||
+          event.reason.message && event.reason.message.includes('Access to storage')
+        )) {
+          event.preventDefault();
+          console.log('Storage access blocked (suppressed)');
+        }
+      });
+    </script>
+    
     <script type="module" src="/src/main.jsx"></script>
     
     <!-- Hide loader once React mounts -->
