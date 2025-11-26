@@ -118,15 +118,22 @@ const AuthCallback = () => {
       // Clear hash immediately
       window.history.replaceState(null, '', '/auth/callback');
 
-      // Try to set session (may fail due to storage restrictions, but that's ok)
-      supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken
-      }).finally(() => {
-        console.log('Session set attempt complete, redirecting...');
-        // Always redirect regardless of success/failure
+      // Fire and forget - don't wait for this at all
+      // The storage error may cause the promise to hang
+      try {
+        supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+      } catch (e) {
+        console.log('setSession sync error:', e);
+      }
+
+      // Redirect immediately with a small delay for UI feedback
+      console.log('Redirecting to onboarding...');
+      setTimeout(() => {
         window.location.href = '/onboarding';
-      });
+      }, 1000);
 
       return;
     }
