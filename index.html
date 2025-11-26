@@ -176,8 +176,8 @@
       @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     
-    <!-- Cache Busting - v3.0.1 -->
-    <meta name="version" content="3.0.1" />
+    <!-- Cache Busting - v3.0.2 -->
+    <meta name="version" content="3.0.2" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -193,43 +193,103 @@
     
     <div id="root"></div>
     
-    <!-- Suppress storage errors globally - must be before any scripts -->
+    <!-- Polyfill storage BEFORE any scripts load -->
     <script>
-      // Aggressively suppress ALL storage-related errors
-      const suppressStorageError = (error) => {
-        const msg = error?.message || error?.toString() || '';
-        return msg.includes('storage') || 
-               msg.includes('Storage') || 
-               msg.includes('localStorage') ||
-               msg.includes('sessionStorage') ||
-               msg.includes('Access to storage');
-      };
-      
-      // Catch sync errors
-      window.addEventListener('error', function(event) {
-        if (suppressStorageError(event.error || { message: event.message })) {
-          event.preventDefault();
-          event.stopPropagation();
-          return true;
+      (function() {
+        // Test if storage is actually available
+        function isStorageAvailable(type) {
+          try {
+            var storage = window[type];
+            var x = '__storage_test__';
+            storage.setItem(x, x);
+            storage.removeItem(x);
+            return true;
+          } catch(e) {
+            return false;
+          }
         }
-      }, true);
-      
-      // Catch async errors (promises)
-      window.addEventListener('unhandledrejection', function(event) {
-        if (suppressStorageError(event.reason)) {
-          event.preventDefault();
-          event.stopPropagation();
+
+        // Create memory storage fallback
+        function createMemoryStorage() {
+          var data = {};
+          return {
+            getItem: function(key) {
+              return data.hasOwnProperty(key) ? data[key] : null;
+            },
+            setItem: function(key, value) {
+              data[key] = String(value);
+            },
+            removeItem: function(key) {
+              delete data[key];
+            },
+            clear: function() {
+              data = {};
+            },
+            get length() {
+              return Object.keys(data).length;
+            },
+            key: function(index) {
+              var keys = Object.keys(data);
+              return keys[index] || null;
+            }
+          };
         }
-      });
-      
-      // Also override console.error to filter storage errors
-      const originalConsoleError = console.error;
-      console.error = function(...args) {
-        const message = args.join(' ');
-        if (!suppressStorageError({ message })) {
-          originalConsoleError.apply(console, args);
+
+        // Replace localStorage if not available
+        if (!isStorageAvailable('localStorage')) {
+          console.log('localStorage not available, using memory fallback');
+          try {
+            Object.defineProperty(window, 'localStorage', {
+              value: createMemoryStorage(),
+              writable: false,
+              configurable: true
+            });
+          } catch(e) {
+            window.localStorage = createMemoryStorage();
+          }
         }
-      };
+
+        // Replace sessionStorage if not available
+        if (!isStorageAvailable('sessionStorage')) {
+          console.log('sessionStorage not available, using memory fallback');
+          try {
+            Object.defineProperty(window, 'sessionStorage', {
+              value: createMemoryStorage(),
+              writable: false,
+              configurable: true
+            });
+          } catch(e) {
+            window.sessionStorage = createMemoryStorage();
+          }
+        }
+
+        // Suppress any remaining storage errors
+        const suppressStorageError = (error) => {
+          const msg = error?.message || error?.toString() || '';
+          return msg.includes('storage') ||
+                 msg.includes('Storage') ||
+                 msg.includes('localStorage') ||
+                 msg.includes('sessionStorage') ||
+                 msg.includes('Access to storage');
+        };
+
+        // Catch sync errors
+        window.addEventListener('error', function(event) {
+          if (suppressStorageError(event.error || { message: event.message })) {
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+          }
+        }, true);
+
+        // Catch async errors (promises)
+        window.addEventListener('unhandledrejection', function(event) {
+          if (suppressStorageError(event.reason)) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        });
+      })();
     </script>
     
     <script type="module" src="/src/main.jsx"></script>
