@@ -318,8 +318,11 @@ const Onboarding = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
   
-  const { updateProfile, loading } = useAuth();
+  const { user, updateProfile, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Add debugging to see user state
+  console.log('[Onboarding] User from context:', user?.id || 'null');
 
   // Style options with translated labels
   const styleOptions = [
@@ -373,19 +376,34 @@ const Onboarding = () => {
   };
 
   const handleSubmit = () => {
+    console.log('=== ONBOARDING SUBMIT ===');
+    console.log('User from context:', user?.id || 'null');
+
+    // If user not loaded yet, wait a bit and retry
+    if (!user?.id) {
+      console.warn('⚠️ User not loaded yet, waiting 2 seconds...');
+      setErrorMsg('Loading your profile, please wait...');
+
+      setTimeout(() => {
+        setErrorMsg('');
+        // Retry submission
+        handleSubmit();
+      }, 2000);
+      return;
+    }
+
     setSubmitting(true);
     setErrorMsg('');
 
     // Set a timeout to redirect no matter what happens
-    // Increase timeout to 10 seconds to allow database save to complete
     const redirectTimeout = setTimeout(() => {
       console.warn('⚠️ Redirect timeout triggered after 10s - forcing redirect');
       window.location.href = '/profile';
     }, 10000);
 
     // Try to save preferences
-    console.log('=== ONBOARDING SUBMIT ===');
-    console.log('Saving preferences:', {
+    console.log('Saving preferences with user ID:', user.id);
+    console.log('Preferences:', {
       styleInterests: selectedStyles,
       favoriteBrands: favoriteBrands,
       onboardingCompleted: true
