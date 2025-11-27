@@ -163,26 +163,16 @@ export const updatePreferences = async (userId, preferences) => {
   // Always save to memory first (in case DB fails)
   savePendingPreferences(preferences);
 
+  // If userId is provided (from AuthContext), use it directly
+  // This is the best practice - trust the authenticated context
+  if (!userId) {
+    console.warn('⚠️ No userId provided, preferences saved in memory only');
+    return { success: true, preferences, savedLocally: true };
+  }
+
   try {
-    // Get current authenticated user using getSession (more reliable than getUser)
-    const { data: { session }, error: sessionError } = await safeGetSession();
-
-    console.log('Session check:', {
-      hasSession: !!session,
-      hasUser: !!session?.user,
-      userId: session?.user?.id,
-      sessionError: sessionError?.message
-    });
-
-    // If not authenticated or session missing, preferences are saved in memory
-    if (sessionError || !session?.user) {
-      console.warn('⚠️ No authenticated session, preferences saved in memory only');
-      return { success: true, preferences, savedLocally: true };
-    }
-
-    // Use session user ID to ensure it matches auth.uid() for RLS
-    const authenticatedUserId = session.user.id;
-    console.log('Using authenticated user ID:', authenticatedUserId);
+    const authenticatedUserId = userId;
+    console.log('Using user ID from context:', authenticatedUserId);
 
     // Get current preferences to merge (if profile exists)
     let currentProfile = null;
@@ -211,7 +201,7 @@ export const updatePreferences = async (userId, preferences) => {
     // Use upsert with the authenticated user's ID
     const upsertPayload = {
       id: authenticatedUserId,
-      email: currentProfile?.email || session.user.email || null,
+      email: currentProfile?.email || null, // Email comes from existing profile
       marketing_opt_in: currentProfile?.marketing_opt_in ?? false,
       preferences: newPreferences,
       updated_at: new Date().toISOString()
