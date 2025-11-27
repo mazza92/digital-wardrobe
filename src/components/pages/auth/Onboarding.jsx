@@ -376,34 +376,20 @@ const Onboarding = () => {
   };
 
   const handleSubmit = () => {
-    console.log('=== ONBOARDING SUBMIT ===');
-    console.log('User from context:', user?.id || 'null');
-
-    // If user not loaded yet, wait a bit and retry
-    if (!user?.id) {
-      console.warn('⚠️ User not loaded yet, waiting 2 seconds...');
-      setErrorMsg('Loading your profile, please wait...');
-
-      setTimeout(() => {
-        setErrorMsg('');
-        // Retry submission
-        handleSubmit();
-      }, 2000);
-      return;
-    }
-
     setSubmitting(true);
     setErrorMsg('');
 
+    console.log('=== ONBOARDING SUBMIT ===');
+    console.log('User from context:', user?.id || 'null');
+
     // Set a timeout to redirect no matter what happens
     const redirectTimeout = setTimeout(() => {
-      console.warn('⚠️ Redirect timeout triggered after 10s - forcing redirect');
+      console.log('Redirecting after timeout');
       window.location.href = '/profile';
-    }, 10000);
+    }, 5000);
 
     // Try to save preferences
-    console.log('Saving preferences with user ID:', user.id);
-    console.log('Preferences:', {
+    console.log('Saving preferences:', {
       styleInterests: selectedStyles,
       favoriteBrands: favoriteBrands,
       onboardingCompleted: true

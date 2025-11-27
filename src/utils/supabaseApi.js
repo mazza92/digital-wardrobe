@@ -77,18 +77,18 @@ export const getCurrentUser = async () => {
   };
 };
 
-const getProfile = async (userId) => {
+export const getProfile = async (userId) => {
   const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
     .eq('id', userId)
     .maybeSingle(); // Use maybeSingle to avoid error when row doesn't exist
-    
+
   // Don't log RLS errors - they're expected before email confirmation
   if (error && error.code !== '42501' && !error.message?.includes('row-level security')) {
     console.error('Error fetching profile:', error);
   }
-  
+
   return data || {};
 };
 

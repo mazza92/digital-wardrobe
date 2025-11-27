@@ -90,21 +90,25 @@ export const AuthProvider = ({ children }) => {
             console.log('On signup page, not setting user yet');
             return;
           }
-          
-          try {
-            // Sync any pending preferences first
-            await api.syncPendingPreferences();
-            
-            const userData = await api.getCurrentUser();
-            setUser(userData);
-            setNeedsOnboarding(checkNeedsOnboarding(userData));
-            setPendingSignup(false); // Clear pending signup flag
-          } catch (err) {
-            // If profile fetch fails, at least set basic user info
-            setUser(session.user);
-            setNeedsOnboarding(true); // Assume needs onboarding if we can't fetch profile
-            setPendingSignup(false);
-          }
+
+          // Set user immediately from session (no async calls that might hang)
+          console.log('Setting user from session:', session.user.id);
+          setUser(session.user);
+          setPendingSignup(false);
+
+          // Fetch profile data in background (non-blocking)
+          api.getProfile(session.user.id).then(profile => {
+            if (profile) {
+              console.log('Profile loaded:', profile);
+              setUser({ ...session.user, ...profile });
+              setNeedsOnboarding(checkNeedsOnboarding({ ...session.user, ...profile }));
+            } else {
+              setNeedsOnboarding(true);
+            }
+          }).catch(err => {
+            console.log('Profile fetch failed:', err.message);
+            setNeedsOnboarding(true);
+          });
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
