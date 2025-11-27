@@ -163,16 +163,32 @@ export const updatePreferences = async (userId, preferences) => {
   // Always save to memory first (in case DB fails)
   savePendingPreferences(preferences);
 
-  // If userId is provided (from AuthContext), use it directly
-  // This is the best practice - trust the authenticated context
-  if (!userId) {
-    console.warn('⚠️ No userId provided, preferences saved in memory only');
-    return { success: true, preferences, savedLocally: true };
-  }
-
   try {
-    const authenticatedUserId = userId;
-    console.log('Using user ID from context:', authenticatedUserId);
+    // If userId not provided, try to get it from current auth state
+    let authenticatedUserId = userId;
+
+    if (!authenticatedUserId) {
+      console.log('No userId provided, checking auth state...');
+
+      // Try to get user from auth state synchronously if available
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id) {
+          authenticatedUserId = user.id;
+          console.log('Got userId from auth state:', authenticatedUserId);
+        }
+      } catch (authErr) {
+        console.warn('Could not get user from auth state:', authErr.message);
+      }
+    }
+
+    // If still no userId, save to memory only
+    if (!authenticatedUserId) {
+      console.warn('⚠️ No authenticated user found, preferences saved in memory only');
+      return { success: true, preferences, savedLocally: true };
+    }
+
+    console.log('Using authenticated user ID:', authenticatedUserId);
 
     // Get current preferences to merge (if profile exists)
     let currentProfile = null;
