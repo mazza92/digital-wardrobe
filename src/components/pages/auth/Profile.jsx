@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
 import { useFavorites } from '../../../hooks/useFavorites';
 import { fetchOutfits } from '../../../utils/api';
-import { getOutfitDescription } from '../../../utils/outfitUtils';
+import { getOutfitDescription, getOutfitTitle } from '../../../utils/outfitUtils';
 import { theme } from '../../../design-system/theme';
 import { safeGetSession } from '../../../utils/supabaseClient';
 
@@ -848,9 +848,10 @@ const Profile = () => {
         });
       }
       
-      // Check outfit title/description for style keywords (use language-aware description)
+      // Check outfit title/description for style keywords (use language-aware title and description)
+      const outfitTitle = getOutfitTitle(outfit, i18n.language);
       const outfitDescription = getOutfitDescription(outfit, i18n.language);
-      const outfitText = `${outfit.title || ''} ${outfitDescription || ''}`.toLowerCase();
+      const outfitText = `${outfitTitle || ''} ${outfitDescription || ''}`.toLowerCase();
       userStyles.forEach(style => {
         if (outfitText.includes(style.toLowerCase())) {
           score += 1;
@@ -962,14 +963,14 @@ const Profile = () => {
                       <DayName $isToday={day.isToday}>{day.dayName}</DayName>
                     </DayLabel>
                     <DayOutfitImage $isToday={day.isToday}>
-                      {outfit.image && <img src={outfit.image} alt={outfit.title} />}
+                      {outfit.image && <img src={outfit.image} alt={getOutfitTitle(outfit, i18n.language)} />}
                       {outfit.matchReasons?.length > 0 && (
                         <MatchBadge>
                           ✨ {t('profile.inspiration.forYou')}
                         </MatchBadge>
                       )}
                       <DayOutfitOverlay>
-                        <DayOutfitTitle>{outfit.title}</DayOutfitTitle>
+                        <DayOutfitTitle>{getOutfitTitle(outfit, i18n.language)}</DayOutfitTitle>
                       </DayOutfitOverlay>
                     </DayOutfitImage>
                   </DayCard>

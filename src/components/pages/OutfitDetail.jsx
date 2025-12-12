@@ -2,7 +2,7 @@ import { useState, useEffect, memo, useMemo, useCallback, lazy, Suspense } from 
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
-import { getOutfitDescription } from '../../utils/outfitUtils'
+import { getOutfitDescription, getOutfitTitle } from '../../utils/outfitUtils'
 import { useFavorites } from '../../hooks/useFavorites'
 import { useAuth } from '../../context/AuthContext'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
@@ -1214,7 +1214,7 @@ function OutfitDetail() {
         </ImageSection>
         
         <InfoSection>
-          <OutfitTitle>{outfit.title}</OutfitTitle>
+          <OutfitTitle>{getOutfitTitle(outfit, i18n.language)}</OutfitTitle>
           <OutfitDescription>{getOutfitDescription(outfit, i18n.language)}</OutfitDescription>
           <PublicationDate>
             {getRelativeTime(outfit.createdAt)}
@@ -1290,7 +1290,7 @@ function OutfitDetail() {
                     ))}
                   </ProductTags>
                   <GalleryOverlay>
-                    <GalleryTitle>{recommendedOutfit.title}</GalleryTitle>
+                    <GalleryTitle>{getOutfitTitle(recommendedOutfit, i18n.language)}</GalleryTitle>
                     <GalleryDescription>{getOutfitDescription(recommendedOutfit, i18n.language)}</GalleryDescription>
                     <GalleryShopButton>
                       {t('outfit.shopNow')} →

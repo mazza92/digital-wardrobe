@@ -2,7 +2,7 @@
 // Simple SEO management without external dependencies
 
 import { useEffect } from 'react'
-import { getOutfitDescription } from '../utils/outfitUtils'
+import { getOutfitDescription, getOutfitTitle } from '../utils/outfitUtils'
 
 export const useSEO = ({
   title,
@@ -90,13 +90,14 @@ export const seoConfig = {
   },
   
   outfit: (outfitData, language = 'fr') => {
+    const title = getOutfitTitle(outfitData, language)
     const description = getOutfitDescription(outfitData, language)
     return {
-      title: `${outfitData.title} - Tenue Mode de Luxe`,
+      title: `${title} - Tenue Mode de Luxe`,
       description: `Découvrez cette tenue élégante d'Emmanuelle K. ${description} Shopping des produits de cette tenue de luxe.`,
       keywords: [
         'tenue', 'outfit', 'mode', 'luxe', 'shopping', 'produits',
-        'style', 'Emmanuelle K', outfitData.title
+        'style', 'Emmanuelle K', title
       ],
       image: outfitData.image,
       url: `https://digital-wardrobe-puce.vercel.app/outfits/${outfitData.id}`

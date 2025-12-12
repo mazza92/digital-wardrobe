@@ -7,7 +7,7 @@ import { getRelativeTime } from '../../utils/api'
 import { useFavorites } from '../../hooks/useFavorites'
 import { useAuth } from '../../context/AuthContext'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
-import { getOutfitDescription } from '../../utils/outfitUtils'
+import { getOutfitDescription, getOutfitTitle } from '../../utils/outfitUtils'
 import { LazyFavoritesList, LazyCartButton, LoadingFallback, preloadResources } from '../../utils/performance'
 import LanguageSwitcher from '../ui/LanguageSwitcher'
 import { PageSkeleton } from '../ui/Skeleton'
@@ -635,7 +635,7 @@ const MemoizedOutfitCard = memo(({ outfit, index, isEager, t, language }) => (
     <OutfitImageWrapper>
       <OptimizedImage
         src={outfit.image}
-        alt={outfit.title}
+        alt={getOutfitTitle(outfit, language)}
         aspectRatio="3/4"
         loading={isEager ? 'eager' : 'lazy'}
         fetchPriority={index < 2 ? 'high' : undefined}
@@ -653,7 +653,7 @@ const MemoizedOutfitCard = memo(({ outfit, index, isEager, t, language }) => (
     </ProductTags>
     <ProductCount>{outfit.products.length} {outfit.products.length === 1 ? t('favorites.item') : t('favorites.items')}</ProductCount>
     <OutfitOverlay>
-      <OutfitTitle>{outfit.title}</OutfitTitle>
+      <OutfitTitle>{getOutfitTitle(outfit, language)}</OutfitTitle>
       <OutfitDescription>{getOutfitDescription(outfit, language)}</OutfitDescription>
       <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
       <ShopButton>
