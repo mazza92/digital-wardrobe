@@ -299,6 +299,9 @@ const SectionSubtitle = styled.p`
 const OutfitsGrid = styled.div`
   display: grid;
   gap: 2rem;
+  /* GPU acceleration for scroll performance */
+  will-change: contents;
+  contain: layout style;
   
   @media (min-width: 480px) {
     grid-template-columns: repeat(2, 1fr);
@@ -319,13 +322,19 @@ const OutfitCard = styled(Link)`
   border-radius: 17px;
   overflow: hidden;
   text-decoration: none;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.05);
+  /* CSS containment for layout stability and performance */
+  contain: layout style;
   
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  @media (min-width: 768px) {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    will-change: transform;
+    
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
   }
 `
 
@@ -334,6 +343,8 @@ const OutfitImageWrapper = styled.div`
   aspect-ratio: 3/4;
   position: relative;
   overflow: hidden;
+  /* Prevent layout shift */
+  contain: layout style paint;
   background: #f5f5f5;
   
   &::after {
@@ -407,20 +418,8 @@ const ProductTag = styled.div`
   left: ${props => props.x}%;
   top: ${props => props.y}%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 0 rgba(16, 16, 16, 0.4);
-  animation: pulse 2s infinite;
-  
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(16, 16, 16, 0.4);
-    }
-    70% {
-      box-shadow: 0 0 0 8px rgba(16, 16, 16, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(16, 16, 16, 0);
-    }
-  }
+  /* Removed animation to prevent CLS and reduce CPU usage */
+  will-change: transform;
 `
 
 const OutfitOverlay = styled.div`
@@ -693,11 +692,24 @@ function MainPortal() {
     wishlist: outfits.filter(outfit => outfit.category === 'wishlist')
   }), [outfits])
 
-  // Preload first 4 images for faster LCP
+  // Preload first 2 images for faster LCP (reduced from 4 to prioritize)
   const criticalImages = useMemo(() => 
-    outfitsByCategory.outfit.slice(0, 4).map(outfit => outfit.image).filter(Boolean),
+    outfitsByCategory.outfit.slice(0, 2).map(outfit => outfit.image).filter(Boolean),
     [outfitsByCategory.outfit]
   )
+  
+  // Add preload link for LCP image immediately
+  useEffect(() => {
+    if (criticalImages[0]) {
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.as = 'image'
+      link.href = criticalImages[0]
+      link.fetchPriority = 'high'
+      document.head.appendChild(link)
+      return () => link.remove()
+    }
+  }, [criticalImages])
   usePreloadImages(criticalImages)
 
   if (isLoading) {

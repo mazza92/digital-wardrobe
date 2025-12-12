@@ -16,6 +16,8 @@ const ImageContainer = styled.div`
   width: 100%;
   overflow: hidden;
   background: ${props => props.$bgColor || '#f5f5f5'};
+  /* Prevent layout shift with contain */
+  contain: layout style paint;
   ${props => props.$aspectRatio && css`
     aspect-ratio: ${props.$aspectRatio};
   `}
@@ -40,10 +42,10 @@ const StyledImage = styled.img.withConfig({
   object-fit: ${props => props.$objectFit || 'cover'};
   object-position: ${props => props.$objectPosition || 'center'};
   opacity: ${props => props.$loaded ? 1 : 0};
-  transition: opacity 0.3s ease;
-  ${props => props.$loaded && css`
-    animation: ${fadeIn} 0.3s ease;
-  `}
+  transition: opacity 0.2s ease-out;
+  /* GPU acceleration and prevent layout shift */
+  will-change: opacity;
+  contain: layout paint;
 `;
 
 const BlurredPreview = styled.img`
@@ -152,6 +154,8 @@ const OptimizedImage = memo(({
           alt={alt}
           srcSet={srcSet}
           sizes={sizes}
+          width="400"
+          height="533"
           $loaded={isLoaded}
           $objectFit={objectFit}
           $objectPosition={objectPosition}
@@ -159,6 +163,7 @@ const OptimizedImage = memo(({
           onError={handleError}
           fetchPriority={fetchPriority}
           decoding="async"
+          loading={loading}
         />
       )}
       
