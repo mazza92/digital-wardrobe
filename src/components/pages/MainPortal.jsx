@@ -7,6 +7,7 @@ import { getRelativeTime } from '../../utils/api'
 import { useFavorites } from '../../hooks/useFavorites'
 import { useAuth } from '../../context/AuthContext'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
+import { getOutfitDescription } from '../../utils/outfitUtils'
 import { LazyFavoritesList, LazyCartButton, LoadingFallback, preloadResources } from '../../utils/performance'
 import LanguageSwitcher from '../ui/LanguageSwitcher'
 import { PageSkeleton } from '../ui/Skeleton'
@@ -629,7 +630,7 @@ const LoadingText = styled.p`
 `
 
 // Memoized OutfitCard component to prevent unnecessary re-renders
-const MemoizedOutfitCard = memo(({ outfit, index, isEager, t }) => (
+const MemoizedOutfitCard = memo(({ outfit, index, isEager, t, language }) => (
   <OutfitCard key={outfit.id} to={`/outfits/${outfit.id}`}>
     <OutfitImageWrapper>
       <OptimizedImage
@@ -653,7 +654,7 @@ const MemoizedOutfitCard = memo(({ outfit, index, isEager, t }) => (
     <ProductCount>{outfit.products.length} {outfit.products.length === 1 ? t('favorites.item') : t('favorites.items')}</ProductCount>
     <OutfitOverlay>
       <OutfitTitle>{outfit.title}</OutfitTitle>
-      <OutfitDescription>{outfit.description}</OutfitDescription>
+      <OutfitDescription>{getOutfitDescription(outfit, language)}</OutfitDescription>
       <PublicationDate>{getRelativeTime(outfit.createdAt)}</PublicationDate>
       <ShopButton>
         {t('outfit.shopNow')} →
@@ -665,7 +666,7 @@ const MemoizedOutfitCard = memo(({ outfit, index, isEager, t }) => (
 MemoizedOutfitCard.displayName = 'MemoizedOutfitCard'
 
 function MainPortal() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { outfits, influencer, isLoading, error } = useOutfits()
   const { user, isAuthenticated, logout } = useAuth()
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
@@ -798,6 +799,7 @@ function MainPortal() {
                     index={index} 
                     isEager={index < 4}
                     t={t}
+                    language={i18n.language}
                   />
                 ))
               ) : (
@@ -823,6 +825,7 @@ function MainPortal() {
                     index={index} 
                     isEager={false}
                     t={t}
+                    language={i18n.language}
                   />
                 ))
               ) : (

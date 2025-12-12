@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
 import { useFavorites } from '../../../hooks/useFavorites';
 import { fetchOutfits } from '../../../utils/api';
+import { getOutfitDescription } from '../../../utils/outfitUtils';
 import { theme } from '../../../design-system/theme';
 import { safeGetSession } from '../../../utils/supabaseClient';
 
@@ -847,8 +848,9 @@ const Profile = () => {
         });
       }
       
-      // Check outfit title/description for style keywords
-      const outfitText = `${outfit.title || ''} ${outfit.description || ''}`.toLowerCase();
+      // Check outfit title/description for style keywords (use language-aware description)
+      const outfitDescription = getOutfitDescription(outfit, i18n.language);
+      const outfitText = `${outfit.title || ''} ${outfitDescription || ''}`.toLowerCase();
       userStyles.forEach(style => {
         if (outfitText.includes(style.toLowerCase())) {
           score += 1;

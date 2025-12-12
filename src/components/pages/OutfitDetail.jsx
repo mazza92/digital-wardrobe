@@ -2,6 +2,7 @@ import { useState, useEffect, memo, useMemo, useCallback, lazy, Suspense } from 
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
+import { getOutfitDescription } from '../../utils/outfitUtils'
 import { useFavorites } from '../../hooks/useFavorites'
 import { useAuth } from '../../context/AuthContext'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
@@ -1214,7 +1215,7 @@ function OutfitDetail() {
         
         <InfoSection>
           <OutfitTitle>{outfit.title}</OutfitTitle>
-          <OutfitDescription>{outfit.description}</OutfitDescription>
+          <OutfitDescription>{getOutfitDescription(outfit, i18n.language)}</OutfitDescription>
           <PublicationDate>
             {getRelativeTime(outfit.createdAt)}
             <SubtleShareButton outfit={outfit} />
@@ -1290,7 +1291,7 @@ function OutfitDetail() {
                   </ProductTags>
                   <GalleryOverlay>
                     <GalleryTitle>{recommendedOutfit.title}</GalleryTitle>
-                    <GalleryDescription>{recommendedOutfit.description}</GalleryDescription>
+                    <GalleryDescription>{getOutfitDescription(recommendedOutfit, i18n.language)}</GalleryDescription>
                     <GalleryShopButton>
                       {t('outfit.shopNow')} →
                     </GalleryShopButton>

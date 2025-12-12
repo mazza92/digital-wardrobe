@@ -2,6 +2,8 @@
 // Simple SEO management without external dependencies
 
 import { useEffect } from 'react'
+import { getOutfitDescription } from '../utils/outfitUtils'
+import i18n from '../i18n/config'
 
 export const useSEO = ({
   title,
@@ -88,16 +90,19 @@ export const seoConfig = {
     url: 'https://digital-wardrobe-puce.vercel.app'
   },
   
-  outfit: (outfitData) => ({
-    title: `${outfitData.title} - Tenue Mode de Luxe`,
-    description: `Découvrez cette tenue élégante d'Emmanuelle K. ${outfitData.description} Shopping des produits de cette tenue de luxe.`,
-    keywords: [
-      'tenue', 'outfit', 'mode', 'luxe', 'shopping', 'produits',
-      'style', 'Emmanuelle K', outfitData.title
-    ],
-    image: outfitData.image,
-    url: `https://digital-wardrobe-puce.vercel.app/outfits/${outfitData.id}`
-  }),
+  outfit: (outfitData) => {
+    const description = getOutfitDescription(outfitData, i18n.language)
+    return {
+      title: `${outfitData.title} - Tenue Mode de Luxe`,
+      description: `Découvrez cette tenue élégante d'Emmanuelle K. ${description} Shopping des produits de cette tenue de luxe.`,
+      keywords: [
+        'tenue', 'outfit', 'mode', 'luxe', 'shopping', 'produits',
+        'style', 'Emmanuelle K', outfitData.title
+      ],
+      image: outfitData.image,
+      url: `https://digital-wardrobe-puce.vercel.app/outfits/${outfitData.id}`
+    }
+  },
   
   wishlist: {
     title: 'Wishlist - Produits Favoris d\'Emmanuelle K',
