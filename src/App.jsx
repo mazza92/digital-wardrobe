@@ -8,14 +8,22 @@ import { LazyMainPortal, LazyOutfitDetail, LazyAbout } from './utils/performance
 
 // Auth - Lazy loaded for better initial load
 import { AuthProvider } from './context/AuthContext.jsx'
+import { CartProvider } from './context/CartContext.jsx'
+
 const Login = lazy(() => import('./components/pages/auth/Login.jsx'))
 const SignUp = lazy(() => import('./components/pages/auth/SignUp.jsx'))
 const Onboarding = lazy(() => import('./components/pages/auth/Onboarding.jsx'))
 const Profile = lazy(() => import('./components/pages/auth/Profile.jsx'))
 const AuthCallback = lazy(() => import('./components/pages/auth/AuthCallback.jsx'))
 
+// Shop - Lazy loaded
+const Shop = lazy(() => import('./components/pages/Shop.jsx'))
+const Checkout = lazy(() => import('./components/pages/Checkout.jsx'))
+const CheckoutSuccess = lazy(() => import('./components/pages/CheckoutSuccess.jsx'))
+
 // UI Components
 import Toast from './components/ui/Toast.jsx'
+import CartDrawer from './components/shop/CartDrawer.jsx'
 
 // Import global styles
 import './styles/globals.css'
@@ -46,6 +54,7 @@ function App() {
   return (
     <PerformanceErrorBoundary>
       <AuthProvider>
+      <CartProvider>
       <div className="app-container">
           <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
@@ -90,10 +99,28 @@ function App() {
                   <AuthCallback />
                 </Suspense>
               } />
+              {/* Shop Routes */}
+              <Route path="/shop" element={
+                <Suspense fallback={<AuthLoadingFallback />}>
+                  <Shop />
+                </Suspense>
+              } />
+              <Route path="/checkout" element={
+                <Suspense fallback={<AuthLoadingFallback />}>
+                  <Checkout />
+                </Suspense>
+              } />
+              <Route path="/checkout/success" element={
+                <Suspense fallback={<AuthLoadingFallback />}>
+                  <CheckoutSuccess />
+                </Suspense>
+              } />
           </Routes>
+          <CartDrawer />
         </Router>
           <Toast />
       </div>
+      </CartProvider>
       </AuthProvider>
     </PerformanceErrorBoundary>
   )

@@ -19,6 +19,7 @@
     "about": "About",
     "outfits": "Outfits",
     "wishlist": "Wishlist",
+    "shop": "Shop",
     "login": "Login",
     "logout": "Logout",
     "account": "My Account",
@@ -262,5 +263,66 @@
     "createAccount": "Create Free Account",
     "hasAccount": "I Already Have an Account",
     "continueAsGuest": "Continue as guest (favorites won't sync)"
+  },
+  "shop": {
+    "title": "My Shop",
+    "subtitle": "Hand-picked favorites selected with love",
+    "backToOutfits": "Back to Outfits",
+    "featured": "Favorite",
+    "outOfStock": "Out of Stock",
+    "addToCart": "Add to Cart",
+    "noProducts": "Shop Coming Soon",
+    "comingSoon": "New products are coming very soon!",
+    "seoTitle": "Shop - EMMANUELLE K",
+    "seoDescription": "Discover the exclusive collection of products selected by Emmanuelle K. Quality fashion, accessories and jewelry."
+  },
+  "cart": {
+    "title": "My Cart",
+    "empty": "Your cart is empty",
+    "remove": "Remove",
+    "subtotal": "Subtotal",
+    "freeShipping": "Free shipping!",
+    "freeShippingProgress": "{{amount}}€ away from free shipping",
+    "checkout": "Checkout",
+    "continueShopping": "Continue Shopping"
+  },
+  "checkout": {
+    "contact": "Contact",
+    "email": "Email",
+    "name": "Full Name",
+    "phone": "Phone",
+    "shipping": "Shipping Address",
+    "address1": "Address",
+    "address2": "Apartment, suite, etc.",
+    "city": "City",
+    "postalCode": "Postal Code",
+    "country": "Country",
+    "note": "Note (optional)",
+    "notePlaceholder": "Special instructions...",
+    "summary": "Order Summary",
+    "qty": "Qty",
+    "subtotal": "Subtotal",
+    "shippingCost": "Shipping",
+    "free": "Free",
+    "total": "Total",
+    "pay": "Pay",
+    "processing": "Processing...",
+    "secure": "Secure payment by Stripe",
+    "emptyCart": "Your cart is empty",
+    "backToShop": "Back to Shop",
+    "errorContact": "Please fill in your contact information",
+    "errorAddress": "Please fill in your shipping address",
+    "errorEmail": "Please enter a valid email address",
+    "errorGeneric": "An error occurred. Please try again."
+  },
+  "checkoutSuccess": {
+    "title": "Thank you for your order!",
+    "message": "Your order has been confirmed. You will receive a confirmation email with your order details.",
+    "orderNumber": "Order Number",
+    "continueShopping": "Continue Shopping",
+    "backToHome": "Back to Home"
+  },
+  "loading": {
+    "shop": "Loading shop..."
   }
 }

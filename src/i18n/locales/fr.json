@@ -19,6 +19,7 @@
     "about": "À propos",
     "outfits": "Tenues",
     "wishlist": "Wishlist",
+    "shop": "Boutique",
     "login": "Connexion",
     "logout": "Déconnexion",
     "account": "Mon Compte",
@@ -262,5 +263,66 @@
     "createAccount": "Créer un compte gratuit",
     "hasAccount": "J'ai déjà un compte",
     "continueAsGuest": "Continuer en tant qu'invité (favoris non synchronisés)"
+  },
+  "shop": {
+    "title": "Ma Boutique",
+    "subtitle": "Mes coups de cœur sélectionnés avec amour",
+    "backToOutfits": "Retour aux tenues",
+    "featured": "Coup de cœur",
+    "outOfStock": "Rupture de stock",
+    "addToCart": "Ajouter au panier",
+    "noProducts": "Boutique bientôt disponible",
+    "comingSoon": "De nouveaux produits arrivent très prochainement !",
+    "seoTitle": "Boutique - EMMANUELLE K",
+    "seoDescription": "Découvrez la collection exclusive de produits sélectionnés par Emmanuelle K. Mode, accessoires et bijoux de qualité."
+  },
+  "cart": {
+    "title": "Mon Panier",
+    "empty": "Votre panier est vide",
+    "remove": "Supprimer",
+    "subtotal": "Sous-total",
+    "freeShipping": "Livraison gratuite !",
+    "freeShippingProgress": "Plus que {{amount}}€ pour la livraison gratuite",
+    "checkout": "Commander",
+    "continueShopping": "Continuer mes achats"
+  },
+  "checkout": {
+    "contact": "Contact",
+    "email": "Email",
+    "name": "Nom complet",
+    "phone": "Téléphone",
+    "shipping": "Adresse de livraison",
+    "address1": "Adresse",
+    "address2": "Complément",
+    "city": "Ville",
+    "postalCode": "Code postal",
+    "country": "Pays",
+    "note": "Note (optionnel)",
+    "notePlaceholder": "Instructions spéciales...",
+    "summary": "Récapitulatif",
+    "qty": "Qté",
+    "subtotal": "Sous-total",
+    "shippingCost": "Livraison",
+    "free": "Gratuit",
+    "total": "Total",
+    "pay": "Payer",
+    "processing": "Traitement...",
+    "secure": "Paiement sécurisé par Stripe",
+    "emptyCart": "Votre panier est vide",
+    "backToShop": "Retour à la boutique",
+    "errorContact": "Veuillez remplir vos informations de contact",
+    "errorAddress": "Veuillez remplir votre adresse de livraison",
+    "errorEmail": "Veuillez entrer une adresse email valide",
+    "errorGeneric": "Une erreur est survenue. Veuillez réessayer."
+  },
+  "checkoutSuccess": {
+    "title": "Merci pour votre commande !",
+    "message": "Votre commande a été confirmée. Vous recevrez un email de confirmation avec les détails de votre commande.",
+    "orderNumber": "Numéro de commande",
+    "continueShopping": "Continuer mes achats",
+    "backToHome": "Retour à l'accueil"
+  },
+  "loading": {
+    "shop": "Chargement de la boutique..."
   }
 }

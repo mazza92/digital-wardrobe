@@ -12,6 +12,7 @@ import { LazyFavoritesList, LazyCartButton, LoadingFallback, preloadResources } 
 import LanguageSwitcher from '../ui/LanguageSwitcher'
 import { PageSkeleton } from '../ui/Skeleton'
 import OptimizedImage, { usePreloadImages } from '../ui/OptimizedImage'
+import CartButton from '../shop/CartButton'
 
 // Lazy load non-critical components
 const SignupPrompt = lazy(() => import('../ui/SignupPrompt'))
@@ -749,6 +750,7 @@ function MainPortal() {
         <BrandName>Virtual Dressing</BrandName>
         <HeaderRight>
           <LanguageSwitcher />
+          <NavLink to="/shop">{t('nav.shop') || 'Shop'}</NavLink>
           {isAuthenticated ? (
             <NavLink to="/profile">
               {t('nav.account') || 'My Account'}
@@ -764,7 +766,7 @@ function MainPortal() {
               favoritesCount={getFavoritesCount()} 
             />
           </Suspense>
-          <NavLink to="/about">{t('nav.about')}</NavLink>
+          <CartButton />
         </HeaderRight>
       </Header>
       
