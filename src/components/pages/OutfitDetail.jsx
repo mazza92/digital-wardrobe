@@ -882,7 +882,7 @@ const ProductCount = styled.div`
 
 
 function OutfitDetail() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { outfitId } = useParams()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
