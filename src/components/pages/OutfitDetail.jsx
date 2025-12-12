@@ -898,7 +898,7 @@ function OutfitDetail() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
   // SEO optimization
-  useSEO(outfit ? seoConfig.outfit(outfit) : seoConfig.home)
+  useSEO(outfit ? seoConfig.outfit(outfit, i18n.language) : seoConfig.home)
   
   const {
     favorites,

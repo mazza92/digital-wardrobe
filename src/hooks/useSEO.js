@@ -3,7 +3,6 @@
 
 import { useEffect } from 'react'
 import { getOutfitDescription } from '../utils/outfitUtils'
-import i18n from '../i18n/config'
 
 export const useSEO = ({
   title,
@@ -90,8 +89,8 @@ export const seoConfig = {
     url: 'https://digital-wardrobe-puce.vercel.app'
   },
   
-  outfit: (outfitData) => {
-    const description = getOutfitDescription(outfitData, i18n.language)
+  outfit: (outfitData, language = 'fr') => {
+    const description = getOutfitDescription(outfitData, language)
     return {
       title: `${outfitData.title} - Tenue Mode de Luxe`,
       description: `Découvrez cette tenue élégante d'Emmanuelle K. ${description} Shopping des produits de cette tenue de luxe.`,
