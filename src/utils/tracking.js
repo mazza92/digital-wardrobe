@@ -72,40 +72,52 @@ export const handleAffiliateClick = (product, outfitId, event) => {
     product.link.includes('go.affilae.com')
   )
   
-  // For manual links, convert to ShopMy format manually (since ShopMy script doesn't detect React links)
-  const finalLink = isAffiliateLink ? product.link : convertToShopMyLink(product.link)
-  
-  // Open the link
-  const newWindow = window.open(finalLink, '_blank', 'noopener,noreferrer')
-  
-  // Track the click
+  // Track the click (async, non-blocking)
   trackClick(
     product.id,
     outfitId,
     product.name,
     product.brand,
-    product.link // Track original link, not converted one
+    product.link
   ).catch(error => {
     console.error('Error tracking click:', error)
   })
   
-  // If popup was blocked, copy link to clipboard as fallback
-  if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-    console.log('Popup blocked - copying link to clipboard')
-    try {
-      navigator.clipboard.writeText(finalLink).then(() => {
-        console.log('Lien copié dans le presse-papiers')
-      }).catch(() => {
-        console.log('Impossible de copier le lien automatiquement')
-      })
-    } catch (error) {
-      console.log('Clipboard not available')
+  if (isAffiliateLink) {
+    // For affiliate links (catalog), use window.open directly
+    const newWindow = window.open(product.link, '_blank', 'noopener,noreferrer')
+    
+    // If popup was blocked, copy link to clipboard as fallback
+    if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+      console.log('Popup blocked - copying link to clipboard')
+      try {
+        navigator.clipboard.writeText(product.link).then(() => {
+          console.log('Lien copié dans le presse-papiers')
+        }).catch(() => {
+          console.log('Impossible de copier le lien automatiquement')
+        })
+      } catch (error) {
+        console.log('Clipboard not available')
+      }
     }
-  }
-  
-  // Prevent default to avoid double navigation
-  if (event) {
-    event.preventDefault()
+    
+    // Prevent default to avoid double navigation
+    if (event) {
+      event.preventDefault()
+    }
+  } else {
+    // For manual links, update the href to ShopMy format and let default behavior happen
+    // This allows ShopMy script to intercept if it's loaded, or uses our converted link
+    const shopMyLink = convertToShopMyLink(product.link)
+    
+    // Update the href attribute so the link points to ShopMy
+    if (event && event.currentTarget) {
+      event.currentTarget.href = shopMyLink
+    }
+    
+    // Don't prevent default - let the browser navigate naturally
+    // This allows ShopMy's script to intercept if it detects the link
+    // If ShopMy doesn't intercept, our converted link will be used
   }
 }
 
