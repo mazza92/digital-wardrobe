@@ -919,6 +919,26 @@ function OutfitDetail() {
     fetchData()
   }, [outfitId])
 
+  // Notify ShopMy script to re-scan for dynamically added links
+  useEffect(() => {
+    if (outfit && outfit.products) {
+      // Wait for DOM to update, then trigger ShopMy re-scan
+      const timer = setTimeout(() => {
+        // ShopMy script should automatically detect new links, but we can trigger a custom event
+        // Some ShopMy implementations listen for DOM mutations or custom events
+        const event = new CustomEvent('shopmy:rescan', { bubbles: true })
+        document.dispatchEvent(event)
+        
+        // Also try to manually trigger ShopMy if it exposes a global function
+        if (window.ShopMy && typeof window.ShopMy.scan === 'function') {
+          window.ShopMy.scan()
+        }
+      }, 500) // Small delay to ensure React has finished rendering
+      
+      return () => clearTimeout(timer)
+    }
+  }, [outfit])
+
   const fetchData = async () => {
     try {
       setIsLoading(true)
@@ -1205,7 +1225,24 @@ function OutfitDetail() {
                   target="_blank" 
                   rel="noopener noreferrer"
                   data-skip-shopmy={selectedProduct.link && (selectedProduct.link.includes('go.shopmy.us') || selectedProduct.link.includes('affilae.com') || selectedProduct.link.includes('feeds.affilae.com') || selectedProduct.link.includes('go.affilae.com')) ? 'true' : undefined}
-                  onClick={(e) => handleAffiliateClick(selectedProduct, outfit.id, e)}
+                  onClick={(e) => {
+                    // Only handle clicks for affiliate links (catalog products)
+                    // Manual links should be handled by ShopMy script
+                    const isAffiliateLink = selectedProduct.link && (
+                      selectedProduct.link.includes('go.shopmy.us') || 
+                      selectedProduct.link.includes('affilae.com') || 
+                      selectedProduct.link.includes('feeds.affilae.com') || 
+                      selectedProduct.link.includes('go.affilae.com')
+                    )
+                    
+                    if (isAffiliateLink) {
+                      handleAffiliateClick(selectedProduct, outfit.id, e)
+                    } else {
+                      // For manual links, just track the click and let ShopMy handle the conversion
+                      handleAffiliateClick(selectedProduct, outfit.id, e)
+                      // Don't prevent default - let ShopMy intercept
+                    }
+                  }}
                 >
                   {t('outfit.shopNow')}
                 </ShopButton>
@@ -1243,7 +1280,24 @@ function OutfitDetail() {
                         target="_blank" 
                         rel="noopener noreferrer"
                         data-skip-shopmy={product.link && (product.link.includes('go.shopmy.us') || product.link.includes('affilae.com') || product.link.includes('feeds.affilae.com') || product.link.includes('go.affilae.com')) ? 'true' : undefined}
-                        onClick={(e) => handleAffiliateClick(product, outfit.id, e)}
+                        onClick={(e) => {
+                          // Only handle clicks for affiliate links (catalog products)
+                          // Manual links should be handled by ShopMy script
+                          const isAffiliateLink = product.link && (
+                            product.link.includes('go.shopmy.us') || 
+                            product.link.includes('affilae.com') || 
+                            product.link.includes('feeds.affilae.com') || 
+                            product.link.includes('go.affilae.com')
+                          )
+                          
+                          if (isAffiliateLink) {
+                            handleAffiliateClick(product, outfit.id, e)
+                          } else {
+                            // For manual links, just track the click and let ShopMy handle the conversion
+                            handleAffiliateClick(product, outfit.id, e)
+                            // Don't prevent default - let ShopMy intercept
+                          }
+                        }}
                       >
                         {t('outfit.shopNow')}
                       </ProductCardButton>
