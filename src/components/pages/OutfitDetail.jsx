@@ -10,7 +10,7 @@ import { fetchOutfits, getRelativeTime } from '../../utils/api'
 import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
 import SubtleShareButton from '../ui/SubtleShareButton'
-import { handleAffiliateClick } from '../../utils/tracking'
+import { handleAffiliateClick, trackClick } from '../../utils/tracking'
 import LanguageSwitcher from '../ui/LanguageSwitcher'
 import OptimizedImage from '../ui/OptimizedImage'
 
@@ -1225,7 +1225,31 @@ function OutfitDetail() {
                   target="_blank" 
                   rel="noopener noreferrer"
                   data-skip-shopmy={selectedProduct.link && (selectedProduct.link.includes('go.shopmy.us') || selectedProduct.link.includes('affilae.com') || selectedProduct.link.includes('feeds.affilae.com') || selectedProduct.link.includes('go.affilae.com')) ? 'true' : undefined}
-                  onClick={(e) => handleAffiliateClick(selectedProduct, outfit.id, e)}
+                  onClick={(e) => {
+                    // Only track clicks, let ShopMy script handle the conversion
+                    // For manual links, ShopMy script should intercept and convert
+                    // For affiliate links, use our handler
+                    const isAffiliateLink = selectedProduct.link && (
+                      selectedProduct.link.includes('go.shopmy.us') || 
+                      selectedProduct.link.includes('affilae.com') || 
+                      selectedProduct.link.includes('feeds.affilae.com') || 
+                      selectedProduct.link.includes('go.affilae.com')
+                    )
+                    
+                    if (isAffiliateLink) {
+                      handleAffiliateClick(selectedProduct, outfit.id, e)
+                    } else {
+                      // For manual links, just track and let ShopMy script handle it
+                      trackClick(
+                        selectedProduct.id,
+                        outfit.id,
+                        selectedProduct.name,
+                        selectedProduct.brand,
+                        selectedProduct.link
+                      ).catch(err => console.error('Error tracking click:', err))
+                      // Don't prevent default - let ShopMy script intercept
+                    }
+                  }}
                 >
                   {t('outfit.shopNow')}
                 </ShopButton>

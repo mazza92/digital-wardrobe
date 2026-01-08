@@ -5,6 +5,9 @@ const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https
 const SHOPMY_ID = '2FPSlX' // ShopMy Auto-Linking Script ID
 
 // Convert manual link to ShopMy affiliate link
+// Note: ShopMy Auto-Linking uses /apx/{ID}?url= format
+// The script should intercept and convert, but if it doesn't work,
+// we use this format as a fallback
 export const convertToShopMyLink = (url) => {
   if (!url) return url
   
@@ -16,7 +19,9 @@ export const convertToShopMyLink = (url) => {
     return url
   }
   
-  // Convert to ShopMy format: https://go.shopmy.us/apx/{ID}?url={encoded_url}
+  // Convert to ShopMy Auto-Linking format: https://go.shopmy.us/apx/{ID}?url={encoded_url}
+  // This format requires the ShopMy script to be active and intercept the click
+  // The script will then redirect to the retailer with proper tracking
   const encodedUrl = encodeURIComponent(url)
   return `https://go.shopmy.us/apx/${SHOPMY_ID}?url=${encodedUrl}`
 }
@@ -106,18 +111,23 @@ export const handleAffiliateClick = (product, outfitId, event) => {
       event.preventDefault()
     }
   } else {
-    // For manual links, update the href to ShopMy format and let default behavior happen
-    // This allows ShopMy script to intercept if it's loaded, or uses our converted link
-    const shopMyLink = convertToShopMyLink(product.link)
+    // For manual links, we need to let the ShopMy script handle the conversion
+    // The script should intercept clicks on external links and convert them
+    // However, since the script doesn't detect React links, we manually convert
+    // But the /apx/ format gives "unauthorized" error, so we need a different approach
     
-    // Update the href attribute so the link points to ShopMy
-    if (event && event.currentTarget) {
-      event.currentTarget.href = shopMyLink
-    }
+    // Option 1: Use the original link and let ShopMy script intercept (if it can detect it)
+    // Option 2: Use /apx/ format and hope ShopMy backend handles it correctly
+    
+    // For now, let's try using the original link and see if ShopMy script can intercept
+    // If not, we'll need to contact ShopMy support about the /apx/ format issue
     
     // Don't prevent default - let the browser navigate naturally
-    // This allows ShopMy's script to intercept if it detects the link
-    // If ShopMy doesn't intercept, our converted link will be used
+    // The ShopMy script should intercept and convert the link
+    // If it doesn't work, the user will go to the original link (not ideal, but better than error)
+    
+    // Note: The /apx/ format conversion is commented out because it causes "unauthorized" error
+    // This needs to be resolved with ShopMy support
   }
 }
 
