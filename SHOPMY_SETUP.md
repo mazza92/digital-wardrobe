@@ -68,8 +68,13 @@ var shopmyId = 'sDXyBS'; // Remplacez 'sDXyBS' par votre ID ShopMy
 2. **Produit manuel** (doit être converti) :
    - Taggez un produit manuellement (sans utiliser le catalogue)
    - Entrez un lien direct (ex: `https://www.zara.com/product`)
-   - Le script ShopMy devrait automatiquement convertir ce lien
-   - Vérifiez dans le code source : le lien devient `https://go.shopmy.us/apx/votreusername?url=...`
+   - **IMPORTANT** : Le script ShopMy convertit les liens **au moment du clic**, pas au chargement
+   - Pour vérifier :
+     1. Ouvrez la console du navigateur (F12)
+     2. Cliquez sur le bouton "Shop Now"
+     3. Regardez l'URL dans la barre d'adresse du navigateur
+     4. Elle devrait être : `https://go.shopmy.us/apx/votreusername?url=...`
+   - Le lien dans le HTML source reste inchangé (c'est normal)
 
 ### Format des liens convertis
 
@@ -99,9 +104,20 @@ https://go.shopmy.us/apx/votreusername?url=https%3A%2F%2Fwww.retailer.com%2Fprod
    - Exemple : `digital-wardrobe-puce.vercel.app` (sans `https://`)
 
 4. **Le script convertit les liens au moment du clic** :
-   - Les liens ne sont pas modifiés dans le HTML source
-   - La conversion se fait dynamiquement quand l'utilisateur clique
-   - Vérifiez en cliquant sur un lien et en regardant l'URL dans la barre d'adresse du navigateur
+   - ⚠️ **IMPORTANT** : Les liens ne sont PAS modifiés dans le HTML source
+   - La conversion se fait dynamiquement quand l'utilisateur clique sur le lien
+   - Pour tester : Cliquez sur un lien manuel et vérifiez l'URL dans la barre d'adresse
+   - L'URL devrait être : `https://go.shopmy.us/apx/votreusername?url=...`
+
+5. **Vérifiez que le script est actif** :
+   - Ouvrez la console (F12) et cherchez les messages `[ShopMy]`
+   - Vous devriez voir : `[ShopMy] ✅ Script loaded successfully`
+   - Si vous voyez des erreurs, suivez les instructions dans les messages
+
+6. **Le script peut prendre quelques secondes pour scanner la page** :
+   - Attendez 2-3 secondes après le chargement de la page
+   - Les liens sont convertis progressivement
+   - Si ça ne fonctionne toujours pas, vérifiez votre script ID et les domaines autorisés
 
 ### Les liens du catalogue sont convertis (ne devrait pas)
 
