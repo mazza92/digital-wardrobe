@@ -319,15 +319,55 @@
     <!-- This script automatically converts external product links to ShopMy affiliate links -->
     <!-- Only links without data-skip-shopmy attribute will be converted -->
     <!-- Get your script ID from: Account Settings → Advanced → Auto-Linking Script -->
+    <!-- 
+      TO CONFIGURE:
+      1. Get your ShopMy script ID from Account Settings → Advanced
+      2. Replace 'YOUR_SHOPMY_ID' below with your actual ID (e.g., 'sDXyBS')
+      3. Make sure your domain is approved in ShopMy → Account Settings → Advanced → Allowed Domains
+    -->
     <script>
       // Load ShopMy script dynamically if enabled
       (function() {
-        var shopmyId = 'YOUR_SHOPMY_ID'; // Replace with your ShopMy script ID
+        // IMPORTANT: Replace 'YOUR_SHOPMY_ID' with your actual ShopMy script ID
+        // You can also set it via environment variable VITE_SHOPMY_SCRIPT_ID
+        var shopmyId = 'YOUR_SHOPMY_ID'; // ⚠️ REPLACE THIS WITH YOUR SHOPMY SCRIPT ID
+        
         if (shopmyId && shopmyId !== 'YOUR_SHOPMY_ID') {
+          console.log('[ShopMy] Loading Auto-Linking script with ID:', shopmyId);
+          
+          // Wait for DOM to be ready
+          if (document.body) {
+            loadShopMyScript(shopmyId);
+          } else {
+            document.addEventListener('DOMContentLoaded', function() {
+              loadShopMyScript(shopmyId);
+            });
+          }
+        } else {
+          console.warn('[ShopMy] ⚠️ Script ID not configured!');
+          console.warn('[ShopMy] Please replace YOUR_SHOPMY_ID in index.html with your actual ShopMy script ID');
+          console.warn('[ShopMy] Get your ID from: Account Settings → Advanced → Auto-Linking Script');
+        }
+        
+        function loadShopMyScript(id) {
           var script = document.createElement('script');
           script.defer = true;
-          script.src = 'https://static.shopmy.us/Auto/' + shopmyId + '.js';
-          script.setAttribute('data-sms', shopmyId);
+          script.src = 'https://static.shopmy.us/Auto/' + id + '.js';
+          script.setAttribute('data-sms', id);
+          
+          script.onerror = function() {
+            console.error('[ShopMy] ❌ Failed to load script');
+            console.error('[ShopMy] Possible causes:');
+            console.error('[ShopMy] 1. Invalid script ID');
+            console.error('[ShopMy] 2. Domain not approved in ShopMy → Account Settings → Advanced → Allowed Domains');
+            console.error('[ShopMy] 3. Network/CORS issue');
+          };
+          
+          script.onload = function() {
+            console.log('[ShopMy] ✅ Script loaded successfully');
+            console.log('[ShopMy] Auto-linking is now active for external product links');
+          };
+          
           document.body.appendChild(script);
         }
       })();

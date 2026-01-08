@@ -38,14 +38,16 @@ VITE_SHOPMY_ENABLED=true
 
 2. Redéployez l'application
 
-**Option B : Modification directe dans `index.html`**
+**Option B : Modification directe dans `index.html` (RECOMMANDÉ pour commencer)**
 
 1. Ouvrez `digital-wardrobe/index.html`
-2. Trouvez la ligne avec `var shopmyId = 'YOUR_SHOPMY_ID';`
+2. Trouvez la ligne avec `var shopmyId = 'YOUR_SHOPMY_ID';` (ligne ~325)
 3. Remplacez `YOUR_SHOPMY_ID` par votre script ID :
 ```html
-var shopmyId = 'sDXyBS'; // Remplacez par votre ID
+var shopmyId = 'sDXyBS'; // Remplacez 'sDXyBS' par votre ID ShopMy
 ```
+4. Sauvegardez et redéployez l'application
+5. **IMPORTANT** : Vérifiez la console du navigateur (F12) pour voir si le script se charge correctement
 
 ### Étape 3 : Approuver votre domaine
 
@@ -82,15 +84,24 @@ https://go.shopmy.us/apx/votreusername?url=https%3A%2F%2Fwww.retailer.com%2Fprod
 
 1. **Vérifiez que le script est chargé** :
    - Ouvrez la console du navigateur (F12)
-   - Vérifiez qu'il n'y a pas d'erreurs de chargement du script
+   - Vous devriez voir : `[ShopMy] ✅ Script loaded successfully`
+   - Si vous voyez `[ShopMy] ⚠️ Script ID not configured!`, remplacez `YOUR_SHOPMY_ID` dans `index.html`
+   - Si vous voyez `[ShopMy] ❌ Failed to load script`, vérifiez votre ID et les domaines autorisés
 
 2. **Vérifiez votre script ID** :
-   - Assurez-vous que l'ID est correct dans `index.html`
+   - Assurez-vous que l'ID est correct dans `index.html` (ligne ~325)
    - Le format doit être : `https://static.shopmy.us/Auto/VOTRE_ID.js`
+   - L'ID ne doit contenir QUE les caractères alphanumériques (ex: `sDXyBS`, pas l'URL complète)
 
 3. **Vérifiez les domaines autorisés** :
    - Dans ShopMy → Account Settings → Advanced
    - Votre domaine doit être dans la liste "Allowed Domains"
+   - Exemple : `digital-wardrobe-puce.vercel.app` (sans `https://`)
+
+4. **Le script convertit les liens au moment du clic** :
+   - Les liens ne sont pas modifiés dans le HTML source
+   - La conversion se fait dynamiquement quand l'utilisateur clique
+   - Vérifiez en cliquant sur un lien et en regardant l'URL dans la barre d'adresse du navigateur
 
 ### Les liens du catalogue sont convertis (ne devrait pas)
 
