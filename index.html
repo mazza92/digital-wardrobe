@@ -315,6 +315,24 @@
 
     <script type="module" src="/src/main.jsx"></script>
     
+    <!-- ShopMy Auto-Linking Script -->
+    <!-- This script automatically converts external product links to ShopMy affiliate links -->
+    <!-- Only links without data-skip-shopmy attribute will be converted -->
+    <!-- Get your script ID from: Account Settings → Advanced → Auto-Linking Script -->
+    <script>
+      // Load ShopMy script dynamically if enabled
+      (function() {
+        var shopmyId = 'YOUR_SHOPMY_ID'; // Replace with your ShopMy script ID
+        if (shopmyId && shopmyId !== 'YOUR_SHOPMY_ID') {
+          var script = document.createElement('script');
+          script.defer = true;
+          script.src = 'https://static.shopmy.us/Auto/' + shopmyId + '.js';
+          script.setAttribute('data-sms', shopmyId);
+          document.body.appendChild(script);
+        }
+      })();
+    </script>
+    
     <!-- Hide loader once React mounts -->
     <script>
       window.addEventListener('load', function() {

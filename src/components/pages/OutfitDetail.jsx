@@ -1204,6 +1204,7 @@ function OutfitDetail() {
                   href={selectedProduct.link} 
                   target="_blank" 
                   rel="noopener noreferrer"
+                  data-skip-shopmy={selectedProduct.link && (selectedProduct.link.includes('go.shopmy.us') || selectedProduct.link.includes('affilae.com') || selectedProduct.link.includes('feeds.affilae.com')) ? 'true' : undefined}
                   onClick={(e) => handleAffiliateClick(selectedProduct, outfit.id, e)}
                 >
                   {t('outfit.shopNow')}
@@ -1241,6 +1242,7 @@ function OutfitDetail() {
                         href={product.link} 
                         target="_blank" 
                         rel="noopener noreferrer"
+                        data-skip-shopmy={product.link && (product.link.includes('go.shopmy.us') || product.link.includes('affilae.com') || product.link.includes('feeds.affilae.com')) ? 'true' : undefined}
                         onClick={(e) => handleAffiliateClick(product, outfit.id, e)}
                       >
                         {t('outfit.shopNow')}
