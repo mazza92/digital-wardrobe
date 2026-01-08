@@ -85,6 +85,24 @@ https://go.shopmy.us/apx/votreusername?url=https%3A%2F%2Fwww.retailer.com%2Fprod
 
 ## 🔍 Dépannage
 
+### Erreur "unauthorized" lors du clic sur un lien converti
+
+Si vous voyez une erreur `{"success": false, "msg": "unauthorized", "error": "unauthorized"}` :
+
+1. **Vérifiez que le domaine est approuvé** :
+   - Dans ShopMy → Account Settings → Advanced
+   - Vérifiez que votre domaine est bien dans "Allowed Domains"
+   - Le domaine doit être exactement : `digital-wardrobe-puce.vercel.app` (sans `https://`)
+
+2. **Vérifiez que le retailer est dans le réseau ShopMy** :
+   - Tous les retailers ne sont pas supportés par ShopMy
+   - Si le retailer (ex: Monica Vinader) n'est pas dans le réseau, les liens ne fonctionneront pas
+   - Contactez le support ShopMy pour vérifier : creatorsupport@shopmy.us
+
+3. **Vérifiez votre script ID** :
+   - Assurez-vous que l'ID dans le code (`2FPSlX`) correspond exactement à celui dans ShopMy
+   - Vérifiez qu'il n'y a pas de confusion entre "I" (i majuscule) et "l" (L minuscule)
+
 ### Le script ne fonctionne pas
 
 1. **Vérifiez que le script est chargé** :
