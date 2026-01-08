@@ -10,7 +10,7 @@ import { fetchOutfits, getRelativeTime } from '../../utils/api'
 import FavoritesList from '../ui/FavoritesList'
 import FavoritesButton from '../ui/CartButton'
 import SubtleShareButton from '../ui/SubtleShareButton'
-import { handleAffiliateClick, trackClick } from '../../utils/tracking'
+import { handleAffiliateClick } from '../../utils/tracking'
 import LanguageSwitcher from '../ui/LanguageSwitcher'
 import OptimizedImage from '../ui/OptimizedImage'
 
@@ -1225,30 +1225,7 @@ function OutfitDetail() {
                   target="_blank" 
                   rel="noopener noreferrer"
                   data-skip-shopmy={selectedProduct.link && (selectedProduct.link.includes('go.shopmy.us') || selectedProduct.link.includes('affilae.com') || selectedProduct.link.includes('feeds.affilae.com') || selectedProduct.link.includes('go.affilae.com')) ? 'true' : undefined}
-                  onClick={(e) => {
-                    const isAffiliateLink = selectedProduct.link && (
-                      selectedProduct.link.includes('go.shopmy.us') || 
-                      selectedProduct.link.includes('affilae.com') || 
-                      selectedProduct.link.includes('feeds.affilae.com') || 
-                      selectedProduct.link.includes('go.affilae.com')
-                    )
-                    
-                    if (isAffiliateLink) {
-                      // For affiliate links, use our handler
-                      handleAffiliateClick(selectedProduct, outfit.id, e)
-                    } else {
-                      // For manual links, track click but don't prevent default
-                      // Let ShopMy script intercept and convert the link
-                      trackClick(
-                        selectedProduct.id,
-                        outfit.id,
-                        selectedProduct.name,
-                        selectedProduct.brand,
-                        selectedProduct.link
-                      ).catch(err => console.error('Error tracking click:', err))
-                      // Don't call preventDefault - let ShopMy handle it
-                    }
-                  }}
+                  onClick={(e) => handleAffiliateClick(selectedProduct, outfit.id, e)}
                 >
                   {t('outfit.shopNow')}
                 </ShopButton>
@@ -1286,30 +1263,7 @@ function OutfitDetail() {
                         target="_blank" 
                         rel="noopener noreferrer"
                         data-skip-shopmy={product.link && (product.link.includes('go.shopmy.us') || product.link.includes('affilae.com') || product.link.includes('feeds.affilae.com') || product.link.includes('go.affilae.com')) ? 'true' : undefined}
-                        onClick={(e) => {
-                          const isAffiliateLink = product.link && (
-                            product.link.includes('go.shopmy.us') || 
-                            product.link.includes('affilae.com') || 
-                            product.link.includes('feeds.affilae.com') || 
-                            product.link.includes('go.affilae.com')
-                          )
-                          
-                          if (isAffiliateLink) {
-                            // For affiliate links, use our handler
-                            handleAffiliateClick(product, outfit.id, e)
-                          } else {
-                            // For manual links, track click but don't prevent default
-                            // Let ShopMy script intercept and convert the link
-                            trackClick(
-                              product.id,
-                              outfit.id,
-                              product.name,
-                              product.brand,
-                              product.link
-                            ).catch(err => console.error('Error tracking click:', err))
-                            // Don't call preventDefault - let ShopMy handle it
-                          }
-                        }}
+                        onClick={(e) => handleAffiliateClick(product, outfit.id, e)}
                       >
                         {t('outfit.shopNow')}
                       </ProductCardButton>
