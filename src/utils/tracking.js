@@ -44,12 +44,55 @@ export const trackClick = async (productId, outfitId, productName, brand, affili
 }
 
 export const handleAffiliateClick = (product, outfitId, event) => {
-  // Open the link immediately to avoid popup blockers
-  if (product.link) {
-    // Try to open in new tab
+  if (!product.link) return
+  
+  // For links that should be skipped (catalog/affiliate links), use direct window.open
+  const shouldSkipShopMy = product.link && (
+    product.link.includes('go.shopmy.us') || 
+    product.link.includes('affilae.com') || 
+    product.link.includes('feeds.affilae.com') || 
+    product.link.includes('go.affilae.com')
+  )
+  
+  if (shouldSkipShopMy) {
+    // Direct affiliate links - open directly
     const newWindow = window.open(product.link, '_blank', 'noopener,noreferrer')
     
-    // Track the click after opening (non-blocking)
+    // Track the click
+    trackClick(
+      product.id,
+      outfitId,
+      product.name,
+      product.brand,
+      product.link
+    ).catch(error => {
+      console.error('Error tracking click:', error)
+    })
+    
+    // If popup was blocked, copy link to clipboard as fallback
+    if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+      console.log('Popup blocked - copying link to clipboard')
+      try {
+        navigator.clipboard.writeText(product.link).then(() => {
+          console.log('Lien copié dans le presse-papiers')
+        }).catch(() => {
+          console.log('Impossible de copier le lien automatiquement')
+        })
+      } catch (error) {
+        console.log('Clipboard not available')
+      }
+    }
+    
+    // Prevent default to avoid double navigation
+    if (event) {
+      event.preventDefault()
+    }
+  } else {
+    // Manual links - let ShopMy script intercept and convert
+    // Don't prevent default - let the link behavior happen naturally
+    // ShopMy will intercept the click and convert the URL
+    
+    // Track the click asynchronously (non-blocking)
     trackClick(
       product.id,
       outfitId,
@@ -64,20 +107,8 @@ export const handleAffiliateClick = (product, outfitId, event) => {
       console.error('Error tracking click:', error)
     })
     
-    // If popup was blocked, copy link to clipboard as fallback
-    if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-      console.log('Popup blocked - copying link to clipboard')
-      try {
-        navigator.clipboard.writeText(product.link).then(() => {
-          // Show a subtle notification (you could replace this with a toast)
-          console.log('Lien copié dans le presse-papiers')
-        }).catch(() => {
-          console.log('Impossible de copier le lien automatiquement')
-        })
-      } catch (error) {
-        console.log('Clipboard not available')
-      }
-    }
+    // Let the default link behavior happen (ShopMy will intercept)
+    // Don't call event.preventDefault() - this allows ShopMy to work
   }
 }
 
