@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopMy Auto-Linking Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #FDFCF8;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #666;
+            margin-top: 0;
+        }
+        a {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            background: #000;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        a:hover {
+            background: #333;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .manual-link {
+            background: #4caf50;
+        }
+        .affiliate-link {
+            background: #ff9800;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+    
+    <!-- Content Security Policy (same as main site) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://www.google-analytics.com https://www.googletagmanager.com https://static.shopmy.us; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://digital-wardrobe-admin.vercel.app https://www.google-analytics.com https://www.googletagmanager.com https://ycxfqhuwtlujuumgejlo.supabase.co https://*.supabase.co https://static.shopmy.us https://go.shopmy.us;" />
+</head>
+<body>
+    <h1>ShopMy Auto-Linking Test Page</h1>
+    
+    <div class="info">
+        <strong>Instructions:</strong>
+        <ol>
+            <li>Open browser console (F12) to see ShopMy script loading messages</li>
+            <li>Click on the links below</li>
+            <li>Check the URL in the address bar - it should be converted to a ShopMy link</li>
+            <li>Manual links (green) should be converted, Affiliate links (orange) should NOT be converted</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Manual Links (Should be converted by ShopMy)</h2>
+        <p>These links should be automatically converted to ShopMy affiliate links when clicked.</p>
+        
+        <a href="https://www.monicavinader.com/es/essential-bangle/gold-vermeil-essential-bangle" 
+           target="_blank" 
+           class="manual-link">
+            Monica Vinader - Gold Vermeil Essential Bangle
+        </a>
+        
+        <a href="https://www.zara.com/fr/fr/blouson-bomber-effet-matiere-synthetique-zw-collection-p02969241.html" 
+           target="_blank" 
+           class="manual-link">
+            Zara - Bomber Jacket
+        </a>
+        
+        <a href="https://www.zara.com/fr/fr/product/robe-12345" 
+           target="_blank" 
+           class="manual-link">
+            Zara - Test Product
+        </a>
+    </div>
+
+    <div class="test-section">
+        <h2>Affiliate Links (Should NOT be converted)</h2>
+        <p>These links already have affiliate tracking and should NOT be converted by ShopMy (they have <code>data-skip-shopmy="true"</code>).</p>
+        
+        <a href="https://feeds.affilae.com/track/abc123?url=https://www.example.com/product" 
+           target="_blank" 
+           data-skip-shopmy="true"
+           class="affiliate-link">
+            Affilae Link (Should NOT be converted)
+        </a>
+        
+        <a href="https://go.shopmy.us/apx/2FPSlX?url=https://www.example.com/product" 
+           target="_blank" 
+           data-skip-shopmy="true"
+           class="affiliate-link">
+            ShopMy Link (Should NOT be converted)
+        </a>
+    </div>
+
+    <div class="test-section">
+        <h2>Debug Information</h2>
+        <p><strong>Script ID:</strong> <code id="script-id">2FPSlX</code></p>
+        <p><strong>Script Status:</strong> <span id="script-status">Loading...</span></p>
+        <p><strong>Links Found:</strong> <span id="links-count">-</span></p>
+    </div>
+
+    <!-- ShopMy Auto-Linking Script -->
+    <script>
+      // Load ShopMy script dynamically
+      (function() {
+        var shopmyId = '2FPSlX';
+        
+        if (shopmyId && shopmyId !== 'YOUR_SHOPMY_ID') {
+          console.log('[ShopMy] Loading Auto-Linking script with ID:', shopmyId);
+          document.getElementById('script-id').textContent = shopmyId;
+          
+          // Wait for DOM to be ready
+          if (document.body) {
+            loadShopMyScript(shopmyId);
+          } else {
+            document.addEventListener('DOMContentLoaded', function() {
+              loadShopMyScript(shopmyId);
+            });
+          }
+        } else {
+          console.warn('[ShopMy] ⚠️ Script ID not configured!');
+          document.getElementById('script-status').textContent = 'Not configured';
+        }
+        
+        function loadShopMyScript(id) {
+          var script = document.createElement('script');
+          script.defer = true;
+          script.src = 'https://static.shopmy.us/Auto/' + id + '.js';
+          script.setAttribute('data-sms', id);
+          
+          script.onerror = function() {
+            console.error('[ShopMy] ❌ Failed to load script');
+            document.getElementById('script-status').textContent = 'Failed to load';
+            document.getElementById('script-status').style.color = 'red';
+          };
+          
+          script.onload = function() {
+            console.log('[ShopMy] ✅ Script loaded successfully');
+            console.log('[ShopMy] Auto-linking is now active for external product links');
+            document.getElementById('script-status').textContent = 'Loaded successfully';
+            document.getElementById('script-status').style.color = 'green';
+            
+            // Count links after a short delay
+            setTimeout(function() {
+              var links = document.querySelectorAll('a[href^="http"]:not([data-skip-shopmy="true"])');
+              document.getElementById('links-count').textContent = links.length;
+              console.log('[ShopMy] Found', links.length, 'links that should be converted');
+            }, 1000);
+          };
+          
+          document.body.appendChild(script);
+        }
+      })();
+      
+      // Track link clicks for debugging
+      document.addEventListener('click', function(e) {
+        if (e.target.tagName === 'A' && e.target.href) {
+          console.log('[Test] Link clicked:', e.target.href);
+          console.log('[Test] Has data-skip-shopmy:', e.target.getAttribute('data-skip-shopmy'));
+        }
+      }, true);
+    </script>
+</body>
+</html>
