@@ -318,19 +318,11 @@
     <!-- ShopMy Auto-Linking Script -->
     <!-- This script automatically converts external product links to ShopMy affiliate links -->
     <!-- Only links without data-skip-shopmy attribute will be converted -->
-    <!-- Get your script ID from: Account Settings → Advanced → Auto-Linking Script -->
-    <!-- 
-      TO CONFIGURE:
-      1. Get your ShopMy script ID from Account Settings → Advanced
-      2. Replace 'YOUR_SHOPMY_ID' below with your actual ID (e.g., 'sDXyBS')
-      3. Make sure your domain is approved in ShopMy → Account Settings → Advanced → Allowed Domains
-    -->
     <script>
       // Load ShopMy script dynamically if enabled
       (function() {
-        // IMPORTANT: Replace 'YOUR_SHOPMY_ID' with your actual ShopMy script ID
-        // You can also set it via environment variable VITE_SHOPMY_SCRIPT_ID
-        var shopmyId = 'YOUR_SHOPMY_ID'; // ⚠️ REPLACE THIS WITH YOUR SHOPMY SCRIPT ID
+        // ShopMy Auto-Linking Script ID
+        var shopmyId = '2FPSlX';
         
         if (shopmyId && shopmyId !== 'YOUR_SHOPMY_ID') {
           console.log('[ShopMy] Loading Auto-Linking script with ID:', shopmyId);
