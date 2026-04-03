@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
-import outfitsData from '../../data/outfits.json'
+import { useOutfits } from '../../hooks/useOutfits'
+import { resolveHeroTagline } from '../../utils/heroCopy'
 import LanguageSwitcher from '../ui/LanguageSwitcher'
 
 const AboutContainer = styled.div`
@@ -12,47 +13,80 @@ const AboutContainer = styled.div`
 `
 
 const Header = styled.header`
-  background: #E3DBCC;
-  padding: 0.75rem 1rem;
+  background: #fdfcf8;
+  padding: 0.875rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-height: 56px;
+  
+  @media (min-width: 480px) {
+    padding: 1rem 1.25rem;
+  }
   
   @media (min-width: 768px) {
-    padding: 1rem 1.5rem;
+    padding: 1.125rem 2rem;
+    min-height: 64px;
   }
 `
 
 const BackButton = styled(Link)`
   color: #666;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.5rem;
-  border-radius: 8px;
+  padding: 0.375rem 0.75rem;
+  border-radius: 10px;
   transition: all 0.3s ease;
+  margin-right: 0.5rem;
+  
+  @media (min-width: 480px) {
+    font-size: 0.9rem;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+  }
   
   @media (min-width: 768px) {
     font-size: 1rem;
-    gap: 0.5rem;
+    border-radius: 12px;
   }
   
   &:hover {
     color: #101010;
-    background-color: #f5f5f5;
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: translateX(-2px);
   }
 `
 
-const BrandName = styled.h1`
-  font-size: 1rem;
-  font-weight: 300;
+const BrandName = styled(Link)`
+  font-size: 0.95rem;
+  font-weight: 500;
   margin: 0;
+  letter-spacing: 0.3px;
   color: #101010;
-  letter-spacing: 2px;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  
+  @media (min-width: 480px) {
+    font-size: 1.05rem;
+  }
+  
+  @media (min-width: 768px) {
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+  }
+  
+  &:hover {
+    opacity: 0.7;
+  }
 `
 
 const Content = styled.div`
@@ -189,46 +223,64 @@ const ShopButton = styled(Link)`
 `
 
 function About() {
-  const { t } = useTranslation()
-  const { influencer, socialMedia } = outfitsData
+  const { t, i18n } = useTranslation()
+  const { influencer } = useOutfits()
+  const socialMedia = influencer?.socialMedia || {}
 
-  // SEO optimization
   useSEO(seoConfig.about)
+
+  if (!influencer) {
+    return (
+      <AboutContainer>
+        <div style={{ padding: '2rem', textAlign: 'center' }}>{t('loading.default', 'Chargement...')}</div>
+      </AboutContainer>
+    )
+  }
+
+  const displayBio = resolveHeroTagline(i18n.language, influencer, t)
 
   return (
     <AboutContainer>
       <Header>
         <BackButton to="/">
-          ← {t('common.back')}
+          ← {t('common.backToHome')}
         </BackButton>
-        <BrandName>{influencer.brand}</BrandName>
+        <BrandName to="/">{influencer.name}</BrandName>
         <LanguageSwitcher />
       </Header>
       
       <Content>
         <ProfileImage image={influencer.heroImage} />
         <Name>{influencer.name}</Name>
-        <Bio>{influencer.bio}</Bio>
+        {displayBio && <Bio>{displayBio}</Bio>}
         
         <SocialSection>
           <SectionTitle>{t('about.follow')}</SectionTitle>
           <SocialLinks>
-            <SocialLink href={socialMedia.instagram} target="_blank" rel="noopener noreferrer">
-              <SocialIcon>IG</SocialIcon>
-              Instagram
-            </SocialLink>
-            <SocialLink href={socialMedia.tiktok} target="_blank" rel="noopener noreferrer">
-              <SocialIcon>TT</SocialIcon>
-              TikTok
-            </SocialLink>
-            <SocialLink href={socialMedia.youtube} target="_blank" rel="noopener noreferrer">
-              <SocialIcon>YT</SocialIcon>
-              YouTube
-            </SocialLink>
-            <SocialLink href={socialMedia.pinterest} target="_blank" rel="noopener noreferrer">
-              <SocialIcon>P</SocialIcon>
-              Pinterest
-            </SocialLink>
+            {socialMedia.instagram && (
+              <SocialLink href={socialMedia.instagram} target="_blank" rel="noopener noreferrer">
+                <SocialIcon>IG</SocialIcon>
+                Instagram
+              </SocialLink>
+            )}
+            {socialMedia.tiktok && (
+              <SocialLink href={socialMedia.tiktok} target="_blank" rel="noopener noreferrer">
+                <SocialIcon>TikTok</SocialIcon>
+                TikTok
+              </SocialLink>
+            )}
+            {socialMedia.website && (
+              <SocialLink href={socialMedia.website} target="_blank" rel="noopener noreferrer">
+                <SocialIcon>Web</SocialIcon>
+                {t('about.website', 'Site web')}
+              </SocialLink>
+            )}
+            {socialMedia.email && (
+              <SocialLink href={socialMedia.email.startsWith('mailto:') ? socialMedia.email : `mailto:${socialMedia.email}`}>
+                <SocialIcon>@</SocialIcon>
+                Email
+              </SocialLink>
+            )}
           </SocialLinks>
         </SocialSection>
         

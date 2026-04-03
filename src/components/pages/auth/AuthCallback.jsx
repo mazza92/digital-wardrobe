@@ -77,22 +77,13 @@ const AuthCallback = () => {
     if (redirecting) return;
 
     const hash = window.location.hash;
-    console.log('AuthCallback mounted. Hash:', hash);
 
-    // Parse hash parameters
     const hashParams = new URLSearchParams(hash.substring(1));
     const accessToken = hashParams.get('access_token');
     const refreshToken = hashParams.get('refresh_token');
     const hashError = hashParams.get('error');
     const hashErrorCode = hashParams.get('error_code');
     const hashErrorDescription = hashParams.get('error_description');
-
-    console.log('Parsed:', { 
-      hasAccessToken: !!accessToken, 
-      hasRefreshToken: !!refreshToken, 
-      error: hashError,
-      errorCode: hashErrorCode 
-    });
 
     // Handle errors
     if (hashError) {
@@ -109,47 +100,33 @@ const AuthCallback = () => {
       return;
     }
 
-    // If we have tokens, set session and redirect
     if (accessToken && refreshToken) {
-      console.log('Have tokens, setting session...');
       setStatus('success');
       setRedirecting(true);
 
-      // Clear hash immediately
       window.history.replaceState(null, '', '/auth/callback');
 
-      // Fire and forget - don't wait for this at all
-      // The storage error may cause the promise to hang
       try {
         supabase.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken
         });
-      } catch (e) {
-        console.log('setSession sync error:', e);
-      }
+      } catch (e) {}
 
-      // Redirect immediately with a small delay for UI feedback
-      console.log('Redirecting to onboarding...');
       setTimeout(() => {
-        window.location.href = '/onboarding';
+        window.location.href = '/profile';
       }, 1000);
 
       return;
     }
 
-    // No tokens - check if we already have a session
     if (!hash || hash === '#') {
-      console.log('No hash, checking for existing session...');
-
       safeGetSession().then(({ data }) => {
         if (data?.session) {
-          console.log('Found existing session');
           setStatus('success');
           setRedirecting(true);
-          window.location.href = '/onboarding';
+          window.location.href = '/profile';
         } else {
-          console.log('No session found');
           setStatus('error');
           setError('No authentication data found. Please sign up again.');
           setTimeout(() => {
@@ -157,11 +134,9 @@ const AuthCallback = () => {
           }, 3000);
         }
       }).catch(err => {
-        console.error('Session check failed:', err);
-        // Try redirecting anyway
         setStatus('success');
         setRedirecting(true);
-        window.location.href = '/onboarding';
+        window.location.href = '/profile';
       });
     }
   }, [redirecting]);
@@ -179,7 +154,12 @@ const AuthCallback = () => {
         
         {status === 'success' && (
           <>
-            <SuccessIcon>✓</SuccessIcon>
+            <SuccessIcon>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+            </SuccessIcon>
             <Title>{t('auth.callback.success', 'Email confirmed!')}</Title>
             <Message>{t('auth.callback.redirecting', 'Redirecting you to complete your profile...')}</Message>
           </>
@@ -187,7 +167,13 @@ const AuthCallback = () => {
         
         {status === 'error' && (
           <>
-            <SuccessIcon>⚠️</SuccessIcon>
+            <SuccessIcon>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </SuccessIcon>
             <Title>{t('auth.callback.error', 'Verification failed')}</Title>
             <Message>{t('auth.callback.errorMessage', 'There was a problem verifying your email.')}</Message>
             {error && <ErrorMessage>{error}</ErrorMessage>}

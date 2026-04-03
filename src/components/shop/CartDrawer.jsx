@@ -1,43 +1,43 @@
 import React from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
-import styled, { keyframes } from 'styled-components'
+import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useCart } from '../../context/CartContext'
-
-const slideIn = keyframes`
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
-`
-
-const fadeIn = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
-`
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  animation: ${fadeIn} 0.2s ease;
+  z-index: 999;
+  opacity: ${props => props.$isOpen ? 1 : 0};
+  visibility: ${props => props.$isOpen ? 'visible' : 'hidden'};
+  transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
 `
 
 const Drawer = styled.div`
   position: fixed;
   top: 0;
   right: 0;
-  bottom: 0;
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
+  height: 100vh;
+  height: 100dvh;
   background: white;
-  z-index: 1001;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
-  animation: ${slideIn} 0.3s ease;
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+  min-height: 0;
+  transform: translateX(${props => props.$isOpen ? '0' : '100%'});
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+  overscroll-behavior: contain;
 `
 
 const Header = styled.div`
+  flex-shrink: 0;
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #eee;
   display: flex;
@@ -77,8 +77,12 @@ const CloseButton = styled.button`
 `
 
 const Content = styled.div`
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 1rem 1.5rem;
 `
 
@@ -190,7 +194,9 @@ const RemoveButton = styled.button`
 `
 
 const Footer = styled.div`
+  flex-shrink: 0;
   padding: 1.25rem 1.5rem;
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid #eee;
   background: #fafafa;
 `
@@ -261,17 +267,18 @@ const FREE_SHIPPING_THRESHOLD = 50
 
 const CartDrawer = () => {
   const { t, i18n } = useTranslation()
-  const { 
-    items, 
-    itemCount, 
-    subtotal, 
-    isOpen, 
-    closeCart, 
-    updateQuantity, 
-    removeItem 
+  const {
+    items,
+    itemCount,
+    subtotal,
+    isOpen,
+    closeCart,
+    updateQuantity,
+    removeItem
   } = useCart()
 
-  if (!isOpen) return null
+  // Lock body scroll when drawer is open (must be called before early return)
+  useBodyScrollLock(isOpen)
 
   const amountToFreeShipping = FREE_SHIPPING_THRESHOLD - subtotal
   const hasFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD
@@ -283,10 +290,10 @@ const CartDrawer = () => {
     return item.name
   }
 
-  return (
+  return createPortal(
     <>
-      <Overlay onClick={closeCart} />
-      <Drawer>
+      <Overlay $isOpen={isOpen} onClick={closeCart} />
+      <Drawer $isOpen={isOpen}>
         <Header>
           <Title>
             {t('cart.title', 'Mon Panier')}
@@ -313,7 +320,9 @@ const CartDrawer = () => {
                 <ItemImage src={item.imageUrl} alt={getItemName(item)} />
                 <ItemDetails>
                   <ItemName>{getItemName(item)}</ItemName>
-                  <ItemPrice>{item.price.toFixed(2)}€</ItemPrice>
+                  {item.price != null && item.price !== '' && (
+                    <ItemPrice>{Number(item.price).toFixed(2)}€</ItemPrice>
+                  )}
                   <QuantityControl>
                     <QuantityButton
                       onClick={() => updateQuantity(item.productId, item.quantity - 1)}
@@ -341,7 +350,11 @@ const CartDrawer = () => {
           <Footer>
             {hasFreeShipping ? (
               <FreeShipping>
-                ✓ {t('cart.freeShipping', 'Livraison gratuite !')}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '0.5rem' }}>
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+                {t('cart.freeShipping', 'Livraison gratuite !')}
               </FreeShipping>
             ) : (
               <ShippingProgress>
@@ -367,6 +380,8 @@ const CartDrawer = () => {
         )}
       </Drawer>
     </>
+    ,
+    document.body
   )
 }
 

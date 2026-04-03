@@ -5,6 +5,7 @@
     "retry": "Retry",
     "close": "Close",
     "back": "Back",
+    "backToHome": "Home",
     "save": "Save",
     "cancel": "Cancel",
     "continue": "Continue",
@@ -17,8 +18,13 @@
   },
   "nav": {
     "about": "About",
-    "outfits": "Outfits",
-    "wishlist": "Wishlist",
+    "outfits": "Looks",
+    "outfitsSubtitle": "My looks",
+    "wishlist": "Editorials",
+    "wishlistSubtitle": "My editorials",
+    "secretEmmanuelle": "My Secrets",
+    "coupDeCoeur": "Private Sales",
+    "coupDeCoeurSubtitle": "My private sales",
     "shop": "Shop",
     "login": "Login",
     "logout": "Logout",
@@ -29,24 +35,82 @@
   "header": {
     "brand": "Digital Wardrobe"
   },
+  "secretEmmanuelle": {
+    "subtitle": "Discover exclusive products from Emmanuelle's shop"
+  },
+  "ventesPrivees": {
+    "subtitle": "My favorite pieces become yours, and get a second life",
+    "teaserParagraph1": "Find here, by invitation, selected pieces and accessories that have accompanied me for a moment in life, a shoot, or an inspiration.",
+    "teaserParagraph2": "Because they are among my favorites, because they were chosen with care and kept with attention, I am happy to give them today the chance to continue their story elsewhere.",
+    "invitationCta": "Click here to receive an invitation"
+  },
+  "coupDeCoeur": {
+    "subtitle": "My editorials",
+    "accessModal": {
+      "title": "Editorials access",
+      "prompt": "Enter the password to access this section.",
+      "passwordPlaceholder": "Password",
+      "submit": "Access",
+      "submitting": "Checking...",
+      "errorWrong": "Incorrect password.",
+      "errorNetwork": "Network error. Please try again."
+    }
+  },
+  "editorial": {
+    "shopTheEdit": "Shop the Edit"
+  },
+  "home": {
+    "newArrivals": "New arrivals",
+    "mostDesired": "The Most Desired",
+    "editorialPicks": "Editorial Picks",
+    "shopAll": "Shop all",
+    "seeMore": "See more",
+    "showAll": "Show all",
+    "addToHomeScreen": "Add to Home Screen"
+  },
   "hero": {
-    "latestOutfits": "Latest Outfits"
+    "latestOutfits": "Latest Outfits",
+    "curatedBy": "Everything I love, wear, and always come back to",
+    "tagline": "So happy to open my wardrobe to you, here you'll find my looks, my essentials, and my secrets"
   },
   "outfit": {
     "title": "Outfit",
+    "inThisLook": "In this look",
     "products": "Products",
-    "shopNow": "Shop Now",
+    "shopNow": "Discover",
+    "order": "Order",
+    "discover": "Discover",
+    "save": "Save",
+    "findItHere": "Find it here",
+    "findIt": "Find it here",
+    "myStyle": "My style",
+    "notForMe": "Not for me",
+    "saveForLater": "Save for later",
+    "voteLove": "That's my style",
+    "voteNotMyStyle": "Not my style",
+    "voteLoveShort": "I love it",
+    "voteNotMyStyleShort": "Skip",
+    "voteMyStyle": "My style",
+    "voteNotForMe": "Not for me",
+    "likedByCommunity": "liked by community",
+    "noted": "Noted",
+    "shopTheLook": "Shop the look",
     "addToFavorites": "Save",
     "removeFromFavorites": "Remove from favorites",
     "recommendations": "You may also like",
     "viewAll": "View More",
-    "noProducts": "Price not available"
+    "noProducts": "No content available at the moment",
+    "clickDotsInstruction": "Click on a point to shop",
+    "tapDotsHint": "Tap a dot to shop",
+    "productTag": "Product"
   },
   "loading": {
     "app": "Loading Digital Wardrobe...",
     "outfit": "Loading outfit...",
     "favorites": "Loading favorites...",
-    "about": "Loading About page..."
+    "about": "Loading About page...",
+    "privacy": "Loading privacy policy...",
+    "legal": "Loading legal information..."
   },
   "error": {
     "unableToLoad": "Unable to load content",
@@ -67,11 +131,15 @@
     "title": "Favorites",
     "empty": "No favorites",
     "emptyDescription": "Start adding products to your favorites",
+    "saved": "Saved",
     "remove": "Remove",
     "clearAll": "Clear All",
+    "viewAll": "View All",
     "items": "items",
     "item": "item",
     "added": "Added to favorites!",
+    "outfitSaved": "Outfit saved!",
+    "itemsAdded": "{{count}} items added",
     "remaining_one": "{{count}} free save remaining",
     "remaining_other": "{{count}} free saves remaining",
     "lastFree": "Last free save! Create an account to save more",
@@ -80,6 +148,7 @@
   "about": {
     "title": "About",
     "follow": "Follow me",
+    "website": "Website",
     "shopCollection": "Shop My Style",
     "shopMyStyle": "Discover all my favorite pieces and recreate these looks for yourself. Click on any outfit to shop the individual items."
   },
@@ -89,6 +158,7 @@
     "linkCopiedInstagram": "Link copied! You can now paste it in your Instagram story.",
     "share": "Share",
     "shareWithFriend": "Share this look with a friend",
+    "sharePostWithFriend": "Share this article with a friend",
     "shareTitle": "Share"
   },
   "accessibility": {
@@ -100,11 +170,16 @@
     "textarea": "Text area {{context}}"
   },
   "footer": {
-    "copyright": "© 2025 Virtual Dressing. All rights reserved."
+    "copyright": "© 2026 Powered by CuratedCloset",
+    "joinCuratedCloset": "Join CuratedCloset",
+    "privacyPolicy": "Privacy Policy",
+    "legalInfo": "Legal information",
+    "newsletter": "Subscribe to newsletter"
   },
   "auth": {
     "login": {
-      "title": "Welcome Back",
+      "title": "Welcome",
+      "titleWithName": "Welcome {{name}}",
       "subtitle": "Sign in to access your favorites and personalized recommendations",
       "email": "Email",
       "emailPlaceholder": "your@email.com",
@@ -115,6 +190,18 @@
       "noAccount": "Don't have an account?",
       "signupLink": "Create one",
       "forgotPassword": "Forgot password?",
+      "resetEmailRequired": "Enter your email first to receive a reset link.",
+      "resetPasswordSent": "A password reset link has been sent to your email.",
+      "resetTitle": "Set a new password",
+      "resetSubtitle": "Enter your new password below to secure your account.",
+      "resetConfirmPassword": "Confirm password",
+      "resetConfirmPlaceholder": "Confirm your password",
+      "resetSubmit": "Update password",
+      "resetSubmitting": "Updating...",
+      "resetSuccess": "Your password has been updated. You can now sign in.",
+      "resetFailed": "Unable to reset password. Please try again.",
+      "resetInvalidLink": "This reset link is invalid or expired. Please request a new one.",
+      "resetPasswordsMismatch": "Passwords do not match.",
       "error": {
         "invalidCredentials": "Invalid email or password",
         "generic": "An error occurred. Please try again."
@@ -122,17 +209,23 @@
     },
     "signup": {
       "title": "Create Account",
-      "subtitle": "Join to save your favorites and get personalized style recommendations",
+      "subtitle": "Join me to receive my newsletter and early-access invitations to my private sales",
+      "name": "Name",
+      "namePlaceholder": "Your name",
       "email": "Email",
       "emailPlaceholder": "your@email.com",
       "password": "Password",
       "passwordPlaceholder": "Create a password",
       "passwordHint": "At least 6 characters",
-      "marketing": "I want to receive style tips and exclusive offers",
+      "marketing": "I accept the <privacyLink>Privacy Policy</privacyLink> and want to receive style tips and exclusive offers",
       "submit": "Create Account",
       "submitting": "Creating account...",
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in",
+      "invitationSuccessTitle": "You're on the list!",
+      "invitationSuccessMessage": "You'll receive an invitation when private sales open.",
+      "invitationSuccessButton": "Go to my account",
+      "alreadyRegisteredMessage": "This email is already registered.",
       "success": "Account created! Please check your email to confirm your account, then log in.",
       "confirmEmail": {
         "title": "Check your email",
@@ -244,35 +337,77 @@
     "editPreferences": "Edit Preferences",
     "backToOutfits": "Back to Outfits",
     "addMore": "Add more",
+    "showAll": "Show all",
+    "showLess": "Show less",
+    "more": "more",
     "emptyFavorites": {
       "title": "No favorites yet",
       "description": "Save items you love and they'll appear here",
       "button": "Start Exploring"
+    },
+    "perks": {
+      "title": "Exclusive Perks",
+      "exclusive": "Exclusive",
+      "new": "New",
+      "privateSale": {
+        "title": "Private Sales",
+        "description": "Invitation to my closet sale"
+      },
+      "secrets": {
+        "title": "My Secrets",
+        "description": "Exclusive access to my products"
+      }
     }
   },
   "signupPrompt": {
     "title": "Save Your Favorites",
-    "description": "Create a free account to save \"{{itemName}}\" and access your favorites across all devices.",
-    "descriptionGeneric": "Create a free account to save your favorites and never lose them.",
-    "benefits": {
-      "sync": "Save unlimited favorites across devices",
-      "alerts": "Get alerts when items go on sale",
-      "similar": "Get notified when similar items are uploaded",
-      "recommendations": "Personalized style recommendations"
-    },
+    "simpleDescription": "Save your favorite pieces, always find your favorites and get exclusive access to my private sales.",
     "createAccount": "Create Free Account",
-    "hasAccount": "I Already Have an Account",
-    "continueAsGuest": "Continue as guest (favorites won't sync)"
+    "alreadyHaveAccount": "Already have an account?",
+    "signInHere": "Sign in"
+  },
+  "signupNudge": {
+    "message": "You love the same looks ✨ Create your profile to receive style ideas and invitations to private sales",
+    "cta": "Sign up",
+    "closeAria": "Close"
+  },
+  "signupWelcome": {
+    "title": "Welcome, your account is ready",
+    "subtitle": "You unlocked synced favorites, your personal account space, and private sale access.",
+    "featureFavorites": "Saved favorites",
+    "featurePrivateSales": "Private sales",
+    "featureProfile": "Account area",
+    "ctaAccount": "Go to account",
+    "ctaLater": "Later",
+    "closeAria": "Close"
   },
   "shop": {
-    "title": "My Shop",
-    "subtitle": "Hand-picked favorites selected with love",
+    "title": "My Secrets",
+    "subtitle": "Exclusive products, created by me for you",
     "backToOutfits": "Back to Outfits",
     "featured": "Favorite",
     "outOfStock": "Out of Stock",
     "addToCart": "Add to Cart",
     "noProducts": "Shop Coming Soon",
     "comingSoon": "New products are coming very soon!",
+    "firstSecret": "My first secret is coming soon",
+    "clickToNotify": "Click here to be notified.",
+    "clickToBeNotified": "Click here to be notified",
+    "createAccount": "Create account / Sign in",
+    "alreadyNotified": "You will be notified",
+    "secretsAccess": {
+      "welcome": "Welcome",
+      "welcomeName": "Welcome {{name}}",
+      "question": "Do you have a password to access my secrets?",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Your password",
+      "submit": "Access",
+      "submitting": "Checking...",
+      "backToHome": "Back to home",
+      "errorEmpty": "Please enter a password.",
+      "errorWrong": "Incorrect password.",
+      "errorGeneric": "Something went wrong."
+    },
     "seoTitle": "Shop - EMMANUELLE K",
     "seoDescription": "Discover the exclusive collection of products selected by Emmanuelle K. Quality fashion, accessories and jewelry."
   },
@@ -321,6 +456,24 @@
     "orderNumber": "Order Number",
     "continueShopping": "Continue Shopping",
     "backToHome": "Back to Home"
+  },
+  "legal": {
+    "title": "Legal Information - EMMANUELLE K",
+    "description": "Legal information and publisher details for Virtual Dressing by Emmanuelle K.",
+    "titlePage": "Legal Information",
+    "lastUpdated": "Last updated: {{date}}",
+    "publisher": {
+      "title": "Publisher",
+      "text": "This website is published by Emmanuelle K. For any questions regarding legal information, please contact us."
+    },
+    "hosting": {
+      "title": "Hosting",
+      "text": "This site is hosted by Vercel Inc. You can find more information about the host in their terms of service."
+    },
+    "contact": {
+      "title": "Contact",
+      "text": "For any request concerning legal information:"
+    }
   },
   "loading": {
     "shop": "Loading shop..."

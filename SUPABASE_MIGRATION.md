@@ -9,6 +9,7 @@
 create table if not exists user_profiles (
   id uuid references auth.users not null primary key,
   email text,
+  name text,
   marketing_opt_in boolean default false,
   preferences jsonb default '{}'::jsonb,
   updated_at timestamp with time zone,
@@ -71,10 +72,11 @@ create policy "Users can delete their own favorites."
 create or replace function public.handle_new_user() 
 returns trigger as $$
 begin
-  insert into public.user_profiles (id, email, marketing_opt_in, preferences)
+  insert into public.user_profiles (id, email, name, marketing_opt_in, preferences)
   values (
     new.id, 
     new.email, 
+    new.raw_user_meta_data->>'name',
     (new.raw_user_meta_data->>'marketing_opt_in')::boolean,
     '{}'::jsonb
   );

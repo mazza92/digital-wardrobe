@@ -12,20 +12,49 @@ const Container = styled.div`
 `
 
 const Header = styled.header`
-  background: #F3F0E9;
-  padding: 1rem 1.5rem;
+  background: #fdfcf8;
+  padding: 0.875rem 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-height: 56px;
+  
+  @media (min-width: 480px) {
+    padding: 1rem 1.25rem;
+  }
+  
+  @media (min-width: 768px) {
+    padding: 1.125rem 2rem;
+    min-height: 64px;
+  }
 `
 
 const Logo = styled(Link)`
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.3px;
   color: #101010;
   text-decoration: none;
-  letter-spacing: 2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  
+  @media (min-width: 480px) {
+    font-size: 1.05rem;
+  }
+  
+  @media (min-width: 768px) {
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+  }
+  
+  &:hover {
+    opacity: 0.7;
+  }
 `
 
 const Main = styled.main`
@@ -156,7 +185,7 @@ function CheckoutSuccess() {
   return (
     <Container>
       <Header>
-        <Logo to="/">EMMANUELLE K</Logo>
+        <Logo to="/">Emmanuelle K</Logo>
       </Header>
 
       <Main>
@@ -183,7 +212,7 @@ function CheckoutSuccess() {
               {t('checkoutSuccess.continueShopping', 'Continuer mes achats')}
             </PrimaryButton>
             <SecondaryButton to="/">
-              {t('checkoutSuccess.backToHome', 'Retour à l\'accueil')}
+              {t('common.backToHome')}
             </SecondaryButton>
           </ButtonGroup>
         </Card>

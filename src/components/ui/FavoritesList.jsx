@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { handleAffiliateClick } from '../../utils/tracking'
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 
 const FavoritesContainer = styled.div`
   position: fixed;
@@ -10,6 +12,7 @@ const FavoritesContainer = styled.div`
   width: 100%;
   max-width: 400px;
   height: 100vh;
+  height: 100dvh;
   background: white;
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
   z-index: 1000;
@@ -17,9 +20,11 @@ const FavoritesContainer = styled.div`
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
+  overscroll-behavior: contain;
 `
 
 const FavoritesHeader = styled.div`
+  flex-shrink: 0;
   padding: 1.5rem;
   border-bottom: 1px solid #f0f0f0;
   display: flex;
@@ -51,8 +56,12 @@ const CloseButton = styled.button`
 `
 
 const FavoritesContent = styled.div`
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 1rem;
 `
 
@@ -61,7 +70,9 @@ const EmptyState = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  min-height: 100%;
+  padding: 2rem 1rem;
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
   text-align: center;
   color: #666;
 `
@@ -183,7 +194,9 @@ const RemoveButton = styled.button`
 `
 
 const FavoritesFooter = styled.div`
+  flex-shrink: 0;
   padding: 1.5rem;
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid #f0f0f0;
   background: #f8f9fa;
 `
@@ -200,24 +213,7 @@ const ActionButtons = styled.div`
   gap: 0.75rem;
 `
 
-const ClearButton = styled.button`
-  flex: 1;
-  padding: 0.75rem 1rem;
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  color: #666;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: #e9ecef;
-    border-color: #adb5bd;
-  }
-`
-
-const ViewButton = styled.button`
+const ViewAllButton = styled.button`
   flex: 1;
   padding: 0.75rem 1rem;
   background: #1a1a1a;
@@ -227,34 +223,58 @@ const ViewButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: #333;
     transform: translateY(-1px);
   }
 `
 
+const CloseButton2 = styled.button`
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  color: #666;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+  }
+`
+
 const Overlay = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
   opacity: ${props => props.$isOpen ? 1 : 0};
   visibility: ${props => props.$isOpen ? 'visible' : 'hidden'};
   transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
 `
 
 function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, onClearFavorites }) {
   const { t } = useTranslation()
-  
+  const navigate = useNavigate()
+
+  // Lock body scroll when sidebar is open
+  useBodyScrollLock(isOpen)
+
+  const handleViewAll = () => {
+    onClose()
+    navigate('/profile')
+  }
+
   const formatPrice = (priceString) => {
-    if (!priceString) return t('outfit.noProducts')
+    if (priceString == null || priceString === '') return ''
     
     // If price already contains currency symbol, return as-is
-    if (priceString.includes('€') || priceString.includes('$') || priceString.includes('£')) {
+    if (String(priceString).includes('€') || String(priceString).includes('$') || String(priceString).includes('£')) {
       return priceString
     }
     
@@ -273,10 +293,15 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
     if (e.target.closest('button')) {
       return
     }
-    
-    // If item has affiliate link, track click and redirect
+
+    // If item has affiliate link, track click and open in new tab
     if (item.link) {
-      handleAffiliateClick(item, 'favorites', e)
+      // handleAffiliateClick returns true if it handled opening the link (e.g., ShopMy/Affilae links)
+      const linkHandled = handleAffiliateClick(item, 'favorites', e)
+      if (!linkHandled) {
+        // For non-affiliate redirect links, open in new tab manually
+        window.open(item.link, '_blank', 'noopener,noreferrer')
+      }
     }
   }
 
@@ -285,7 +310,7 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
     onRemoveFavorite(itemId)
   }
 
-  return (
+  return createPortal(
     <>
       <Overlay $isOpen={isOpen} onClick={handleOverlayClick} />
       <FavoritesContainer $isOpen={isOpen}>
@@ -293,11 +318,15 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
           <FavoritesTitle>{t('favorites.title')}</FavoritesTitle>
           <CloseButton onClick={onClose}>×</CloseButton>
         </FavoritesHeader>
-        
+
         <FavoritesContent>
           {favorites.length === 0 ? (
             <EmptyState>
-              <EmptyIcon>💔</EmptyIcon>
+              <EmptyIcon>
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </EmptyIcon>
               <EmptyTitle>{t('favorites.empty')}</EmptyTitle>
               <EmptyDescription>
                 {t('favorites.emptyDescription')}
@@ -306,59 +335,65 @@ function FavoritesListComponent({ isOpen, onClose, favorites, onRemoveFavorite, 
           ) : (
             <FavoritesList>
               {favorites.map((item) => (
-                <FavoriteItem 
+                <FavoriteItem
                   key={item.id}
                   $hasLink={!!item.link}
                   onClick={(e) => handleItemClick(item, e)}
                 >
                   <ProductImage imageUrl={item.imageUrl}>
                     {item.imageUrl ? (
-                      <img 
-                        src={item.imageUrl} 
+                      <img
+                        src={item.imageUrl}
                         alt={item.name}
-                        onError={(e) => {
-                          e.target.style.display = 'none'
-                          e.target.parentElement.innerHTML = '👗'
-                        }}
+                        onError={(e) => { e.target.style.display = 'none' }}
                       />
                     ) : (
-                      '👗'
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
                     )}
                   </ProductImage>
                   <ProductInfo>
                     <ProductName>{item.name}</ProductName>
                     <ProductBrand>{item.brand}</ProductBrand>
-                    <ProductPrice>{formatPrice(item.price)}</ProductPrice>
+                    {item.price != null && item.price !== '' && (
+                      <ProductPrice>{formatPrice(item.price)}</ProductPrice>
+                    )}
                   </ProductInfo>
-                  <RemoveButton 
+                  <RemoveButton
                     onClick={(e) => handleRemoveClick(item.id, e)}
                     title={t('favorites.remove')}
                   >
-                    ❤️
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
                   </RemoveButton>
                 </FavoriteItem>
               ))}
             </FavoritesList>
           )}
         </FavoritesContent>
-        
+
         {favorites.length > 0 && (
           <FavoritesFooter>
             <FavoritesCount>
               {favorites.length} {favorites.length === 1 ? t('favorites.item') : t('favorites.items')}
             </FavoritesCount>
             <ActionButtons>
-              <ClearButton onClick={onClearFavorites}>
-                {t('favorites.clearAll')}
-              </ClearButton>
-              <ViewButton onClick={onClose}>
+              <ViewAllButton onClick={handleViewAll}>
+                {t('favorites.viewAll', 'Voir tout')}
+              </ViewAllButton>
+              <CloseButton2 onClick={onClose}>
                 {t('common.close')}
-              </ViewButton>
+              </CloseButton2>
             </ActionButtons>
           </FavoritesFooter>
         )}
       </FavoritesContainer>
-    </>
+    </>,
+    document.body
   )
 }
 

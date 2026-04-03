@@ -1,11 +1,38 @@
 // Social sharing utilities for the Digital Wardrobe frontend
 
-export const generateShareUrl = (outfitId, baseUrl = window.location.origin) => {
-  return `${baseUrl}/outfits/${outfitId}`
+import { outfitToSlug, postToSlug } from './slugify'
+
+// Production domain - always use this for sharing, not window.location.origin
+// which could be a Vercel preview URL
+const PRODUCTION_DOMAIN = 'https://emmanuellek.com'
+
+/**
+ * Generates a share URL for an outfit.
+ * Accepts either a full outfit object (preferred, produces SEO-friendly slug)
+ * or a plain string ID (backward-compatible).
+ */
+export const generateShareUrl = (outfitOrId, baseUrl = PRODUCTION_DOMAIN) => {
+  const slug = typeof outfitOrId === 'string'
+    ? outfitOrId
+    : outfitToSlug(outfitOrId)
+  return `${baseUrl}/outfits/${slug}`
 }
 
 export const generateShareText = (outfitTitle, influencerName = 'Emmanuelle K') => {
-  return `Découvrez cette tenue de ${influencerName}: "${outfitTitle}" sur Virtual Dressing`
+  return `Outfit "${outfitTitle}" - CuratedCloset`
+}
+
+/**
+ * Generates a share URL for an editorial post.
+ * Produces SEO-friendly slug URLs.
+ */
+export const generatePostShareUrl = (post, baseUrl = PRODUCTION_DOMAIN) => {
+  const slug = postToSlug(post)
+  return `${baseUrl}/editorial/${slug}`
+}
+
+export const generatePostShareText = (postTitle) => {
+  return `"${postTitle}" - CuratedCloset`
 }
 
 export const shareToWhatsApp = (url, text) => {
@@ -45,14 +72,13 @@ export const shareToPinterest = (url, text, imageUrl) => {
   window.open(pinterestUrl, '_blank', 'width=600,height=400')
 }
 
-export const copyToClipboard = (url, text) => {
-  const shareText = `${text} ${url}`
-  navigator.clipboard.writeText(shareText).then(() => {
+export const copyToClipboard = (url) => {
+  navigator.clipboard.writeText(url).then(() => {
     alert('Lien copié dans le presse-papiers !')
   }).catch(() => {
     // Fallback for older browsers
     const textArea = document.createElement('textarea')
-    textArea.value = shareText
+    textArea.value = url
     document.body.appendChild(textArea)
     textArea.select()
     document.execCommand('copy')
@@ -62,7 +88,7 @@ export const copyToClipboard = (url, text) => {
 }
 
 export const shareToEmail = (url, text) => {
-  const subject = 'Découvrez cette tenue sur Virtual Dressing'
+  const subject = 'CuratedCloset - Outfit Share'
   const body = `${text}\n\n${url}`
   const emailUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   window.location.href = emailUrl

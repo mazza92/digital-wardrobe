@@ -1,32 +1,75 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { Suspense, lazy } from 'react'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { Suspense, lazy, useEffect, useLayoutEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 // Import design system components
 import { LoadingFallback, PerformanceErrorBoundary } from './utils/performance.js'
-import { LazyMainPortal, LazyOutfitDetail, LazyAbout } from './utils/performance.js'
+import { LazyMainPortal, LazyOutfitDetail, LazyAbout, LazyPrivacyPolicy, LazyLegalInfo } from './utils/performance.js'
 
 // Auth - Lazy loaded for better initial load
 import { AuthProvider } from './context/AuthContext.jsx'
 import { CartProvider } from './context/CartContext.jsx'
+import { FavoritesProvider } from './context/FavoritesContext.jsx'
 
 const Login = lazy(() => import('./components/pages/auth/Login.jsx'))
 const SignUp = lazy(() => import('./components/pages/auth/SignUp.jsx'))
-const Onboarding = lazy(() => import('./components/pages/auth/Onboarding.jsx'))
+// V1: Onboarding flow commented out for MVP
+// V2: Uncomment below to re-enable onboarding
+// const Onboarding = lazy(() => import('./components/pages/auth/Onboarding.jsx'))
 const Profile = lazy(() => import('./components/pages/auth/Profile.jsx'))
 const AuthCallback = lazy(() => import('./components/pages/auth/AuthCallback.jsx'))
+const ResetPassword = lazy(() => import('./components/pages/auth/ResetPassword.jsx'))
 
 // Shop - Lazy loaded
 const Shop = lazy(() => import('./components/pages/Shop.jsx'))
+const PrivateSale = lazy(() => import('./components/pages/PrivateSale.jsx'))
+const PrivateSaleProduct = lazy(() => import('./components/pages/PrivateSaleProduct.jsx'))
 const Checkout = lazy(() => import('./components/pages/Checkout.jsx'))
 const CheckoutSuccess = lazy(() => import('./components/pages/CheckoutSuccess.jsx'))
 
+// Editorial - Lazy loaded with error handling
+const EditorialDetail = lazy(() => 
+  import('./components/pages/EditorialDetail.jsx').catch(err => {
+    // Return a fallback component if import fails
+    return { 
+      default: () => (
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <h2>Page non disponible</h2>
+          <p>L'article éditorial n'a pas pu être chargé.</p>
+        </div>
+      )
+    }
+  })
+)
+
 // UI Components
 import Toast from './components/ui/Toast.jsx'
+import FavoriteToast from './components/ui/FavoriteToast.jsx'
 import CartDrawer from './components/shop/CartDrawer.jsx'
+import SiteLayout from './components/layout/SiteLayout.jsx'
+import InstagramBrowserBanner from './components/ui/InstagramBrowserBanner.jsx'
+import GuestSignupNudgeBanner from './components/ui/GuestSignupNudgeBanner.jsx'
+import SignupWelcomeToast from './components/ui/SignupWelcomeToast.jsx'
+import GlobalSignupPromptLauncher from './components/ui/GlobalSignupPromptLauncher.jsx'
+import AnalyticsTracker from './components/ui/AnalyticsTracker.jsx'
 
 // Import global styles
 import './styles/globals.css'
+
+// Disable browser scroll restoration so we fully control scroll position on navigation
+if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual'
+}
+
+// Scroll to top on route change — useLayoutEffect fires before paint,
+// preventing the browser from briefly showing the old scroll position
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [pathname])
+  return null
+}
 
 // Minimal loading spinner for auth pages
 const AuthLoadingFallback = () => (
@@ -50,30 +93,77 @@ const AuthLoadingFallback = () => (
 
 function App() {
   const { t } = useTranslation()
+
+  // Hide the initial HTML loader for non-outfit pages.
+  // Outfit pages have their own instant-render content that should persist until
+  // OutfitDetail has loaded its data and is ready to display.
+  useEffect(() => {
+    const isOutfitPage = window.location.pathname.startsWith('/outfits/')
+    if (!isOutfitPage && typeof window.__hideLoader === 'function') {
+      window.__hideLoader()
+    }
+  }, [])
   
   return (
-    <PerformanceErrorBoundary>
-      <AuthProvider>
+    <AuthProvider>
+      <PerformanceErrorBoundary>
+      <FavoritesProvider>
       <CartProvider>
       <div className="app-container">
           <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <AnalyticsTracker />
+          <InstagramBrowserBanner />
+          <ScrollToTop />
           <Routes>
-            <Route 
-              path="/" 
-              element={<LazyMainPortal />} 
-            />
-            <Route 
-              path="/outfits/:outfitId" 
-              element={<LazyOutfitDetail />} 
-            />
-            <Route 
-              path="/about" 
-              element={
-                <Suspense fallback={<LoadingFallback message={t('loading.about')} />}>
-                  <LazyAbout />
-                </Suspense>
-              } 
-            />
+            <Route element={<SiteLayout />}>
+              <Route
+                path="/"
+                element={
+                  <Suspense fallback={<AuthLoadingFallback />}>
+                    <LazyMainPortal />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/outfits/:outfitId"
+                element={
+                  <Suspense fallback={<AuthLoadingFallback />}>
+                    <LazyOutfitDetail />
+                  </Suspense>
+                }
+              />
+              <Route 
+                path="/editorial/:slug" 
+                element={
+                  <Suspense fallback={<AuthLoadingFallback />}>
+                    <EditorialDetail />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/about" 
+                element={
+                  <Suspense fallback={<LoadingFallback message={t('loading.about')} />}>
+                    <LazyAbout />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/privacy" 
+                element={
+                  <Suspense fallback={<LoadingFallback message={t('loading.privacy', 'Chargement...')} />}>
+                    <LazyPrivacyPolicy />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/legal" 
+                element={
+                  <Suspense fallback={<LoadingFallback message={t('loading.legal', 'Chargement...')} />}>
+                    <LazyLegalInfo />
+                  </Suspense>
+                } 
+              />
               <Route path="/login" element={
                 <Suspense fallback={<AuthLoadingFallback />}>
                   <Login />
@@ -84,11 +174,13 @@ function App() {
                   <SignUp />
                 </Suspense>
               } />
-              <Route path="/onboarding" element={
+              {/* V1: Onboarding flow commented out for MVP */}
+              {/* V2: Uncomment below to re-enable onboarding route */}
+              {/* <Route path="/onboarding" element={
                 <Suspense fallback={<AuthLoadingFallback />}>
                   <Onboarding />
                 </Suspense>
-              } />
+              } /> */}
               <Route path="/profile" element={
                 <Suspense fallback={<AuthLoadingFallback />}>
                   <Profile />
@@ -99,10 +191,25 @@ function App() {
                   <AuthCallback />
                 </Suspense>
               } />
+              <Route path="/auth/reset-password" element={
+                <Suspense fallback={<AuthLoadingFallback />}>
+                  <ResetPassword />
+                </Suspense>
+              } />
               {/* Shop Routes */}
               <Route path="/shop" element={
                 <Suspense fallback={<AuthLoadingFallback />}>
                   <Shop />
+                </Suspense>
+              } />
+              <Route path="/shop/sale/:saleId/item/:itemId" element={
+                <Suspense fallback={<AuthLoadingFallback />}>
+                  <PrivateSaleProduct />
+                </Suspense>
+              } />
+              <Route path="/shop/sale/:saleId" element={
+                <Suspense fallback={<AuthLoadingFallback />}>
+                  <PrivateSale />
                 </Suspense>
               } />
               <Route path="/checkout" element={
@@ -115,14 +222,20 @@ function App() {
                   <CheckoutSuccess />
                 </Suspense>
               } />
+            </Route>
           </Routes>
           <CartDrawer />
+          <GuestSignupNudgeBanner />
+          <SignupWelcomeToast />
+          <GlobalSignupPromptLauncher />
         </Router>
           <Toast />
+          <FavoriteToast />
       </div>
       </CartProvider>
-      </AuthProvider>
-    </PerformanceErrorBoundary>
+      </FavoritesProvider>
+      </PerformanceErrorBoundary>
+    </AuthProvider>
   )
 }
 

@@ -1,17 +1,20 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
-import { 
-  generateShareUrl, 
-  generateShareText, 
-  shareToWhatsApp, 
-  shareToFacebook, 
-  shareToTwitter, 
-  shareToInstagram, 
-  shareToPinterest, 
-  copyToClipboard, 
-  shareToEmail, 
-  shareToTelegram 
+import {
+  generateShareUrl,
+  generateShareText,
+  generatePostShareUrl,
+  generatePostShareText,
+  shareToWhatsApp,
+  shareToFacebook,
+  shareToTwitter,
+  shareToInstagram,
+  shareToPinterest,
+  copyToClipboard,
+  shareToEmail,
+  shareToTelegram
 } from '../../utils/sharing'
 
 const ShareContainer = styled.div`
@@ -53,39 +56,107 @@ const ShareText = styled.span`
 `
 
 const ShareDropdown = styled.div`
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  /* Mobile: Bottom sheet style */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  padding: 0.75rem;
-  margin-top: 0.5rem;
-  z-index: 1000;
-  min-width: 200px;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.15);
+  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: 10001;
   backdrop-filter: blur(20px);
   border: 1px solid rgba(0, 0, 0, 0.08);
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -6px;
+  border-bottom: none;
+  animation: slideUp 0.25s ease-out forwards;
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  /* Desktop: Centered modal style */
+  @media (min-width: 768px) {
+    bottom: auto;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-bottom: 6px solid white;
+    right: auto;
+    transform: translate(-50%, -50%);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    padding: 1.25rem;
+    min-width: 320px;
+    max-width: 400px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    animation: fadeInScale 0.2s ease-out forwards;
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+  }
+`
+
+const ShareHandle = styled.div`
+  width: 36px;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+  margin: 0 auto 0.75rem;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+`
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 50%;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover {
+    background: #e0e0e0;
+    color: #333;
+  }
+
+  @media (min-width: 768px) {
+    display: flex;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
   }
 `
 
 const ShareTitle = styled.div`
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #666;
-  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
   text-align: center;
 `
 
@@ -96,27 +167,28 @@ const ShareGrid = styled.div`
 `
 
 const ShareOption = styled.button`
-  background: #f8f9fa;
+  background: #f5f5f5;
   border: none;
-  border-radius: 8px;
-  padding: 0.5rem;
+  border-radius: 12px;
+  padding: 0.75rem 0.5rem;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  transition: all 0.2s ease;
+  gap: 0.4rem;
+  transition: all 0.15s ease;
   font-size: 0.7rem;
   font-weight: 500;
   color: #333;
-  
+  -webkit-tap-highlight-color: transparent;
+
   &:hover {
-    background: #e9ecef;
-    transform: translateY(-1px);
+    background: #ebebeb;
   }
-  
+
   &:active {
-    transform: translateY(0);
+    background: #e0e0e0;
+    transform: scale(0.96);
   }
 `
 
@@ -124,12 +196,12 @@ const ShareIconSmall = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  
+  width: 28px;
+  height: 28px;
+
   svg {
-    width: 16px;
-    height: 16px;
+    width: 24px;
+    height: 24px;
   }
 `
 
@@ -139,16 +211,24 @@ const Overlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 999;
-  background: rgba(0, 0, 0, 0.05);
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.5);
 `
 
-export default function SubtleShareButton({ outfit, className }) {
+export default function SubtleShareButton({ outfit, post, className }) {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
-  
-  const shareUrl = generateShareUrl(outfit.id)
-  const shareText = generateShareText(outfit.title)
+
+  // Support both outfit and post sharing
+  const shareUrl = post
+    ? generatePostShareUrl(post)
+    : generateShareUrl(outfit)
+  const shareText = post
+    ? generatePostShareText(post.title || post.titleEn)
+    : generateShareText(outfit.title)
+  const shareImage = post
+    ? post.featuredImage
+    : outfit?.image
   
   const shareOptions = [
     {
@@ -182,11 +262,11 @@ export default function SubtleShareButton({ outfit, className }) {
       action: () => shareToFacebook(shareUrl, shareText)
     },
     {
-      id: 'twitter',
-      name: 'Twitter',
+      id: 'x',
+      name: 'X',
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
         </svg>
       ),
       action: () => shareToTwitter(shareUrl, shareText)
@@ -199,7 +279,7 @@ export default function SubtleShareButton({ outfit, className }) {
           <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.746-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.001z"/>
         </svg>
       ),
-      action: () => shareToPinterest(shareUrl, shareText, outfit.image)
+      action: () => shareToPinterest(shareUrl, shareText, shareImage)
     },
     {
       id: 'telegram',
@@ -229,7 +309,7 @@ export default function SubtleShareButton({ outfit, className }) {
           <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
         </svg>
       ),
-      action: () => copyToClipboard(shareUrl, shareText)
+      action: () => copyToClipboard(shareUrl)
     }
   ]
   
@@ -241,14 +321,24 @@ export default function SubtleShareButton({ outfit, className }) {
   return (
     <ShareContainer className={className}>
       <ShareIcon onClick={() => setIsOpen(!isOpen)}>
-        🔗
-        <ShareText>{t('sharing.shareWithFriend')}</ShareText>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+        <ShareText>{post ? t('sharing.sharePostWithFriend') : t('sharing.shareWithFriend')}</ShareText>
       </ShareIcon>
       
-      {isOpen && (
+      {isOpen && createPortal(
         <>
           <Overlay onClick={() => setIsOpen(false)} />
           <ShareDropdown>
+            <ShareHandle />
+            <CloseButton onClick={() => setIsOpen(false)} aria-label="Close">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </CloseButton>
             <ShareTitle>{t('sharing.shareTitle')}</ShareTitle>
             <ShareGrid>
               {shareOptions.map((option) => (
@@ -262,7 +352,8 @@ export default function SubtleShareButton({ outfit, className }) {
               ))}
             </ShareGrid>
           </ShareDropdown>
-        </>
+        </>,
+        document.body
       )}
     </ShareContainer>
   )

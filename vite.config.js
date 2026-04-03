@@ -30,20 +30,20 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           // Core React and react-i18next together - react-i18next needs React
-          if (id.includes('node_modules/react/') || 
+          if (id.includes('node_modules/react/') ||
               id.includes('node_modules/react-dom/') ||
               id.includes('node_modules/react-i18next')) {
             return 'react-vendor'
           }
-          // Router - needed for navigation
+          // Router - needed for navigation (critical path)
           if (id.includes('node_modules/react-router')) {
             return 'router'
           }
-          // Styled components - needed for UI
+          // Styled components - needed for UI (critical path)
           if (id.includes('node_modules/styled-components')) {
             return 'styled'
           }
-          // Supabase - lazy loaded
+          // Supabase - defer loading (not critical for initial render)
           if (id.includes('node_modules/@supabase')) {
             return 'supabase'
           }
@@ -51,10 +51,15 @@ export default defineConfig({
           if (id.includes('node_modules/i18next') || id.includes('node_modules/i18next-browser-languagedetector')) {
             return 'i18n'
           }
-          // Auth pages - loaded on demand
-          if (id.includes('/pages/auth/')) {
-            return 'auth'
+          // Critical page components - predictable names for preloading
+          if (id.includes('components/pages/OutfitDetail')) {
+            return 'outfit-detail'
           }
+          if (id.includes('components/pages/MainPortal')) {
+            return 'main-portal'
+          }
+          // Do not split /pages/auth/ into a separate chunk — it can duplicate React
+          // context modules and break useAuth() inside lazy-loaded Profile after signup.
         },
         // Optimize chunk names for caching
         chunkFileNames: 'assets/[name]-[hash:8].js',
@@ -96,14 +101,19 @@ export default defineConfig({
   server: {
     // Enable HMR
     hmr: true,
-    // Warm up frequent files for faster dev experience
-    warmup: {
-      clientFiles: [
-        './src/components/pages/MainPortal.jsx',
-        './src/components/pages/OutfitDetail.jsx',
-        './src/App.jsx'
-      ]
-    }
+    // Warmup can improve HMR later, but makes "npm run dev" feel slower.
+    // Enable only when needed: VITE_WARMUP=true
+    ...(process.env.VITE_WARMUP === 'true'
+      ? {
+          warmup: {
+            clientFiles: [
+              './src/components/pages/MainPortal.jsx',
+              './src/components/pages/OutfitDetail.jsx',
+              './src/App.jsx'
+            ]
+          }
+        }
+      : {})
   },
   // Preview server optimizations
   preview: {
@@ -121,8 +131,8 @@ export default defineConfig({
     // Remove legal comments in production
     legalComments: 'none',
     // Target modern browsers
-    target: 'es2020'
-    // Note: Console statements are kept for debugging in production
-    // To remove console.log, install babel-plugin-transform-remove-console as a dev dependency
+    target: 'es2020',
+    // Remove console.* and debugger statements in production
+    drop: ['console', 'debugger']
   }
 })

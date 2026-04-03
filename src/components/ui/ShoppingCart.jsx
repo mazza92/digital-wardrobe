@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import styled from 'styled-components'
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 
 const CartContainer = styled.div`
   position: fixed;
   top: 0;
   right: 0;
+  bottom: 0;
   width: 100%;
   max-width: 400px;
-  height: 100vh;
   background: white;
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
   z-index: 1000;
@@ -15,6 +16,8 @@ const CartContainer = styled.div`
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 `
 
 const CartHeader = styled.div`
@@ -210,23 +213,24 @@ const CheckoutButton = styled.button`
 
 const Overlay = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
   opacity: ${props => props.isOpen ? 1 : 0};
   visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
   transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
 `
 
 function ShoppingCart({ isOpen, onClose, cart, updateQuantity, removeFromCart, getCartTotal }) {
+  // Lock body scroll when cart is open
+  useBodyScrollLock(isOpen)
+
   const formatPrice = (priceString) => {
-    if (!priceString) return 'Prix non disponible'
+    if (priceString == null || priceString === '') return ''
     
     // If price already contains currency symbol, return as-is
-    if (priceString.includes('€') || priceString.includes('$') || priceString.includes('£')) {
+    if (String(priceString).includes('€') || String(priceString).includes('$') || String(priceString).includes('£')) {
       return priceString
     }
     
@@ -267,7 +271,9 @@ function ShoppingCart({ isOpen, onClose, cart, updateQuantity, removeFromCart, g
                 <ItemDetails>
                   <ItemName>{item.name}</ItemName>
                   <ItemBrand>{item.brand}</ItemBrand>
-                  <ItemPrice>{formatPrice(item.price)}</ItemPrice>
+                  {item.price != null && item.price !== '' && (
+                    <ItemPrice>{formatPrice(item.price)}</ItemPrice>
+                  )}
                   <QuantityControls>
                     <QuantityButton 
                       onClick={() => handleQuantityChange(item.id, item.quantity - 1)}

@@ -12,13 +12,20 @@ const fadeIn = keyframes`
 `;
 
 const ImageContainer = styled.div`
-  position: relative;
-  width: 100%;
+  position: ${props => props.$fill ? 'absolute' : 'relative'};
+  ${props => props.$fill ? css`
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  ` : css`
+    width: 100%;
+  `}
   overflow: hidden;
   background: ${props => props.$bgColor || '#f5f5f5'};
   /* Prevent layout shift with contain */
   contain: layout style paint;
-  ${props => props.$aspectRatio && css`
+  ${props => !props.$fill && props.$aspectRatio && css`
     aspect-ratio: ${props.$aspectRatio};
   `}
 `;
@@ -29,23 +36,27 @@ const Placeholder = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #f5f5f5 25%, #ebebeb 50%, #f5f5f5 75%);
   background-size: 200% 100%;
-  animation: ${shimmer} 1.5s infinite;
+  animation: ${shimmer} 1.2s ease-in-out infinite;
+  z-index: 1;
 `;
 
 const StyledImage = styled.img.withConfig({
-  shouldForwardProp: (prop) => !['$objectFit', '$objectPosition', '$loaded'].includes(prop)
+  shouldForwardProp: (prop) => !prop.startsWith('$')
 })`
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: ${props => props.$objectFit || 'cover'};
   object-position: ${props => props.$objectPosition || 'center'};
   opacity: ${props => props.$loaded ? 1 : 0};
-  transition: opacity 0.2s ease-out;
-  /* GPU acceleration and prevent layout shift */
+  transition: opacity 0.3s ease-out;
+  z-index: 2;
+  /* GPU acceleration */
   will-change: opacity;
-  contain: layout paint;
 `;
 
 const BlurredPreview = styled.img`
@@ -87,6 +98,7 @@ const OptimizedImage = memo(({
   onLoad,
   onError,
   bgColor,
+  fill = false,
   ...props
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -126,13 +138,17 @@ const OptimizedImage = memo(({
     onError?.(e);
   };
 
+  // Filter out non-DOM props to prevent React warnings
+  const { isEager, ...domProps } = props;
+  
   return (
     <ImageContainer
       ref={containerRef}
       className={className}
       $aspectRatio={aspectRatio}
       $bgColor={bgColor}
-      {...props}
+      $fill={fill}
+      {...domProps}
     >
       {/* Shimmer placeholder */}
       {!isLoaded && !hasError && <Placeholder />}
@@ -154,8 +170,6 @@ const OptimizedImage = memo(({
           alt={alt}
           srcSet={srcSet}
           sizes={sizes}
-          width="400"
-          height="533"
           $loaded={isLoaded}
           $objectFit={objectFit}
           $objectPosition={objectPosition}
@@ -178,7 +192,11 @@ const OptimizedImage = memo(({
           fontSize: '0.875rem',
           textAlign: 'center'
         }}>
-          📷
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+          </svg>
         </div>
       )}
     </ImageContainer>

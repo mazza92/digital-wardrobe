@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="fr">
   <head>
-    <!-- IMMEDIATE: Unregister service workers and clear cache BEFORE anything loads -->
     <script>
       (function() {
         if ('serviceWorker' in navigator) {
@@ -21,9 +20,7 @@
       })();
     </script>
 
-    <!-- Optimized hybrid storage: Fast synchronous operations -->
     <script>
-      // Suppress ALL storage errors (from extensions, early code, etc)
       window.addEventListener('unhandledrejection', function(e) {
         var msg = e.reason && e.reason.message ? String(e.reason.message) : '';
         if (msg.indexOf('storage') > -1 || msg.indexOf('Storage') > -1) {
@@ -43,7 +40,6 @@
       (function() {
         'use strict';
 
-        // Memory storage fallback (pure JS object - very fast)
         function MemStorage() {
           var d = {};
           this.getItem = function(k) { return d[k] || null; };
@@ -54,7 +50,6 @@
           Object.defineProperty(this, 'length', { get: function() { return Object.keys(d).length; }});
         }
 
-        // Test storage availability ONCE upfront (not on every operation)
         function isStorageAvailable(storageType) {
           try {
             var storage = window[storageType];
@@ -67,22 +62,15 @@
           }
         }
 
-        // Create optimized hybrid storage (decided once, fast operations)
         function createHybridStorage(storageType) {
           var canUseNative = isStorageAvailable(storageType);
-
           if (canUseNative) {
-            console.log(storageType + ' available - using native');
-            // Return native storage directly (fastest)
             return window[storageType];
           } else {
-            console.log(storageType + ' blocked - using memory fallback');
-            // Return memory storage (still fast, no try-catch overhead)
             return new MemStorage();
           }
         }
 
-        // Replace with optimized storage (single decision, no runtime overhead)
         try {
           Object.defineProperty(window, 'localStorage', {
             value: createHybridStorage('localStorage'),
@@ -100,121 +88,257 @@
             writable: false
           });
         } catch(e) { window.sessionStorage = createHybridStorage('sessionStorage'); }
-
-        console.log('Optimized storage ready');
       })();
     </script>
 
-    <!-- Basic Meta Tags -->
+    <script>
+      (function() {
+        var API_URL = 'https://admin.emmanuellek.com/api';
+        var path = window.location.pathname;
+        var outfitSlug = path.startsWith('/outfits/') ? path.split('/outfits/')[1] : null;
+
+        function getCachedData(key) {
+          try {
+            var cached = sessionStorage.getItem(key);
+            if (cached) {
+              var parsed = JSON.parse(cached);
+              if (parsed.data && (Date.now() - parsed.timestamp) < 30 * 60 * 1000) {
+                return parsed.data;
+              }
+            }
+          } catch(e) {}
+          return null;
+        }
+
+        function shouldRefresh(key) {
+          try {
+            var cached = sessionStorage.getItem(key);
+            if (!cached) return true;
+            return (Date.now() - JSON.parse(cached).timestamp) > 5 * 60 * 1000;
+          } catch(e) { return true; }
+        }
+
+        window.__renderOutfitPage = function(outfit, isLightMode) {
+          if (!outfit) return;
+          if (window.__outfitRendered && !isLightMode) return;
+          window.__outfitRendered = true;
+
+          var container = document.getElementById('outfit-skeleton');
+          if (!container) return;
+
+          var loader = document.getElementById('initial-loader');
+          if (loader) loader.style.display = 'none';
+
+          var placeholder = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400"%3E%3Crect fill="%23f0f0f0" width="300" height="400"/%3E%3C/svg%3E';
+
+          var productsHtml = '';
+          var products = outfit.products || [];
+          products.slice(0, 6).forEach(function(p) {
+            var link = p.link || '#';
+            var img = p.image || p.imageUrl || placeholder;
+            var brand = p.brand || '';
+            var name = p.name || '';
+            var price = p.price ? (p.price + '€') : '';
+            var hasPlaceholder = !p.image && !p.imageUrl;
+            productsHtml += '<a href="' + link + '" target="_blank" rel="noopener" class="ir-card">' +
+              '<div class="ir-card-img-wrap' + (hasPlaceholder ? ' ir-placeholder' : '') + '"><img src="' + img + '" alt="' + name + '" loading="' + (hasPlaceholder ? 'lazy' : 'eager') + '" class="ir-card-img"></div>' +
+              '<div class="ir-card-info"><div class="ir-brand">' + brand + '</div><div class="ir-name">' + name + '</div>' +
+              (price ? '<div class="ir-price">' + price + '</div>' : '') +
+              '<div class="ir-btn">Commander</div></div></a>';
+          });
+
+          var outfitImg = outfit.image || placeholder;
+          var outfitHasPlaceholder = !outfit.image;
+
+          container.innerHTML =
+            '<header class="ir-header"><a href="/" class="ir-logo">Emmanuelle K</a></header>' +
+            '<div class="ir-main">' +
+              '<div class="ir-img-col' + (outfitHasPlaceholder ? ' ir-placeholder' : '') + '"><img src="' + outfitImg + '" alt="' + (outfit.title || 'Outfit') + '" class="ir-outfit-img" loading="eager"></div>' +
+              '<div class="ir-products-col"><h1 class="ir-title">' + (outfit.title || '') + '</h1><div class="ir-grid">' + productsHtml + '</div></div>' +
+            '</div>';
+
+          container.classList.add('active');
+          container.classList.add('ir-rendered');
+        };
+
+        if (outfitSlug) {
+          var cachedOutfit = getCachedData('dw_outfit_' + outfitSlug);
+          if (cachedOutfit) {
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', function() { window.__renderOutfitPage(cachedOutfit, false); });
+            } else {
+              window.__renderOutfitPage(cachedOutfit, false);
+            }
+          }
+
+          fetch(API_URL + '/outfits/public/' + outfitSlug + '?light=true')
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(d) {
+              if (d && d.outfit) {
+                window.__renderOutfitPage(d.outfit, true);
+                window.__PREFETCHED_OUTFIT__ = d.outfit;
+
+                if (d.outfit.hasBase64Image || d.outfit.products.some(function(p) { return p.hasBase64Image; })) {
+                  fetch(API_URL + '/outfits/public/' + outfitSlug)
+                    .then(function(r2) { return r2.ok ? r2.json() : null; })
+                    .then(function(d2) {
+                      if (d2 && d2.outfit) {
+                        try { sessionStorage.setItem('dw_outfit_' + outfitSlug, JSON.stringify({ data: d2.outfit, timestamp: Date.now() })); } catch(e) {}
+                        window.__PREFETCHED_OUTFIT__ = d2.outfit;
+                      }
+                    });
+                } else {
+                  try { sessionStorage.setItem('dw_outfit_' + outfitSlug, JSON.stringify({ data: d.outfit, timestamp: Date.now() })); } catch(e) {}
+                }
+              }
+            })
+            .catch(function(e) {
+              if (!window.__outfitRendered) {
+                fetch(API_URL + '/outfits/public/' + outfitSlug)
+                  .then(function(r) { return r.ok ? r.json() : null; })
+                  .then(function(d) {
+                    if (d && d.outfit) {
+                      window.__renderOutfitPage(d.outfit, false);
+                      window.__PREFETCHED_OUTFIT__ = d.outfit;
+                    }
+                  });
+              }
+            });
+        }
+
+        if (!outfitSlug) {
+          var cachedOutfits = getCachedData('dw_cache_v2_outfits');
+          var cachedProfile = getCachedData('dw_cache_v2_profile');
+
+          if (cachedOutfits) window.__PREFETCHED_OUTFITS__ = Promise.resolve(cachedOutfits);
+          if (cachedProfile) window.__PREFETCHED_PROFILE__ = Promise.resolve(cachedProfile);
+
+          if (!cachedOutfits || shouldRefresh('dw_cache_v2_outfits')) {
+            var p = fetch(API_URL + '/outfits/export').then(function(r) { return r.ok ? r.json() : null; })
+              .then(function(d) {
+                if (d) try { sessionStorage.setItem('dw_cache_v2_outfits', JSON.stringify({ data: d, timestamp: Date.now() })); } catch(e) {}
+                return d || cachedOutfits;
+              })
+              .catch(function() { return cachedOutfits; });
+            if (!window.__PREFETCHED_OUTFITS__) window.__PREFETCHED_OUTFITS__ = p;
+          }
+
+          if (!cachedProfile || shouldRefresh('dw_cache_v2_profile')) {
+            var q = fetch(API_URL + '/profile').then(function(r) { return r.ok ? r.json() : null; })
+              .then(function(d) { if (d) try { sessionStorage.setItem('dw_cache_v2_profile', JSON.stringify({ data: d, timestamp: Date.now() })); } catch(e) {} return d || cachedProfile; })
+              .catch(function() { return cachedProfile; });
+            if (!window.__PREFETCHED_PROFILE__) window.__PREFETCHED_PROFILE__ = q;
+          }
+        }
+      })();
+    </script>
+
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="Emmanuelle K" />
     <meta name="language" content="French" />
     <meta name="revisit-after" content="7 days" />
-    
-    <!-- Primary Meta Tags -->
-    <title>Virtual Dressing - Mode de Luxe avec Emmanuelle K</title>
-    <meta name="title" content="Virtual Dressing - Mode de Luxe avec Emmanuelle K" />
+
+    <title>Emmanuelle K - CuratedCloset</title>
+    <meta name="title" content="Emmanuelle K - CuratedCloset" />
     <meta name="description" content="Découvrez les looks élégants et sophistiqués d'Emmanuelle K. Shopping mode de luxe avec des tenues stylées et des produits sélectionnés. Influenceur mode française." />
     <meta name="keywords" content="mode, luxe, fashion, style, tenues, shopping, Emmanuelle K, influenceur mode, looks élégants, mode féminine, tendances mode, shopping en ligne, produits de luxe, styling, outfits" />
-    
-    <!-- Open Graph / Facebook -->
+
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://digital-wardrobe-puce.vercel.app/" />
-    <meta property="og:title" content="Virtual Dressing - Mode de Luxe avec Emmanuelle K" />
+    <meta property="og:url" content="https://emmanuellek.com/" />
+    <meta property="og:title" content="Emmanuelle K - CuratedCloset" />
     <meta property="og:description" content="Découvrez les looks élégants et sophistiqués d'Emmanuelle K. Shopping mode de luxe avec des tenues stylées et des produits sélectionnés." />
-    <meta property="og:image" content="https://www.na-kd.com/cdn-cgi/image/quality=80,sharpen=0.3,width=984/globalassets/oversized_belted_trenchcoat_1858-000002-0765_3_campaign.jpg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Emmanuelle K - Fashion Influencer" />
-    <meta property="og:site_name" content="Virtual Dressing" />
+    <meta property="og:image" content="https://emmanuellek.com/favicon.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="Emmanuelle K - CuratedCloset" />
+    <meta property="og:site_name" content="Emmanuelle K" />
     <meta property="og:locale" content="fr_FR" />
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://digital-wardrobe-puce.vercel.app/" />
-    <meta property="twitter:title" content="Virtual Dressing - Mode de Luxe avec Emmanuelle K" />
+
+    <meta property="twitter:card" content="summary" />
+    <meta property="twitter:url" content="https://emmanuellek.com/" />
+    <meta property="twitter:title" content="Emmanuelle K - CuratedCloset" />
     <meta property="twitter:description" content="Découvrez les looks élégants et sophistiqués d'Emmanuelle K. Shopping mode de luxe avec des tenues stylées et des produits sélectionnés." />
-    <meta property="twitter:image" content="https://www.na-kd.com/cdn-cgi/image/quality=80,sharpen=0.3,width=984/globalassets/oversized_belted_trenchcoat_1858-000002-0765_3_campaign.jpg" />
-    <meta property="twitter:image:alt" content="Emmanuelle K - Fashion Influencer" />
+    <meta property="twitter:image" content="https://emmanuellek.com/favicon.png" />
+    <meta property="twitter:image:alt" content="Emmanuelle K - CuratedCloset" />
     <meta property="twitter:site" content="@emmanuellek" />
     <meta property="twitter:creator" content="@emmanuellek" />
-    
-    <!-- Favicon and Icons -->
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="shortcut icon" href="/favicon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#1a1a1a" />
     <meta name="msapplication-TileColor" content="#1a1a1a" />
-    
-    <!-- Preconnect to external domains -->
+    <meta name="msapplication-TileImage" content="/favicon.png" />
+    <meta name="apple-mobile-web-app-title" content="Emmanuelle K" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://digital-wardrobe-admin.vercel.app" />
+    <link rel="preconnect" href="https://admin.emmanuellek.com" />
+    <link rel="dns-prefetch" href="https://admin.emmanuellek.com" />
     <link rel="preconnect" href="https://ycxfqhuwtlujuumgejlo.supabase.co" />
-    <link rel="preconnect" href="https://www.google-analytics.com" />
-    <link rel="preconnect" href="https://www.googletagmanager.com" />
-    
-    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://ycxfqhuwtlujuumgejlo.supabase.co" />
+    <link rel="dns-prefetch" href="https://cdn.shopify.com" />
+    <link rel="dns-prefetch" href="https://cdn-cgi.image" />
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="//digital-wardrobe-admin.vercel.app" />
+    <link rel="dns-prefetch" href="//admin.emmanuellek.com" />
     <link rel="dns-prefetch" href="//ycxfqhuwtlujuumgejlo.supabase.co" />
     <link rel="dns-prefetch" href="//www.google-analytics.com" />
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
-    
-    <!-- Fonts - Non-blocking with font-display: optional to prevent CLS -->
+
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=optional" /></noscript>
-    
-    <!-- Structured Data -->
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&display=optional" /></noscript>
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-             "name": "Virtual Dressing",
-      "url": "https://digital-wardrobe-puce.vercel.app",
+      "name": "Emmanuelle K",
+      "url": "https://emmanuellek.com",
       "description": "Découvrez les looks élégants et sophistiqués d'Emmanuelle K. Shopping mode de luxe avec des tenues stylées et des produits sélectionnés.",
       "author": {
         "@type": "Person",
         "name": "Emmanuelle K",
-        "url": "https://digital-wardrobe-puce.vercel.app",
-        "image": "https://www.na-kd.com/cdn-cgi/image/quality=80,sharpen=0.3,width=984/globalassets/oversized_belted_trenchcoat_1858-000002-0765_3_campaign.jpg",
+        "url": "https://emmanuellek.com",
+        "image": "https://emmanuellek.com/favicon.png",
         "sameAs": [
           "https://instagram.com/emmanuellek",
-          "https://tiktok.com/@emmanuellek",
-          "https://youtube.com/@emmanuellek",
-          "https://pinterest.com/emmanuellek"
+          "https://tiktok.com/@emmanuellek"
         ]
       },
       "publisher": {
         "@type": "Organization",
-             "name": "Virtual Dressing",
+        "name": "Emmanuelle K",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://digital-wardrobe-puce.vercel.app/logo.png"
+          "url": "https://emmanuellek.com/favicon.png"
         }
       },
       "potentialAction": {
         "@type": "SearchAction",
         "target": {
           "@type": "EntryPoint",
-          "urlTemplate": "https://digital-wardrobe-puce.vercel.app/search?q={search_term_string}"
+          "urlTemplate": "https://emmanuellek.com/search?q={search_term_string}"
         },
         "query-input": "required name=search_term_string"
       }
     }
     </script>
-    
-    <!-- Additional Person Schema -->
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Person",
       "name": "Emmanuelle K",
       "description": "Créatrice de contenu mode et lifestyle de luxe. Partageant un style élégant et sophistiqué pour la femme moderne.",
-      "image": "https://www.na-kd.com/cdn-cgi/image/quality=80,sharpen=0.3,width=984/globalassets/oversized_belted_trenchcoat_1858-000002-0765_3_campaign.jpg",
-      "url": "https://digital-wardrobe-puce.vercel.app",
+      "image": "https://emmanuellek.com/favicon.png",
+      "url": "https://emmanuellek.com",
       "jobTitle": "Fashion Influencer & Content Creator",
       "worksFor": {
         "@type": "Organization",
@@ -222,9 +346,7 @@
       },
       "sameAs": [
         "https://instagram.com/emmanuellek",
-        "https://tiktok.com/@emmanuellek",
-        "https://youtube.com/@emmanuellek",
-        "https://pinterest.com/emmanuellek"
+        "https://tiktok.com/@emmanuellek"
       ],
       "knowsAbout": [
         "Fashion",
@@ -243,26 +365,126 @@
       }
     }
     </script>
-    
-    <!-- Security Headers -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://www.google-analytics.com https://www.googletagmanager.com https://static.shopmy.us; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://digital-wardrobe-admin.vercel.app https://www.google-analytics.com https://www.googletagmanager.com https://ycxfqhuwtlujuumgejlo.supabase.co https://*.supabase.co https://static.shopmy.us https://go.shopmy.us;" />
-    
-    <!-- Critical CSS inline for faster first paint -->
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://www.google-analytics.com https://www.googletagmanager.com https://static.shopmy.us; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://admin.emmanuellek.com http://localhost:3000 https://www.google-analytics.com https://www.googletagmanager.com https://ycxfqhuwtlujuumgejlo.supabase.co https://*.supabase.co https://static.shopmy.us https://go.shopmy.us;" />
+
     <style>
-      /* Critical CSS - Inline for faster FCP */
-      body { 
-        margin: 0; 
+      body {
+        margin: 0;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         background: #FDFCF8;
         -webkit-font-smoothing: antialiased;
       }
-      /* Font loading optimization - prevent FOUT/CLS */
       body.fonts-loaded { font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
       #root { min-height: 100vh; contain: layout style; }
+
+      @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .skeleton-shimmer {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s ease-in-out infinite;
+      }
+
+      .outfit-skeleton { display: none; max-width: 1200px; margin: 0 auto; padding: 0; }
+      .outfit-skeleton.active { display: block; }
+
+      .ir-header {
+        background: #fdfcf8;
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .ir-logo {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #101010;
+        text-decoration: none;
+      }
+      .ir-main { padding: 1rem; }
+      .ir-outfit-img {
+        width: 100%;
+        aspect-ratio: 3/4;
+        object-fit: cover;
+        border-radius: 4px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+      }
+      .ir-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        color: #101010;
+      }
+      .ir-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+      .ir-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid rgba(0,0,0,0.08);
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      .ir-card-img-wrap { aspect-ratio: 3/4; overflow: hidden; background: #f5f5f5; }
+      .ir-card-img { width: 100%; height: 100%; object-fit: cover; }
+      .ir-placeholder { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; }
+      .ir-img-col.ir-placeholder { border-radius: 4px; }
+      .ir-card-info { padding: 0.75rem; }
+      .ir-brand { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+      .ir-name { font-size: 0.85rem; font-weight: 500; color: #101010; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .ir-price { font-size: 0.85rem; font-weight: 600; color: #101010; margin-bottom: 8px; }
+      .ir-btn {
+        background: #101010;
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+      @media (min-width: 768px) {
+        .ir-main { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem; align-items: start; }
+        .ir-outfit-img { aspect-ratio: 4/5; }
+        .ir-title { margin-top: 0; }
+      }
+      .ir-rendered .outfit-skeleton-header,
+      .ir-rendered .outfit-skeleton-img,
+      .ir-rendered .outfit-skeleton-grid { display: none; }
+
+      .outfit-skeleton-header {
+        background: #fdfcf8;
+        padding: 0.875rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .outfit-skeleton-brand { font-size: 1.1rem; font-weight: 600; color: #101010; }
+      .outfit-skeleton-img { width: 100%; aspect-ratio: 3/4; border-radius: 4px; margin: 1rem; box-sizing: border-box; }
+      .outfit-skeleton-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; padding: 1rem; }
+      .outfit-skeleton-card { background: white; border-radius: 12px; border: 1px solid rgba(0, 0, 0, 0.08); overflow: hidden; }
+      .outfit-skeleton-card-img { width: 100%; aspect-ratio: 3/4; }
+      .outfit-skeleton-card-content { padding: 0.75rem; }
+      .outfit-skeleton-text { height: 14px; border-radius: 4px; margin-bottom: 0.5rem; }
+      .outfit-skeleton-btn { height: 36px; border-radius: 8px; margin-top: 0.75rem; }
+      @media (min-width: 768px) {
+        .outfit-skeleton.active:not(.ir-rendered) { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem; }
+      }
+
       .initial-loader {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: #FDFCF8;
+        background: #ffffff;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -277,14 +499,29 @@
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
       }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      /* Prevent CLS - reserve space for images */
-      img { content-visibility: auto; }
-      /* GPU acceleration for animations */
-      * { -webkit-backface-visibility: hidden; }
     </style>
-    
-    <!-- Font loading detection -->
+
+    <script>
+      (function() {
+        var path = window.location.pathname;
+        if (path.startsWith('/outfits/')) {
+          var showSkeleton = function() {
+            var skeleton = document.getElementById('outfit-skeleton');
+            var loader = document.getElementById('initial-loader');
+            if (skeleton && !skeleton.classList.contains('active')) {
+              skeleton.classList.add('active');
+            }
+            if (loader) loader.style.display = 'none';
+          };
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', showSkeleton);
+          } else {
+            showSkeleton();
+          }
+        }
+      })();
+    </script>
+
     <script>
       if ('fonts' in document) {
         document.fonts.ready.then(function() {
@@ -294,94 +531,57 @@
         document.body.classList.add('fonts-loaded');
       }
     </script>
-    
-    <!-- Cache Busting - v4.4.0 - Optimized Storage Performance -->
-    <meta name="version" content="4.4.0" />
-    <meta name="build-time" content="2025-01-26T22:00:00Z" />
+
+    <meta name="version" content="5.0.0" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="-1" />
   </head>
   <body>
-    <!-- Skip Link for Accessibility -->
     <a href="#main-content" class="skip-link">Aller au contenu principal</a>
-    
-    <!-- Initial loader shown while JS loads -->
+
+    <div id="outfit-skeleton" class="outfit-skeleton">
+      <div class="outfit-skeleton-header"><span class="outfit-skeleton-brand">Emmanuelle K</span></div>
+      <div class="outfit-skeleton-img skeleton-shimmer"></div>
+      <div class="outfit-skeleton-grid">
+        <div class="outfit-skeleton-card"><div class="outfit-skeleton-card-img skeleton-shimmer"></div><div class="outfit-skeleton-card-content"><div class="outfit-skeleton-text skeleton-shimmer" style="width:80%"></div><div class="outfit-skeleton-text skeleton-shimmer" style="width:60%"></div><div class="outfit-skeleton-btn skeleton-shimmer"></div></div></div>
+        <div class="outfit-skeleton-card"><div class="outfit-skeleton-card-img skeleton-shimmer"></div><div class="outfit-skeleton-card-content"><div class="outfit-skeleton-text skeleton-shimmer" style="width:70%"></div><div class="outfit-skeleton-text skeleton-shimmer" style="width:50%"></div><div class="outfit-skeleton-btn skeleton-shimmer"></div></div></div>
+        <div class="outfit-skeleton-card"><div class="outfit-skeleton-card-img skeleton-shimmer"></div><div class="outfit-skeleton-card-content"><div class="outfit-skeleton-text skeleton-shimmer" style="width:75%"></div><div class="outfit-skeleton-text skeleton-shimmer" style="width:55%"></div><div class="outfit-skeleton-btn skeleton-shimmer"></div></div></div>
+        <div class="outfit-skeleton-card"><div class="outfit-skeleton-card-img skeleton-shimmer"></div><div class="outfit-skeleton-card-content"><div class="outfit-skeleton-text skeleton-shimmer" style="width:85%"></div><div class="outfit-skeleton-text skeleton-shimmer" style="width:45%"></div><div class="outfit-skeleton-btn skeleton-shimmer"></div></div></div>
+      </div>
+    </div>
+
     <div class="initial-loader" id="initial-loader">
       <div class="loader-spinner"></div>
     </div>
-    
+
     <div id="root"></div>
 
     <script type="module" src="/src/main.jsx"></script>
-    
-    <!-- ShopMy Auto-Linking Script -->
-    <!-- This script automatically converts external product links to ShopMy affiliate links -->
-    <!-- Only links without data-skip-shopmy attribute will be converted -->
+
     <script>
-      // Load ShopMy script dynamically if enabled
-      (function() {
-        // ShopMy Auto-Linking Script ID
-        var shopmyId = '2FPSlX';
-        
-        if (shopmyId && shopmyId !== 'YOUR_SHOPMY_ID') {
-          console.log('[ShopMy] Loading Auto-Linking script with ID:', shopmyId);
-          
-          // Wait for DOM to be ready
-          if (document.body) {
-            loadShopMyScript(shopmyId);
-          } else {
-            document.addEventListener('DOMContentLoaded', function() {
-              loadShopMyScript(shopmyId);
-            });
-          }
-        } else {
-          console.warn('[ShopMy] ⚠️ Script ID not configured!');
-          console.warn('[ShopMy] Please replace YOUR_SHOPMY_ID in index.html with your actual ShopMy script ID');
-          console.warn('[ShopMy] Get your ID from: Account Settings → Advanced → Auto-Linking Script');
+      window.__hideLoader = function() {
+        var loader = document.getElementById('initial-loader');
+        if (loader) {
+          loader.classList.add('hidden');
+          setTimeout(function() { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 400);
         }
-        
-        function loadShopMyScript(id) {
-          var script = document.createElement('script');
-          script.defer = true;
-          script.src = 'https://static.shopmy.us/Auto/' + id + '.js';
-          script.setAttribute('data-sms', id);
-          
-          script.onerror = function() {
-            console.error('[ShopMy] ❌ Failed to load script');
-            console.error('[ShopMy] Possible causes:');
-            console.error('[ShopMy] 1. Invalid script ID');
-            console.error('[ShopMy] 2. Domain not approved in ShopMy → Account Settings → Advanced → Allowed Domains');
-            console.error('[ShopMy] 3. Network/CORS issue');
-          };
-          
-          script.onload = function() {
-            console.log('[ShopMy] ✅ Script loaded successfully');
-            console.log('[ShopMy] Auto-linking is now active for external product links');
-          };
-          
-          document.body.appendChild(script);
+        var skeleton = document.getElementById('outfit-skeleton');
+        if (skeleton) {
+          skeleton.style.opacity = '0';
+          skeleton.style.transition = 'opacity 0.15s ease';
+          setTimeout(function() { if (skeleton.parentNode) skeleton.parentNode.removeChild(skeleton); }, 200);
         }
-      })();
-    </script>
-    
-    <!-- Hide loader once React mounts -->
-    <script>
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          var loader = document.getElementById('initial-loader');
-          if (loader) loader.classList.add('hidden');
-        }, 100);
+      };
+      document.addEventListener('DOMContentLoaded', function() {
+        var path = window.location.pathname;
+        if (!path.startsWith('/outfits/')) {
+          setTimeout(window.__hideLoader, 2000);
+        }
+        else {
+          setTimeout(window.__hideLoader, 8000);
+        }
       });
     </script>
-    
-    <!-- Google Analytics (if enabled) -->
-    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'GA_MEASUREMENT_ID');
-    </script> -->
   </body>
 </html>

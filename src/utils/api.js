@@ -1,158 +1,193 @@
 // API utility functions for the Digital Wardrobe frontend
-// With caching for better performance
+// With multi-level caching for better performance
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://digital-wardrobe-admin.vercel.app/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://admin.emmanuellek.com/api'
 
-// Cache configuration
-const CACHE_DURATION = 10 * 60 * 1000 // 10 minutes - increased for better performance
-const STALE_WHILE_REVALIDATE = 60 * 60 * 1000 // 1 hour - serve stale while revalidating
+// Cache configuration - Balance between performance and freshness
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes - reduced for faster updates
+const STALE_WHILE_REVALIDATE = 15 * 60 * 1000 // 15 minutes - serve stale while revalidating
+// Profile cache shorter so back-office changes appear sooner when refetch runs
+const PROFILE_CACHE_DURATION = 1 * 60 * 1000 // 1 minute
 const cache = new Map()
 
 // In-flight request deduplication
 const pendingRequests = new Map()
 
-const getCachedData = (key) => {
+// Persistent storage helpers (sessionStorage for faster subsequent page loads)
+const STORAGE_PREFIX = 'dw_cache_'
+// Bump to drop stale sessionStorage after changing TTL or cache behaviour
+const STORAGE_VERSION = 'v4'
+
+const getStorageKey = (key) => `${STORAGE_PREFIX}${STORAGE_VERSION}_${key}`
+
+const getFromStorage = (key) => {
+  try {
+    const stored = sessionStorage.getItem(getStorageKey(key))
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      // Keep short so admin edits (profile, outfits) show up without long-lived stale tabs
+      if (Date.now() - parsed.timestamp < 5 * 60 * 1000) {
+        return parsed
+      }
+    }
+  } catch {
+    // Ignore storage errors
+  }
+  return null
+}
+
+const setToStorage = (key, data) => {
+  try {
+    sessionStorage.setItem(getStorageKey(key), JSON.stringify({
+      data,
+      timestamp: Date.now()
+    }))
+  } catch {
+    // Ignore storage errors (quota exceeded, etc.)
+  }
+}
+
+// Initialize memory cache from storage on module load
+const initCacheFromStorage = () => {
+  for (const key of ['outfits', 'profile']) {
+    const stored = getFromStorage(key)
+    if (stored) {
+      cache.set(key, stored)
+    }
+  }
+}
+initCacheFromStorage()
+
+const getCachedData = (key, options = {}) => {
   const cached = cache.get(key)
   if (!cached) return { data: null, isStale: false }
-  
+  const ttl = options.profileTtl ? PROFILE_CACHE_DURATION : CACHE_DURATION
+  const staleTtl = options.profileTtl ? PROFILE_CACHE_DURATION * 2 : STALE_WHILE_REVALIDATE
   const age = Date.now() - cached.timestamp
-  if (age < CACHE_DURATION) {
+  if (age < ttl) {
     return { data: cached.data, isStale: false }
   }
-  if (age < STALE_WHILE_REVALIDATE) {
+  if (age < staleTtl) {
     return { data: cached.data, isStale: true }
   }
   return { data: null, isStale: false }
 }
 
 const setCachedData = (key, data) => {
-  cache.set(key, { data, timestamp: Date.now() })
+  const entry = { data, timestamp: Date.now() }
+  cache.set(key, entry)
+  // Persist critical data to storage for faster subsequent page loads
+  if (key === 'outfits' || key === 'profile') {
+    setToStorage(key, data)
+  }
+}
+
+// Generic fetch function with caching
+const fetchWithCache = async (url, cacheKey, options = {}) => {
+  if (!options.forceRefresh) {
+    const { data: cachedData, isStale } = getCachedData(cacheKey, { profileTtl: cacheKey === 'profile' })
+    if (cachedData && !isStale) {
+      return cachedData
+    }
+    if (cachedData && isStale) {
+      fetchFromNetwork(url, cacheKey, options).catch(() => {})
+      return cachedData
+    }
+  }
+  return fetchFromNetwork(url, cacheKey, options)
+}
+
+// Separate network fetch with request deduplication
+const fetchFromNetwork = async (url, cacheKey, options = {}) => {
+  // Deduplicate in-flight requests
+  if (pendingRequests.has(cacheKey)) {
+    return pendingRequests.get(cacheKey)
+  }
+  
+  const fetchPromise = (async () => {
+    try {
+      const response = await fetch(url, {
+        mode: 'cors',
+        cache: options.forceRefresh ? 'no-store' : 'default',
+        headers: {
+          'Accept': 'application/json',
+          ...options.headers
+        },
+        ...options.fetchOptions
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setCachedData(cacheKey, data)
+        return data
+      } else {
+        throw new Error(`API not available: ${response.status}`)
+      }
+    } catch (error) {
+      // Return cached data even if expired on error
+      const cached = cache.get(cacheKey)
+      if (cached) {
+        return cached.data
+      }
+      throw error
+    } finally {
+      pendingRequests.delete(cacheKey)
+    }
+  })()
+  
+  pendingRequests.set(cacheKey, fetchPromise)
+  return fetchPromise
 }
 
 export const fetchOutfits = async (forceRefresh = false) => {
-  const cacheKey = 'outfits'
-  
-  // Return cached data if available and not forcing refresh
-  if (!forceRefresh) {
-    const { data: cachedData, isStale } = getCachedData(cacheKey)
-    if (cachedData && !isStale) {
-      return cachedData
-    }
-    // Return stale data immediately, revalidate in background
-    if (cachedData && isStale) {
-      // Revalidate in background (don't await)
-      fetchOutfitsFromNetwork(cacheKey).catch(() => {})
-      return cachedData
-    }
-  }
-  
-  return fetchOutfitsFromNetwork(cacheKey)
-}
-
-// Separate network fetch with request deduplication
-const fetchOutfitsFromNetwork = async (cacheKey) => {
-  // Deduplicate in-flight requests
-  if (pendingRequests.has(cacheKey)) {
-    return pendingRequests.get(cacheKey)
-  }
-  
-  const fetchPromise = (async () => {
-    try {
-      const url = `${API_BASE_URL}/outfits/export`
-    
-    const response = await fetch(url, {
-      mode: 'cors',
-      headers: {
-        'Accept': 'application/json',
-        }
-    })
-    
-    if (response.ok) {
-      const data = await response.json()
-        setCachedData(cacheKey, data)
+  // Use prefetched data from index.html if available (faster initial load)
+  if (!forceRefresh && window.__PREFETCHED_OUTFITS__) {
+    const prefetched = window.__PREFETCHED_OUTFITS__
+    window.__PREFETCHED_OUTFITS__ = null // Clear after first use
+    const data = await prefetched
+    if (data) {
+      setCachedData('outfits', data)
       return data
-    } else {
-      throw new Error(`API not available: ${response.status}`)
     }
-  } catch (error) {
-      // Return cached data even if expired on error
-      const cached = cache.get(cacheKey)
-      if (cached) {
-        return cached.data
-      }
-    throw error
-    } finally {
-      pendingRequests.delete(cacheKey)
-    }
-  })()
-  
-  pendingRequests.set(cacheKey, fetchPromise)
-  return fetchPromise
+  }
+  const url = `${API_BASE_URL}/outfits/export`
+  return fetchWithCache(url, 'outfits', { forceRefresh })
 }
 
 export const fetchProfile = async (forceRefresh = false) => {
-  const cacheKey = 'profile'
-  
-  // Return cached data if available and not forcing refresh
-  if (!forceRefresh) {
-    const { data: cachedData, isStale } = getCachedData(cacheKey)
-    if (cachedData && !isStale) {
-      return cachedData
-    }
-    // Return stale data immediately, revalidate in background
-    if (cachedData && isStale) {
-      fetchProfileFromNetwork(cacheKey).catch(() => {})
-      return cachedData
+  // Use prefetched data from index.html if available (faster initial load)
+  if (!forceRefresh && window.__PREFETCHED_PROFILE__) {
+    const prefetched = window.__PREFETCHED_PROFILE__
+    window.__PREFETCHED_PROFILE__ = null // Clear after first use
+    const data = await prefetched
+    if (data) {
+      setCachedData('profile', data)
+      return data
     }
   }
-  
-  return fetchProfileFromNetwork(cacheKey)
+  const url = `${API_BASE_URL}/profile`
+  return fetchWithCache(url, 'profile', { forceRefresh })
 }
 
-// Separate network fetch with request deduplication
-const fetchProfileFromNetwork = async (cacheKey) => {
-  // Deduplicate in-flight requests
-  if (pendingRequests.has(cacheKey)) {
-    return pendingRequests.get(cacheKey)
-  }
-  
-  const fetchPromise = (async () => {
-    try {
-      const url = `${API_BASE_URL}/profile`
-    
-    const response = await fetch(url, {
-      mode: 'cors',
-      headers: {
-        'Accept': 'application/json',
-        }
-    })
-    
-    if (response.ok) {
-      const data = await response.json()
-        setCachedData(cacheKey, data)
-      return data
-    } else {
-      throw new Error(`Profile API not available: ${response.status}`)
-    }
-  } catch (error) {
-      // Return cached data even if expired on error
-      const cached = cache.get(cacheKey)
-      if (cached) {
-        return cached.data
-      }
-    throw error
-    } finally {
-      pendingRequests.delete(cacheKey)
-    }
-  })()
-  
-  pendingRequests.set(cacheKey, fetchPromise)
-  return fetchPromise
+// New cached fetch functions for shop products and editorial
+export const fetchShopProducts = async (forceRefresh = false) => {
+  const url = `${API_BASE_URL}/shop/products/public`
+  return fetchWithCache(url, 'shop-products', { forceRefresh })
+}
+
+export const fetchEditorialPosts = async (forceRefresh = false) => {
+  const url = `${API_BASE_URL}/editorial/public`
+  return fetchWithCache(url, 'editorial-posts', { forceRefresh })
 }
 
 // Clear cache (useful for forced refresh)
 export const clearCache = () => {
   cache.clear()
+}
+
+// Clear specific cache entry
+export const clearCacheEntry = (key) => {
+  cache.delete(key)
 }
 
 import i18n from '../i18n/config'

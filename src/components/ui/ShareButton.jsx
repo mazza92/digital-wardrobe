@@ -49,7 +49,14 @@ const ShareButton = styled.button`
 `
 
 const ShareIcon = styled.span`
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
 `
 
 const ShareDropdown = styled.div`
@@ -114,7 +121,14 @@ const ShareOption = styled.button`
 `
 
 const ShareIconLarge = styled.span`
-  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  svg {
+    width: 24px;
+    height: 24px;
+  }
 `
 
 const Overlay = styled.div`
@@ -130,57 +144,95 @@ const Overlay = styled.div`
 export default function ShareButtonComponent({ outfit, variant = 'primary', className }) {
   const [isOpen, setIsOpen] = useState(false)
   
-  const shareUrl = generateShareUrl(outfit.id)
+  const shareUrl = generateShareUrl(outfit)
   const shareText = generateShareText(outfit.title)
   
   const shareOptions = [
     {
       id: 'whatsapp',
       name: 'WhatsApp',
-      icon: '💬',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      ),
       action: () => shareToWhatsApp(shareUrl, shareText)
     },
     {
       id: 'instagram',
       name: 'Instagram',
-      icon: '📷',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+        </svg>
+      ),
       action: () => shareToInstagram(shareUrl, shareText)
     },
     {
       id: 'facebook',
       name: 'Facebook',
-      icon: '📘',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+        </svg>
+      ),
       action: () => shareToFacebook(shareUrl, shareText)
     },
     {
-      id: 'twitter',
-      name: 'Twitter',
-      icon: '🐦',
+      id: 'x',
+      name: 'X',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+      ),
       action: () => shareToTwitter(shareUrl, shareText)
     },
     {
       id: 'pinterest',
       name: 'Pinterest',
-      icon: '📌',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+      ),
       action: () => shareToPinterest(shareUrl, shareText, outfit.image)
     },
     {
       id: 'telegram',
       name: 'Telegram',
-      icon: '✈️',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 2L11 13" />
+          <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+        </svg>
+      ),
       action: () => shareToTelegram(shareUrl, shareText)
     },
     {
       id: 'email',
       name: 'Email',
-      icon: '📧',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+          <polyline points="22,6 12,13 2,6" />
+        </svg>
+      ),
       action: () => shareToEmail(shareUrl, shareText)
     },
     {
       id: 'copy',
       name: 'Copier',
-      icon: '📋',
-      action: () => copyToClipboard(shareUrl, shareText)
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+        </svg>
+      ),
+      action: () => copyToClipboard(shareUrl)
     }
   ]
   
@@ -195,7 +247,12 @@ export default function ShareButtonComponent({ outfit, variant = 'primary', clas
         variant={variant} 
         onClick={() => setIsOpen(!isOpen)}
       >
-        <ShareIcon>🔗</ShareIcon>
+        <ShareIcon>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
+        </ShareIcon>
         Partager
       </ShareButton>
       

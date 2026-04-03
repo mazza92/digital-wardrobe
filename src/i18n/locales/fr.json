@@ -5,6 +5,7 @@
     "retry": "Réessayer",
     "close": "Fermer",
     "back": "Retour",
+    "backToHome": "Accueil",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "continue": "Continuer",
@@ -17,8 +18,13 @@
   },
   "nav": {
     "about": "À propos",
-    "outfits": "Tenues",
-    "wishlist": "Wishlist",
+    "outfits": "Looks",
+    "outfitsSubtitle": "Mes Looks",
+    "wishlist": "Éditos",
+    "wishlistSubtitle": "Mes Éditos",
+    "secretEmmanuelle": "Mes secrets",
+    "coupDeCoeur": "Ventes Privées",
+    "coupDeCoeurSubtitle": "Mes Ventes Privées",
     "shop": "Boutique",
     "login": "Connexion",
     "logout": "Déconnexion",
@@ -29,24 +35,82 @@
   "header": {
     "brand": "Digital Wardrobe"
   },
+  "secretEmmanuelle": {
+    "subtitle": "Découvrez les produits exclusifs de la boutique Emmanuelle"
+  },
+  "ventesPrivees": {
+    "subtitle": "Mes pièces préférées deviennent les tiennes, pour une seconde vie",
+    "teaserParagraph1": "Trouve ici, sur invitation, certaines pièces et accessoires qui m'ont accompagnée le temps d'un moment de vie, d'un shooting ou d'une inspiration.",
+    "teaserParagraph2": "Parce qu'ils font partie de mes préférés, parce qu'ils ont été choisis avec soin et conservés avec attention, je suis heureuse de leur offrir aujourd'hui la chance de continuer leur histoire ailleurs.",
+    "invitationCta": "Clique ici pour recevoir une invitation"
+  },
+  "coupDeCoeur": {
+    "subtitle": "Mes Éditos",
+    "accessModal": {
+      "title": "Accès Éditos",
+      "prompt": "Entrez le mot de passe pour accéder à cette rubrique.",
+      "passwordPlaceholder": "Mot de passe",
+      "submit": "Accéder",
+      "submitting": "Vérification...",
+      "errorWrong": "Mot de passe incorrect.",
+      "errorNetwork": "Erreur réseau. Réessayez."
+    }
+  },
+  "editorial": {
+    "shopTheEdit": "Shop the Edit"
+  },
+  "home": {
+    "newArrivals": "New arrivals",
+    "mostDesired": "The Most Desired",
+    "editorialPicks": "Editorial Picks",
+    "shopAll": "Shop all",
+    "seeMore": "See more",
+    "showAll": "Tout afficher",
+    "addToHomeScreen": "Ajouter à l'écran d'accueil"
+  },
   "hero": {
-    "latestOutfits": "Dernières Tenues"
+    "latestOutfits": "Dernières Tenues",
+    "curatedBy": "Tout ce que j'aime, que je porte et auquel je reviens",
+    "tagline": "Tellement heureuse de vous ouvrir mon dressing, vous y retrouverez mes looks, mes essentiels et mes secrets"
   },
   "outfit": {
     "title": "Tenue",
+    "inThisLook": "Dans ce look",
     "products": "Produits",
-    "shopNow": "Acheter",
+    "shopNow": "Découvrir",
+    "order": "Commander",
+    "discover": "Découvrir",
+    "save": "Sauvegarder",
+    "findItHere": "Où le trouver",
+    "findIt": "Le trouver",
+    "myStyle": "C'est mon style",
+    "notForMe": "Pas pour moi",
+    "saveForLater": "Sauvegarde pour plus tard",
+    "voteLove": "C'est mon style",
+    "voteNotMyStyle": "Pas mon style",
+    "voteLoveShort": "J'adore",
+    "voteNotMyStyleShort": "Passer",
+    "voteMyStyle": "Mon style",
+    "voteNotForMe": "Pas pour moi",
+    "likedByCommunity": "aimé par la communauté",
+    "noted": "C'est noté",
+    "shopTheLook": "Shop the look",
     "addToFavorites": "Sauvegarder",
     "removeFromFavorites": "Retirer des favoris",
     "recommendations": "Découvrir les autres tenues",
     "viewAll": "Voir plus",
-    "noProducts": "Prix non disponible"
+    "noProducts": "Aucun contenu disponible pour le moment",
+    "clickDotsInstruction": "Clique sur un point pour shopper",
+    "tapDotsHint": "Appuie sur un point pour shopper",
+    "productTag": "Produit"
   },
   "loading": {
     "app": "Chargement de l'application...",
     "outfit": "Chargement de la tenue...",
     "favorites": "Chargement des favoris...",
-    "about": "Chargement de la page À propos..."
+    "about": "Chargement de la page À propos...",
+    "privacy": "Chargement de la politique de confidentialité...",
+    "legal": "Chargement des informations légales..."
   },
   "error": {
     "unableToLoad": "Impossible de charger le contenu",
@@ -67,11 +131,15 @@
     "title": "Favoris",
     "empty": "Aucun favori",
     "emptyDescription": "Commencez à ajouter des produits à vos favoris",
+    "saved": "Sauvegardé",
     "remove": "Retirer",
     "clearAll": "Tout effacer",
+    "viewAll": "Voir tout",
     "items": "articles",
     "item": "article",
     "added": "Ajouté aux favoris !",
+    "outfitSaved": "Look sauvegardé !",
+    "itemsAdded": "{{count}} pièces ajoutées",
     "remaining_one": "{{count}} sauvegarde gratuite restante",
     "remaining_other": "{{count}} sauvegardes gratuites restantes",
     "lastFree": "Dernière sauvegarde gratuite ! Créez un compte pour en sauvegarder plus",
@@ -80,6 +148,7 @@
   "about": {
     "title": "À propos",
     "follow": "Suivez-moi",
+    "website": "Site web",
     "shopCollection": "Découvrir la collection",
     "shopMyStyle": "Découvrez toutes mes pièces préférées et recréez ces looks pour vous-même. Cliquez sur n'importe quelle tenue pour acheter les articles individuels."
   },
@@ -89,6 +158,7 @@
     "linkCopiedInstagram": "Lien copié ! Vous pouvez maintenant le coller dans votre story Instagram.",
     "share": "Partager",
     "shareWithFriend": "Partager ce look à un ami",
+    "sharePostWithFriend": "Partager cet édito à un ami",
     "shareTitle": "Partager"
   },
   "accessibility": {
@@ -100,11 +170,16 @@
     "textarea": "Zone de texte {{context}}"
   },
   "footer": {
-    "copyright": "© 2025 Virtual Dressing. Tous droits réservés."
+    "copyright": "© 2026 Propulsé par CuratedCloset",
+    "joinCuratedCloset": "Rejoindre CuratedCloset",
+    "privacyPolicy": "Politique de confidentialité",
+    "legalInfo": "Informations légales",
+    "newsletter": "Recevoir ma newsletter"
   },
   "auth": {
     "login": {
-      "title": "Welcome back",
+      "title": "Bienvenue",
+      "titleWithName": "Bienvenue {{name}}",
       "subtitle": "Connectez-vous pour accéder à votre espace personnel shopping",
       "email": "Email",
       "emailPlaceholder": "votre@email.com",
@@ -115,6 +190,18 @@
       "noAccount": "Pas encore de compte ?",
       "signupLink": "Créer un compte",
       "forgotPassword": "Mot de passe oublié ?",
+      "resetEmailRequired": "Saisis d'abord ton email pour recevoir le lien de réinitialisation.",
+      "resetPasswordSent": "Un lien de réinitialisation vient d'être envoyé à votre email.",
+      "resetTitle": "Définir un nouveau mot de passe",
+      "resetSubtitle": "Saisissez votre nouveau mot de passe pour sécuriser votre compte.",
+      "resetConfirmPassword": "Confirmer le mot de passe",
+      "resetConfirmPlaceholder": "Confirmez votre mot de passe",
+      "resetSubmit": "Mettre à jour le mot de passe",
+      "resetSubmitting": "Mise à jour...",
+      "resetSuccess": "Votre mot de passe a été mis à jour. Vous pouvez maintenant vous connecter.",
+      "resetFailed": "Impossible de réinitialiser le mot de passe. Réessayez.",
+      "resetInvalidLink": "Ce lien de réinitialisation est invalide ou expiré. Demandez-en un nouveau.",
+      "resetPasswordsMismatch": "Les mots de passe ne correspondent pas.",
       "error": {
         "invalidCredentials": "Email ou mot de passe incorrect",
         "generic": "Une erreur s'est produite. Veuillez réessayer."
@@ -122,17 +209,23 @@
     },
     "signup": {
       "title": "Créer un compte",
-      "subtitle": "Rejoignez-nous pour profiter de tous les avantages shopping et recommandations mode personnalisées",
+      "subtitle": "Rejoins-moi pour recevoir ma newsletter et des invitations en avant-premières pour mes ventes privées",
+      "name": "Nom",
+      "namePlaceholder": "Votre nom",
       "email": "Email",
       "emailPlaceholder": "votre@email.com",
       "password": "Mot de passe",
       "passwordPlaceholder": "Créer un mot de passe",
       "passwordHint": "Au moins 6 caractères",
-      "marketing": "Je souhaite recevoir des conseils de style et des offres exclusives",
+      "marketing": "J'accepte la <privacyLink>politique de confidentialité</privacyLink> et souhaite recevoir des conseils de style et des offres exclusives",
       "submit": "Créer mon compte",
       "submitting": "Création du compte...",
       "hasAccount": "Déjà un compte ?",
       "loginLink": "Se connecter",
+      "invitationSuccessTitle": "Tu es sur la liste !",
+      "invitationSuccessMessage": "Tu recevras une invitation lorsque les ventes privées ouvriront.",
+      "invitationSuccessButton": "Aller à mon compte",
+      "alreadyRegisteredMessage": "Cet email est déjà inscrit.",
       "success": "Compte créé ! Veuillez vérifier votre email pour confirmer votre compte, puis connectez-vous.",
       "confirmEmail": {
         "title": "Vérifiez votre email",
@@ -244,35 +337,77 @@
     "editPreferences": "Modifier mes préférences",
     "backToOutfits": "Retour aux tenues",
     "addMore": "Ajouter",
+    "showAll": "Voir tout",
+    "showLess": "Voir moins",
+    "more": "de plus",
     "emptyFavorites": {
       "title": "Aucun favori",
       "description": "Sauvegardez les articles que vous aimez et ils apparaîtront ici",
       "button": "Commencer à explorer"
+    },
+    "perks": {
+      "title": "Avantages Exclusifs",
+      "exclusive": "Exclusif",
+      "new": "Nouveau",
+      "privateSale": {
+        "title": "Ventes Privées",
+        "description": "Invitation à mon vide dressing"
+      },
+      "secrets": {
+        "title": "Mes Secrets",
+        "description": "Accès exclusif à mes produits"
+      }
     }
   },
   "signupPrompt": {
-    "title": "Sauvegardez vos favoris",
-    "description": "Créez un compte gratuit pour sauvegarder « {{itemName}} » et recevoir toutes les offres personnalisées.",
-    "descriptionGeneric": "Créez un compte gratuit pour sauvegarder vos favoris et ne jamais les perdre.",
-    "benefits": {
-      "sync": "Sauvegardez des favoris illimités sur tous vos appareils",
-      "alerts": "Recevez des alertes quand les articles sont en solde",
-      "similar": "Soyez notifié quand des articles similaires sont ajoutés",
-      "recommendations": "Recommandations de style personnalisées"
-    },
+    "title": "Sauvegarde tes favoris",
+    "simpleDescription": "Sauvegarde tes pièces préférées, retrouve toujours tes favoris et reçois des accès exclusifs à mes ventes privées.",
     "createAccount": "Créer un compte gratuit",
-    "hasAccount": "J'ai déjà un compte",
-    "continueAsGuest": "Continuer en tant qu'invité (favoris non synchronisés)"
+    "alreadyHaveAccount": "Déjà un compte ?",
+    "signInHere": "Se connecter"
+  },
+  "signupNudge": {
+    "message": "On aime les mêmes looks ✨ Crée ton profil pour recevoir des idées de style et des invitations pour des ventes privées",
+    "cta": "M'inscrire",
+    "closeAria": "Fermer"
+  },
+  "signupWelcome": {
+    "title": "Bienvenue, ton compte est prêt",
+    "subtitle": "Tu as débloqué tes favoris synchronisés, ton espace perso et l'accès aux ventes privées.",
+    "featureFavorites": "Favoris sauvegardés",
+    "featurePrivateSales": "Ventes privées",
+    "featureProfile": "Espace compte",
+    "ctaAccount": "Voir mon compte",
+    "ctaLater": "Plus tard",
+    "closeAria": "Fermer"
   },
   "shop": {
-    "title": "Ma Boutique",
-    "subtitle": "Mes coups de cœur sélectionnés avec amour",
+    "title": "Mes secrets",
+    "subtitle": "Des produits exclusifs, pensés par moi, pour toi",
     "backToOutfits": "Retour aux tenues",
     "featured": "Coup de cœur",
     "outOfStock": "Rupture de stock",
     "addToCart": "Ajouter au panier",
     "noProducts": "Boutique bientôt disponible",
     "comingSoon": "De nouveaux produits arrivent très prochainement !",
+    "firstSecret": "Mon premier secret arrive bientôt",
+    "clickToNotify": "Clique ici pour être averti(e).",
+    "clickToBeNotified": "Clique ici pour être avertie",
+    "createAccount": "Créer un compte / Se connecter",
+    "alreadyNotified": "Vous serez averti(e)",
+    "secretsAccess": {
+      "welcome": "Bienvenue",
+      "welcomeName": "Bienvenue {{name}}",
+      "question": "Avez-vous un mot de passe pour accéder à mes secrets ?",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "submit": "Accéder",
+      "submitting": "Vérification...",
+      "backToHome": "Retour à l'accueil",
+      "errorEmpty": "Veuillez saisir un mot de passe.",
+      "errorWrong": "Mot de passe incorrect.",
+      "errorGeneric": "Une erreur s'est produite."
+    },
     "seoTitle": "Boutique - EMMANUELLE K",
     "seoDescription": "Découvrez la collection exclusive de produits sélectionnés par Emmanuelle K. Mode, accessoires et bijoux de qualité."
   },
@@ -321,6 +456,24 @@
     "orderNumber": "Numéro de commande",
     "continueShopping": "Continuer mes achats",
     "backToHome": "Retour à l'accueil"
+  },
+  "legal": {
+    "title": "Informations légales - EMMANUELLE K",
+    "description": "Informations légales et mentions légales du site Virtual Dressing par Emmanuelle K.",
+    "titlePage": "Informations légales",
+    "lastUpdated": "Dernière mise à jour : {{date}}",
+    "publisher": {
+      "title": "Éditeur",
+      "text": "Ce site est édité par Emmanuelle K. Pour toute question relative aux informations légales, veuillez nous contacter."
+    },
+    "hosting": {
+      "title": "Hébergement",
+      "text": "Ce site est hébergé par Vercel Inc. Vous pouvez consulter les conditions d'utilisation de l'hébergeur pour plus d'informations."
+    },
+    "contact": {
+      "title": "Contact",
+      "text": "Pour toute demande relative aux informations légales :"
+    }
   },
   "loading": {
     "shop": "Chargement de la boutique..."

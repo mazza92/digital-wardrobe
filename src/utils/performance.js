@@ -1,7 +1,10 @@
 // Performance Optimization Utilities
 // Handles lazy loading, code splitting, image optimization, and performance monitoring
 
-import { lazy, Suspense } from 'react'
+import React, { lazy, Suspense, useState, useRef, useEffect } from 'react'
+// FavoritesButton is tiny — import directly so it never flickers/disappears
+// due to Suspense re-triggering during React 18 startTransition updates
+import _FavoritesButton from '../components/ui/CartButton'
 
 // ============================================================================
 // LAZY LOADING & CODE SPLITTING
@@ -11,12 +14,12 @@ import { lazy, Suspense } from 'react'
 export const LazyMainPortal = lazy(() => import('../components/pages/MainPortal'))
 export const LazyOutfitDetail = lazy(() => import('../components/pages/OutfitDetail'))
 export const LazyAbout = lazy(() => import('../components/pages/About'))
+export const LazyPrivacyPolicy = lazy(() => import('../components/pages/PrivacyPolicy'))
+export const LazyLegalInfo = lazy(() => import('../components/pages/LegalInfo'))
 
 // Lazy load UI components
 export const LazyFavoritesList = lazy(() => import('../components/ui/FavoritesList'))
-export const LazyCartButton = lazy(() => import('../components/ui/CartButton'))
-
-import React from 'react'
+export const LazyCartButton = _FavoritesButton
 
 // Loading component for Suspense fallback
 export const LoadingFallback = ({ message = "Loading..." }) => {
@@ -126,8 +129,7 @@ export const performanceMonitor = {
     const result = renderFunction()
     const end = performance.now()
     
-    console.log(`${componentName} render time: ${end - start}ms`)
-    return result
+        return result
   },
   
   // Measure API call performance
@@ -136,12 +138,10 @@ export const performanceMonitor = {
     try {
       const result = await apiCall()
       const end = performance.now()
-      console.log(`${apiName} API call time: ${end - start}ms`)
-      return result
+            return result
     } catch (error) {
       const end = performance.now()
-      console.error(`${apiName} API call failed after ${end - start}ms:`, error)
-      throw error
+            throw error
     }
   },
   
@@ -153,14 +153,12 @@ export const performanceMonitor = {
       
       img.onload = () => {
         const end = performance.now()
-        console.log(`Image ${imageUrl} load time: ${end - start}ms`)
-        resolve({ url: imageUrl, loadTime: end - start })
+                resolve({ url: imageUrl, loadTime: end - start })
       }
       
       img.onerror = () => {
         const end = performance.now()
-        console.error(`Image ${imageUrl} failed to load after ${end - start}ms`)
-        reject(new Error(`Failed to load image: ${imageUrl}`))
+                reject(new Error(`Failed to load image: ${imageUrl}`))
       }
       
       img.src = imageUrl
@@ -212,6 +210,58 @@ export const throttle = (func, limit) => {
       func.apply(this, args)
       inThrottle = true
       setTimeout(() => inThrottle = false, limit)
+    }
+  }
+}
+
+// ============================================================================
+// ROUTE PREFETCHING
+// ============================================================================
+
+// Preload route components on hover for instant navigation
+const routeImports = {
+  '/': () => import('../components/pages/MainPortal'),
+  '/outfits': () => import('../components/pages/OutfitDetail'),
+  '/about': () => import('../components/pages/About'),
+  '/privacy': () => import('../components/pages/PrivacyPolicy'),
+  '/legal': () => import('../components/pages/LegalInfo'),
+  '/login': () => import('../components/pages/auth/Login'),
+  '/signup': () => import('../components/pages/auth/SignUp'),
+  '/profile': () => import('../components/pages/auth/Profile'),
+  '/shop': () => import('../components/pages/Shop'),
+}
+
+const prefetchedRoutes = new Set()
+
+// Prefetch a route's component
+export const prefetchRoute = (path) => {
+  // Normalize path - extract base route
+  const basePath = '/' + (path.split('/')[1] || '')
+
+  if (prefetchedRoutes.has(basePath)) return
+
+  const importFn = routeImports[basePath]
+  if (importFn) {
+    prefetchedRoutes.add(basePath)
+    // Use requestIdleCallback to not block main thread
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => importFn(), { timeout: 2000 })
+    } else {
+      setTimeout(() => importFn(), 100)
+    }
+  }
+}
+
+// Hook for prefetching on hover/focus
+export const usePrefetch = () => {
+  return {
+    onMouseEnter: (e) => {
+      const href = e.currentTarget?.getAttribute('href') || e.currentTarget?.getAttribute('to')
+      if (href) prefetchRoute(href)
+    },
+    onFocus: (e) => {
+      const href = e.currentTarget?.getAttribute('href') || e.currentTarget?.getAttribute('to')
+      if (href) prefetchRoute(href)
     }
   }
 }
@@ -304,10 +354,23 @@ export class PerformanceErrorBoundary extends React.Component {
   }
   
   componentDidCatch(error, errorInfo) {
-    console.error('Performance Error Boundary caught an error:', error, errorInfo)
+    // Safely log error without causing conversion issues
+    try {
+      const errorMessage = error?.message || (typeof error === 'string' ? error : error?.toString?.() || 'Unknown error')
+      const errorStack = error?.stack || 'No stack trace'
+      const errorInfoStr = errorInfo?.componentStack || (typeof errorInfo === 'string' ? errorInfo : JSON.stringify(errorInfo))
+      console.error('Performance Error Boundary caught an error:', errorMessage, errorStack, errorInfoStr)
+    } catch (e) {
+      // Last resort: just log a simple message
+      console.error('Error in error boundary')
+    }
     
     // Log performance metrics when error occurs
-    bundleAnalyzer.monitorMemory()
+    try {
+      bundleAnalyzer.monitorMemory()
+    } catch (e) {
+      // Ignore errors in memory monitoring
+    }
   }
   
   render() {
@@ -333,30 +396,36 @@ export default {
   LazyMainPortal,
   LazyOutfitDetail,
   LazyAbout,
+  LazyPrivacyPolicy,
+  LazyLegalInfo,
   LazyFavoritesList,
   LazyCartButton,
   LoadingFallback,
-  
+
   // Image optimization
   optimizeImageUrl,
   LazyImage,
-  
+
   // Performance monitoring
   performanceMonitor,
-  
+
   // Memoization
   memoize,
-  
+
   // Debouncing & throttling
   debounce,
   throttle,
-  
+
+  // Route prefetching
+  prefetchRoute,
+  usePrefetch,
+
   // Resource preloading
   preloadResources,
-  
+
   // Bundle analysis
   bundleAnalyzer,
-  
+
   // Error boundary
   PerformanceErrorBoundary
 }

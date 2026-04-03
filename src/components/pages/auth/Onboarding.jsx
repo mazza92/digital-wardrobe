@@ -322,18 +322,33 @@ const Onboarding = () => {
   const navigate = useNavigate();
 
   // Add debugging to see user state
-  console.log('[Onboarding] User from context:', user?.id || 'null');
+  
+
+  // Helper function to get SVG icon for each style
+  const getStyleIcon = (styleId) => {
+    const icons = {
+      casual: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>,
+      elegant: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" /></svg>,
+      bohemian: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" /><path d="M12 6v6l4 2" /></svg>,
+      minimalist: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>,
+      streetwear: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /><circle cx="12" cy="12" r="3" /></svg>,
+      vintage: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>,
+      sporty: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>,
+      romantic: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+    };
+    return icons[styleId] || icons.casual;
+  };
 
   // Style options with translated labels
   const styleOptions = [
-    { id: 'casual', icon: '👕' },
-    { id: 'elegant', icon: '✨' },
-    { id: 'bohemian', icon: '🌸' },
-    { id: 'minimalist', icon: '⬜' },
-    { id: 'streetwear', icon: '🔥' },
-    { id: 'vintage', icon: '🕰️' },
-    { id: 'sporty', icon: '🏃' },
-    { id: 'romantic', icon: '💕' },
+    { id: 'casual' },
+    { id: 'elegant' },
+    { id: 'bohemian' },
+    { id: 'minimalist' },
+    { id: 'streetwear' },
+    { id: 'vintage' },
+    { id: 'sporty' },
+    { id: 'romantic' },
   ];
 
   const toggleStyle = (styleId) => {
@@ -379,51 +394,29 @@ const Onboarding = () => {
     setSubmitting(true);
     setErrorMsg('');
 
-    console.log('=== ONBOARDING SUBMIT ===');
-    console.log('User from context:', user?.id || 'null');
+    
+    
 
     // Set a timeout to redirect no matter what happens
     const redirectTimeout = setTimeout(() => {
-      console.log('Redirecting after timeout');
+      
       window.location.href = '/profile';
     }, 5000);
 
-    // Try to save preferences
-    console.log('Saving preferences:', {
-      styleInterests: selectedStyles,
-      favoriteBrands: favoriteBrands,
-      onboardingCompleted: true
-    });
-
+    // Save preferences
     updateProfile({
       styleInterests: selectedStyles,
       favoriteBrands: favoriteBrands,
       onboardingCompleted: true
     }).then((result) => {
-      console.log('=== PROFILE UPDATE RESULT ===');
-      console.log('Result:', JSON.stringify(result, null, 2));
-
-      if (result.savedToDb) {
-        console.log('✅ Data saved to database successfully!');
-      } else if (result.savedLocally) {
-        console.warn('⚠️ Data saved locally only, NOT to database!');
-        if (result.error) {
-          console.error('Reason:', result.error);
-        }
-      }
-
       clearTimeout(redirectTimeout);
       // Wait a bit to ensure data is saved
       setTimeout(() => {
-        console.log('Redirecting to profile...');
         window.location.href = '/profile';
       }, 500);
     }).catch(err => {
-      console.error('❌ Profile update failed with exception:', err);
-      console.error('Error message:', err.message);
-      console.error('Error stack:', err.stack);
       clearTimeout(redirectTimeout);
-      // Still redirect but log the error
+      // Still redirect on error
       setTimeout(() => {
         window.location.href = '/profile';
       }, 500);
@@ -445,7 +438,12 @@ const Onboarding = () => {
     return (
       <OnboardingContainer>
         <MainContent>
-          <Logo>👗</Logo>
+          <Logo>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2v20M2 12h20" />
+              <path d="M6 6h12M6 18h12" />
+            </svg>
+          </Logo>
           <StepTitle style={{ marginTop: '1rem' }}>{t('common.loading')}</StepTitle>
         </MainContent>
       </OnboardingContainer>
@@ -455,7 +453,12 @@ const Onboarding = () => {
   return (
     <OnboardingContainer>
       <Header>
-        <Logo>👗</Logo>
+        <Logo>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2v20M2 12h20" />
+            <path d="M6 6h12M6 18h12" />
+          </svg>
+        </Logo>
         <SkipButton onClick={handleSkip}>{t('onboarding.skip')}</SkipButton>
       </Header>
 
@@ -489,7 +492,7 @@ const Onboarding = () => {
                   onClick={() => toggleStyle(style.id)}
                   type="button"
                 >
-                  <CardIcon>{style.icon}</CardIcon>
+                  <CardIcon>{getStyleIcon(style.id)}</CardIcon>
                   <CardLabel>{t(`onboarding.style.options.${style.id}`)}</CardLabel>
                 </SelectionCard>
               ))}
@@ -555,7 +558,11 @@ const Onboarding = () => {
 
         {currentStep === 3 && (
           <>
-            <Logo style={{ width: 80, height: 80, fontSize: '3rem', marginBottom: '1.5rem' }}>✨</Logo>
+            <Logo style={{ width: 80, height: 80, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+              </svg>
+            </Logo>
             <StepTitle>{t('onboarding.complete.title')}</StepTitle>
             <StepSubtitle>{t('onboarding.complete.subtitle')}</StepSubtitle>
 

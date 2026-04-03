@@ -1,112 +1,126 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import * as api from '../utils/supabaseApi';
-import { supabase, safeGetSession } from '../utils/supabaseClient';
+import React, { createContext, useState, useContext, useEffect, useMemo, useCallback, useRef } from 'react';
+import { trackSignup } from '../utils/analytics';
+import {
+  mightHaveSession,
+  safeGetSessionLazy,
+  lazyLogin,
+  lazySignup,
+  lazyLogout,
+  lazyRequestPasswordReset,
+  lazyGetCurrentUser,
+  lazyGetProfile,
+  lazyUpdatePreferences,
+  savePendingPreferences,
+  onAuthStateChange
+} from '../utils/supabaseLazy';
 
-// Check if Supabase is properly initialized before using it
-const isSupabaseConfigured = !!supabase;
+// Check if Supabase URL is configured (doesn't load SDK)
+const isSupabaseConfigured = !!import.meta.env.VITE_SUPABASE_URL;
 
-const AuthContext = createContext(null);
+// Single context instance for the whole app (survives Vite HMR and avoids duplicate
+// createContext() when auth routes are in a separate chunk — without this, lazy-loaded
+// Profile can read a different context object than AuthProvider and get null → crash).
+const AUTH_CTX_KEY = '__dw_AuthContext_singleton__'
+function getAuthContext() {
+  const g = typeof globalThis !== 'undefined' ? globalThis : {}
+  if (!g[AUTH_CTX_KEY]) {
+    g[AUTH_CTX_KEY] = createContext(null)
+  }
+  return g[AUTH_CTX_KEY]
+}
+const AuthContext = getAuthContext()
+const SIGNUP_WELCOME_PENDING_KEY = 'dw_signup_welcome_pending';
+const SIGNUP_WELCOME_SHOWN_KEY = 'dw_signup_welcome_shown';
+const SIGNUP_WELCOME_EVENT = 'dw-signup-welcome-ready';
 
+// V1: Onboarding flow commented out for MVP
 // Helper to check if user needs onboarding
 const checkNeedsOnboarding = (userData) => {
-  if (!userData) return false;
-  const prefs = userData.preferences;
-  // User needs onboarding if they have no preferences or onboarding not completed
-  return !prefs || 
-         (!prefs.onboardingCompleted && 
-          (!prefs.styleInterests || prefs.styleInterests.length === 0));
+  // V1: Always return false to skip onboarding
+  return false;
+
+  // V2: Uncomment below to re-enable onboarding check
+  // if (!userData) return false;
+  // const prefs = userData.preferences;
+  // // User needs onboarding if they have no preferences or onboarding not completed
+  // return !prefs ||
+  //        (!prefs.onboardingCompleted &&
+  //         (!prefs.styleInterests || prefs.styleInterests.length === 0));
 };
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Start with loading=false to not block initial render
+  // Content will show immediately, auth state updates in background
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [pendingSignup, setPendingSignup] = useState(false); // Track if we're in signup flow
+  const [authInitialized, setAuthInitialized] = useState(false);
+  const subscriptionRef = useRef(null);
+  const pendingSignupRef = useRef(pendingSignup);
+
+  // Keep ref in sync with state for use in callbacks
+  useEffect(() => {
+    pendingSignupRef.current = pendingSignup;
+  }, [pendingSignup]);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
-      setLoading(false);
+      setAuthInitialized(true);
       return;
     }
 
-    // Check for active session on load
-    const initAuth = async () => {
-      try {
-        const currentPath = window.location.pathname;
-        const isOnSignupPage = currentPath === '/signup';
+    // OPTIMIZATION: Skip Supabase entirely for anonymous visitors
+    // This saves ~174KB (45KB gzip) on initial load
+    const hasExistingSession = mightHaveSession();
+    const currentPath = window.location.pathname;
+    const isAuthPage = currentPath === '/login' || currentPath === '/signup' ||
+                       currentPath.startsWith('/auth/');
 
-        const { data: { session } } = await safeGetSession();
-        if (session?.user && !isOnSignupPage) {
-          // If we have a session and we're not on signup page, set the user
-          try {
-            const profile = await api.getCurrentUser();
-            setUser(profile);
-            setNeedsOnboarding(checkNeedsOnboarding(profile));
-          } catch (profileErr) {
-            // Profile fetch failed, but we have a session - use basic user info
-            console.log('Profile fetch failed, using session user:', profileErr.message);
-            setUser(session.user);
-            setNeedsOnboarding(true);
-          }
-        }
-      } catch (err) {
-        console.error("Auth init error:", err);
-        // Even on error, we should stop loading
-      }
-      // Always set loading to false
-      setLoading(false);
-    };
-    
-    // Run init with a timeout fallback in case it hangs
-    initAuth();
-    
-    // Fallback: ensure loading is false after 3 seconds no matter what
-    const loadingTimeout = setTimeout(() => {
-      setLoading(false);
-    }, 3000);
+    // If no session token and not on auth page, skip loading Supabase
+    if (!hasExistingSession && !isAuthPage) {
+      
+      setAuthInitialized(true);
+      return;
+    }
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const currentPath = window.location.pathname;
-      const isOnSignupPage = currentPath === '/signup';
-      const isOnCallbackPage = currentPath === '/auth/callback';
+    // Auth state change handler
+    const handleAuthChange = async (event, session) => {
+      const path = window.location.pathname;
+      const isOnSignupPage = path === '/signup';
+
       
-      console.log('Auth event:', event, 'Path:', currentPath, 'Pending signup:', pendingSignup);
-      
-      // Skip setting user if we're on the signup page (user hasn't confirmed email yet)
-      // The signup page will handle showing the confirmation screen
-      if (isOnSignupPage && event === 'SIGNED_IN') {
-        console.log('On signup page, skipping user set - waiting for email confirmation');
-        return;
-      }
-      
+
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
         if (session?.user) {
-          // Only skip setting user if we're on the signup page
-          // (user just signed up and we're showing the confirmation screen)
-          // In all other cases, trust the session
-          if (isOnSignupPage) {
-            console.log('On signup page, not setting user yet');
-            return;
+          // Reliable welcome trigger: set it from auth event itself.
+          if (event === 'SIGNED_IN' && pendingSignupRef.current) {
+            try {
+              sessionStorage.setItem(SIGNUP_WELCOME_PENDING_KEY, '1');
+              sessionStorage.removeItem(SIGNUP_WELCOME_SHOWN_KEY);
+              window.dispatchEvent(new Event(SIGNUP_WELCOME_EVENT));
+            } catch {
+              // ignore storage/event failures
+            }
           }
 
           // Set user immediately from session (no async calls that might hang)
-          console.log('Setting user from session:', session.user.id);
+          
           setUser(session.user);
           setPendingSignup(false);
 
           // Fetch profile data in background (non-blocking)
-          api.getProfile(session.user.id).then(profile => {
+          lazyGetProfile(session.user.id).then(profile => {
             if (profile) {
-              console.log('Profile loaded:', profile);
+              
               setUser({ ...session.user, ...profile });
               setNeedsOnboarding(checkNeedsOnboarding({ ...session.user, ...profile }));
             } else {
               setNeedsOnboarding(true);
             }
           }).catch(err => {
-            console.log('Profile fetch failed:', err.message);
+            
             setNeedsOnboarding(true);
           });
         }
@@ -115,15 +129,61 @@ export const AuthProvider = ({ children }) => {
         setNeedsOnboarding(false);
         setPendingSignup(false);
       }
-    });
+    };
+
+    // Check for active session on load - deferred to not block render
+    const initAuth = async () => {
+      try {
+        const isOnSignupPage = currentPath === '/signup';
+
+        const { data: { session } } = await safeGetSessionLazy();
+        if (session?.user && !isOnSignupPage) {
+          // If we have a session and we're not on signup page, set the user
+          try {
+            const profile = await lazyGetCurrentUser();
+            setUser(profile);
+            setNeedsOnboarding(checkNeedsOnboarding(profile));
+          } catch (profileErr) {
+            // Profile fetch failed, but we have a session - use basic user info
+            
+            setUser(session.user);
+            setNeedsOnboarding(true);
+          }
+        }
+      } catch (err) {
+        console.error("Auth init error:", err);
+      }
+      setAuthInitialized(true);
+    };
+
+    // Set up auth state listener (loads Supabase)
+    const setupAuthListener = async () => {
+      const { data: { subscription } } = await onAuthStateChange(handleAuthChange);
+      subscriptionRef.current = subscription;
+    };
+
+    // Defer auth init to allow content to render first
+    // Use requestIdleCallback for best performance
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        initAuth();
+        setupAuthListener();
+      }, { timeout: 2000 });
+    } else {
+      setTimeout(() => {
+        initAuth();
+        setupAuthListener();
+      }, 50);
+    }
 
     return () => {
-      subscription.unsubscribe();
-      clearTimeout(loadingTimeout);
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe();
+      }
     };
-  }, [pendingSignup]);
+  }, []);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     if (!isSupabaseConfigured) {
         setError("Authentication service not configured.");
         return;
@@ -131,7 +191,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.login(email, password);
+      const response = await lazyLogin(email, password);
       setUser(response.user);
       return response.user;
     } catch (err) {
@@ -148,9 +208,9 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const signup = async (email, password, marketingOptIn) => {
+  const signup = useCallback(async (name, email, password, marketingOptIn) => {
     if (!isSupabaseConfigured) {
         setError("Authentication service not configured.");
         return;
@@ -159,10 +219,28 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     setPendingSignup(true); // Set flag to prevent auto-login from onAuthStateChange
     try {
-      const response = await api.signup(email, password, marketingOptIn);
-      // DON'T set user here - wait for email confirmation
-      // The pendingSignup flag prevents onAuthStateChange from setting the user
-      // Return the user data but don't set it in state yet
+      const response = await lazySignup(name, email, password, marketingOptIn);
+      try {
+        sessionStorage.setItem(SIGNUP_WELCOME_PENDING_KEY, '1');
+        sessionStorage.removeItem(SIGNUP_WELCOME_SHOWN_KEY);
+      } catch {
+        // ignore storage failures
+      }
+      // Track signup event for analytics (non-blocking)
+      if (response?.user?.id) {
+        const currentPath = window.location?.pathname || '';
+        const outfitMatch = currentPath.match(/^\/outfits\/([^/]+)/);
+        trackSignup(response.user.id, 'signup_form', outfitMatch ? outfitMatch[1] : null);
+      }
+
+      // With email confirmation disabled, set user immediately after successful signup
+      // This ensures the redirect works without waiting for onAuthStateChange
+      if (response?.user && response?.session) {
+        
+        setUser(response.user);
+        setPendingSignup(false);
+      }
+
       return response.user;
     } catch (err) {
       setError(err.message);
@@ -171,24 +249,45 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     if (!isSupabaseConfigured) return;
     try {
-      await api.logout();
+      await lazyLogout();
       setUser(null);
     } catch (err) {
       console.error("Logout failed", err);
     }
-  };
+  }, []);
 
-  const updateProfile = async (preferences) => {
-    if (!isSupabaseConfigured) return { success: false };
-    
+  const forgotPassword = useCallback(async (email) => {
+    if (!isSupabaseConfigured) {
+      setError("Authentication service not configured.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
     try {
-      const response = await api.updatePreferences(user?.id, preferences);
-      
+      return await lazyRequestPasswordReset(email);
+    } catch (err) {
+      let errorMessage = err.message;
+      if (err.message?.includes('Invalid email')) {
+        errorMessage = 'Please enter a valid email address.';
+      }
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const updateProfile = useCallback(async (preferences) => {
+    if (!isSupabaseConfigured) return { success: false };
+
+    try {
+      const response = await lazyUpdatePreferences(user?.id, preferences);
+
       // If we got user data back, update the state
       if (response.user) {
         setUser(prev => ({ ...prev, preferences: response.user.preferences }));
@@ -207,36 +306,43 @@ export const AuthProvider = ({ children }) => {
           }
         }
       }
-      
+
       return response;
     } catch (err) {
       // Save locally as fallback
-      const localResult = api.savePendingPreferences(preferences);
+      const localResult = savePendingPreferences(preferences);
       if (localResult.success) {
         return localResult;
       }
       setError(err.message);
       throw err;
     }
-  };
+  }, [user]);
 
   // Function to clear pending signup flag (called from AuthCallback)
-  const clearPendingSignup = () => {
+  const clearPendingSignup = useCallback(() => {
     setPendingSignup(false);
-  };
+  }, []);
 
-  const value = {
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  // Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({
     user,
     loading,
     error,
     login,
     signup,
+    forgotPassword,
     logout,
     updateProfile,
     isAuthenticated: !!user,
     needsOnboarding,
-    clearPendingSignup
-  };
+    clearPendingSignup,
+    clearError
+  }), [user, loading, error, login, signup, forgotPassword, logout, updateProfile, needsOnboarding, clearPendingSignup, clearError]);
 
   return (
     <AuthContext.Provider value={value}>

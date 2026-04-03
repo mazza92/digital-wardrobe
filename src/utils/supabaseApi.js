@@ -1,5 +1,18 @@
 import { supabase, safeGetSession } from './supabaseClient';
 
+// --- Simple in-memory cache to reduce Supabase calls ---
+const cache = {
+  profile: { data: null, userId: null, timestamp: 0 },
+  favorites: { data: null, userId: null, timestamp: 0 }
+};
+const CACHE_TTL = 60000; // 1 minute cache
+
+const isCacheValid = (cacheEntry, userId) => {
+  return cacheEntry.data !== null &&
+         cacheEntry.userId === userId &&
+         (Date.now() - cacheEntry.timestamp) < CACHE_TTL;
+};
+
 // --- Auth Endpoints ---
 
 export const login = async (email, password) => {
@@ -22,15 +35,19 @@ export const login = async (email, password) => {
   };
 };
 
-export const signup = async (email, password, marketingOptIn = false) => {
-  // Get the current origin for the redirect URL
+export const signup = async (name, email, password, marketingOptIn = false) => {
+  // Get the current origin for the redirect URL (used when email confirmation is enabled)
   const redirectUrl = `${window.location.origin}/auth/callback`;
+  // Email verification is currently commented out in the app for a simpler launch.
+  // To have signup work without email confirmation, disable "Confirm email" in Supabase:
+  // Authentication > Providers > Email > Confirm email = OFF.
   
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: {
+        name: name,
         marketing_opt_in: marketingOptIn
       },
       emailRedirectTo: redirectUrl
@@ -46,6 +63,7 @@ export const signup = async (email, password, marketingOptIn = false) => {
     await supabase.from('user_profiles').upsert({
       id: data.user.id,
       email: email,
+      name: name,
       marketing_opt_in: marketingOptIn,
       preferences: {},
       updated_at: new Date()
@@ -59,7 +77,25 @@ export const signup = async (email, password, marketingOptIn = false) => {
 };
 
 export const logout = async () => {
+  // Clear all caches on logout
+  cache.profile = { data: null, userId: null, timestamp: 0 };
+  cache.favorites = { data: null, userId: null, timestamp: 0 };
+
   const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+  return { success: true };
+};
+
+export const requestPasswordReset = async (email) => {
+  const configuredFrontendUrl = import.meta.env.VITE_FRONTEND_URL;
+  const fallbackFrontendUrl = import.meta.env.DEV
+    ? window.location.origin
+    : 'https://emmanuellek.com';
+  const frontendUrl = (configuredFrontendUrl || fallbackFrontendUrl).replace(/\/$/, '');
+  const redirectUrl = `${frontendUrl}/auth/reset-password`;
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: redirectUrl
+  });
   if (error) throw error;
   return { success: true };
 };
@@ -78,15 +114,25 @@ export const getCurrentUser = async () => {
 };
 
 export const getProfile = async (userId) => {
+  // Check cache first to reduce Supabase calls
+  if (isCacheValid(cache.profile, userId)) {
+    return cache.profile.data;
+  }
+
   const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
     .eq('id', userId)
     .maybeSingle(); // Use maybeSingle to avoid error when row doesn't exist
 
-  // Don't log RLS errors - they're expected before email confirmation
+  // RLS errors are expected before email confirmation - don't throw
   if (error && error.code !== '42501' && !error.message?.includes('row-level security')) {
-    console.error('Error fetching profile:', error);
+    // Profile fetch failed
+  }
+
+  // Cache successful result
+  if (data) {
+    cache.profile = { data, userId, timestamp: Date.now() };
   }
 
   return data || {};
@@ -156,22 +202,16 @@ export const clearPendingPreferences = () => {
 };
 
 export const updatePreferences = async (userId, preferences) => {
-  console.log('=== updatePreferences called ===');
-  console.log('userId:', userId);
-  console.log('preferences:', JSON.stringify(preferences, null, 2));
-
   // Always save to memory first (in case DB fails)
   savePendingPreferences(preferences);
 
   // Require userId to be provided - no fallback to prevent hanging
   if (!userId) {
-    console.warn('⚠️ No userId provided, preferences saved in memory only');
     return { success: true, preferences, savedLocally: true };
   }
 
   try {
     const authenticatedUserId = userId;
-    console.log('Using user ID:', authenticatedUserId);
 
     // Get current preferences to merge (if profile exists)
     let currentProfile = null;
@@ -182,9 +222,8 @@ export const updatePreferences = async (userId, preferences) => {
         .eq('id', authenticatedUserId)
         .maybeSingle();
       currentProfile = data;
-      console.log('Current profile fetched:', currentProfile ? 'exists' : 'null');
     } catch (err) {
-      console.warn('Could not fetch current profile:', err.message);
+      // Could not fetch current profile
     }
 
     // Merge all preferences
@@ -195,18 +234,14 @@ export const updatePreferences = async (userId, preferences) => {
       ...preferences
     };
 
-    console.log('Merged preferences to save:', JSON.stringify(newPreferences, null, 2));
-
     // Use upsert with the authenticated user's ID
     const upsertPayload = {
       id: authenticatedUserId,
-      email: currentProfile?.email || null, // Email comes from existing profile
+      email: currentProfile?.email || null,
       marketing_opt_in: currentProfile?.marketing_opt_in ?? false,
       preferences: newPreferences,
       updated_at: new Date().toISOString()
     };
-
-    console.log('Upserting to database:', JSON.stringify(upsertPayload, null, 2));
 
     const { data, error } = await supabase
       .from('user_profiles')
@@ -215,26 +250,14 @@ export const updatePreferences = async (userId, preferences) => {
       .single();
 
     if (error) {
-      console.error('❌ DATABASE SAVE ERROR:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-      console.error('Error details:', error.details);
-      console.error('Error hint:', error.hint);
-      // Preferences are already in memory, so this is still a "success" for the user
       return { success: true, preferences: newPreferences, savedLocally: true, error: error.message };
     }
-
-    console.log('✅ Successfully saved to database:', data);
 
     // Clear pending preferences after successful sync
     clearPendingPreferences();
 
     return { success: true, user: data, savedToDb: true };
   } catch (err) {
-    console.error('❌ updatePreferences exception:', err);
-    console.error('Exception message:', err.message);
-    console.error('Exception stack:', err.stack);
-    // Preferences are in memory, return success
     return { success: true, preferences, savedLocally: true, error: err.message };
   }
 };
@@ -251,7 +274,6 @@ export const syncPendingPreferences = async () => {
     const result = await updatePreferences(null, pending);
     return result;
   } catch (err) {
-    console.error('Failed to sync pending preferences:', err);
     return null;
   }
 };
@@ -285,7 +307,6 @@ export const syncFavorites = async (userId, localFavorites) => {
     // If RLS error (403), just return local favorites - table might not have proper policies
     if (error) {
       if (error.code === '42501' || error.message?.includes('policy') || error.code === 'PGRST301') {
-        console.warn('Favorites sync skipped - RLS policy issue. Using local favorites.');
         return { favorites: localFavorites };
       }
       throw error;
@@ -294,13 +315,17 @@ export const syncFavorites = async (userId, localFavorites) => {
     // 3. Fetch updated list
     return getFavorites(userId);
   } catch (err) {
-    console.error('Favorites sync error:', err);
     // Return local favorites as fallback
     return { favorites: localFavorites };
   }
 };
 
 export const getFavorites = async (userId) => {
+  // Check cache first to reduce Supabase calls
+  if (isCacheValid(cache.favorites, userId)) {
+    return { favorites: cache.favorites.data };
+  }
+
   try {
     const { data, error } = await supabase
       .from('favorites')
@@ -310,7 +335,6 @@ export const getFavorites = async (userId) => {
     // If RLS error, return empty - user will use local favorites
     if (error) {
       if (error.code === '42501' || error.message?.includes('policy') || error.code === 'PGRST301') {
-        console.warn('Get favorites skipped - RLS policy issue. Using local favorites.');
         return { favorites: [] };
       }
       throw error;
@@ -328,14 +352,19 @@ export const getFavorites = async (userId) => {
       favoritedAt: item.created_at
     }));
 
+    // Cache successful result
+    cache.favorites = { data: mappedFavorites, userId, timestamp: Date.now() };
+
     return { favorites: mappedFavorites };
   } catch (err) {
-    console.error('Get favorites error:', err);
     return { favorites: [] };
   }
 };
 
 export const addFavorite = async (userId, product) => {
+  // Invalidate cache immediately
+  cache.favorites = { data: null, userId: null, timestamp: 0 };
+
   try {
     const { error } = await supabase
         .from('favorites')
@@ -352,21 +381,22 @@ export const addFavorite = async (userId, product) => {
         }, { onConflict: 'user_id, product_id' });
 
     if (error) {
-      // If RLS error, just log and return - local storage will handle it
+      // If RLS error, return - local storage will handle it
       if (error.code === '42501' || error.message?.includes('policy') || error.code === 'PGRST301') {
-        console.warn('Add favorite skipped - RLS policy issue. Saved locally only.');
         return { success: true, localOnly: true };
       }
       throw error;
     }
     return { success: true };
   } catch (err) {
-    console.error('Add favorite error:', err);
     return { success: false };
   }
 };
 
 export const removeFavorite = async (userId, productId) => {
+  // Invalidate cache immediately
+  cache.favorites = { data: null, userId: null, timestamp: 0 };
+
   try {
     const { error } = await supabase
         .from('favorites')
@@ -375,35 +405,34 @@ export const removeFavorite = async (userId, productId) => {
 
     if (error) {
       if (error.code === '42501' || error.message?.includes('policy') || error.code === 'PGRST301') {
-        console.warn('Remove favorite skipped - RLS policy issue.');
         return { success: true, localOnly: true };
       }
       throw error;
     }
     return { success: true };
   } catch (err) {
-    console.error('Remove favorite error:', err);
     return { success: false };
   }
 };
 
 export const clearFavorites = async (userId) => {
+  // Invalidate cache immediately
+  cache.favorites = { data: null, userId: null, timestamp: 0 };
+
   try {
     const { error } = await supabase
         .from('favorites')
         .delete()
         .match({ user_id: userId });
-        
+
     if (error) {
       if (error.code === '42501' || error.message?.includes('policy') || error.code === 'PGRST301') {
-        console.warn('Clear favorites skipped - RLS policy issue.');
         return { success: true, localOnly: true };
       }
       throw error;
     }
     return { success: true };
   } catch (err) {
-    console.error('Clear favorites error:', err);
     return { success: false };
   }
 };

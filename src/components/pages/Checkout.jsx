@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://digital-wardrobe-admin.vercel.app/api'
-const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL || 'https://digital-wardrobe-puce.vercel.app'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://admin.emmanuellek.com/api'
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL || 'https://emmanuellek.com'
 
 const Container = styled.div`
   min-height: 100vh;
@@ -14,20 +14,49 @@ const Container = styled.div`
 `
 
 const Header = styled.header`
-  background: #F3F0E9;
-  padding: 1rem 1.5rem;
+  background: #fdfcf8;
+  padding: 0.875rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-height: 56px;
+  
+  @media (min-width: 480px) {
+    padding: 1rem 1.25rem;
+  }
+  
+  @media (min-width: 768px) {
+    padding: 1.125rem 2rem;
+    min-height: 64px;
+  }
 `
 
 const Logo = styled(Link)`
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.3px;
   color: #101010;
   text-decoration: none;
-  letter-spacing: 2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  
+  @media (min-width: 480px) {
+    font-size: 1.05rem;
+  }
+  
+  @media (min-width: 768px) {
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+  }
+  
+  &:hover {
+    opacity: 0.7;
+  }
 `
 
 const Main = styled.main`
@@ -382,14 +411,14 @@ function Checkout() {
     return (
       <Container>
         <Header>
-          <Logo to="/">EMMANUELLE K</Logo>
+          <Logo to="/">Emmanuelle K</Logo>
         </Header>
         <Main style={{ display: 'block', maxWidth: '600px' }}>
           <Section>
             <EmptyCart>
               <p>{t('checkout.emptyCart', 'Votre panier est vide')}</p>
-              <BackToShop to="/shop">
-                ← {t('checkout.backToShop', 'Retour à la boutique')}
+              <BackToShop to="/">
+                ← {t('common.backToHome')}
               </BackToShop>
             </EmptyCart>
           </Section>
@@ -401,7 +430,7 @@ function Checkout() {
   return (
     <Container>
       <Header>
-        <Logo to="/">EMMANUELLE K</Logo>
+        <Logo to="/">Emmanuelle K</Logo>
       </Header>
 
       <Main>
@@ -539,7 +568,9 @@ function Checkout() {
                   <ItemName>{getItemName(item)}</ItemName>
                   <ItemMeta>{t('checkout.qty', 'Qté')}: {item.quantity}</ItemMeta>
                 </ItemDetails>
-                <ItemPrice>{(item.price * item.quantity).toFixed(2)}€</ItemPrice>
+                {item.price != null && item.price !== '' && (
+                  <ItemPrice>{(Number(item.price) * item.quantity).toFixed(2)}€</ItemPrice>
+                )}
               </CartItem>
             ))}
 
@@ -574,7 +605,11 @@ function Checkout() {
                 </>
               ) : (
                 <>
-                  🔒 {t('checkout.pay', 'Payer')} {total.toFixed(2)}€
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '0.5rem' }}>
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  {t('checkout.pay', 'Payer')} {total.toFixed(2)}€
                 </>
               )}
             </PayButton>

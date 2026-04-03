@@ -171,33 +171,179 @@ export const StatsSkeleton = () => (
   </StatsSkeletonWrapper>
 );
 
-// Full Page Loading Skeleton
+// Full Page Loading Skeleton – matches current MainPortal layout (white header, hero, tabs, grid)
 const PageSkeletonWrapper = styled.div`
   min-height: 100vh;
-  background: #FDFCF8;
+  background: #ffffff;
+  color: #101010;
 `;
 
 const HeaderSkeleton = styled.div`
-  background: #F3F0E9;
-  padding: 1rem 1.5rem;
+  background: #ffffff;
+  padding: 0.875rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  min-height: 56px;
+  @media (min-width: 768px) {
+    padding: 1.125rem 2rem;
+    min-height: 64px;
+  }
+`;
+
+const HeaderRightSkeleton = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  @media (min-width: 768px) {
+    gap: 0.75rem;
+  }
+`;
+
+const PageHeroSkeletonWrapper = styled.div`
+  background: #ffffff;
+  padding: 2rem 1rem;
+  text-align: center;
+  @media (min-width: 768px) {
+    padding: 3rem 2rem;
+  }
+`;
+
+const HeroBannerSkeleton = styled(SkeletonBase)`
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 0;
+  margin-bottom: 1.5rem;
+  @media (min-width: 768px) {
+    aspect-ratio: 21/9;
+    margin-bottom: 2rem;
+  }
+`;
+
+const HeroTextContainer = styled.div`
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const PageHeroSkeleton = () => (
+  <PageHeroSkeletonWrapper>
+    <SkeletonText $width="180px" $height="12px" style={{ margin: '0 auto 1rem' }} />
+    <HeroBannerSkeleton />
+    <HeroTextContainer>
+      <SkeletonText $width="200px" $height="28px" />
+      <SkeletonText $width="280px" $height="16px" />
+    </HeroTextContainer>
+  </PageHeroSkeletonWrapper>
+);
+
+const TabBarSkeleton = styled.div`
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 0 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  min-height: 48px;
+  align-items: center;
+  @media (min-width: 768px) {
+    padding: 0 2rem;
+  }
+`;
+
+const TabPillSkeleton = styled(SkeletonBase)`
+  width: 80px;
+  height: 36px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  @media (min-width: 480px) {
+    width: 100px;
+  }
+`;
+
+const PageContentSkeleton = styled.div`
+  padding: 4rem 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  @media (min-width: 768px) {
+    padding: 5rem 2rem;
+  }
+`;
+
+const PageSectionTitleSkeleton = styled.div`
+  margin-bottom: 2.5rem;
+`;
+
+const PageOutfitGridSkeleton = styled.div`
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+`;
+
+const PageOutfitCardSkeleton = styled.div`
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+`;
+
+const PageOutfitImageSkeleton = styled(SkeletonBase)`
+  width: 100%;
+  aspect-ratio: 3/4;
+  border-radius: 0;
+`;
+
+const PageOutfitInfoSkeleton = styled.div`
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 `;
 
 export const PageSkeleton = () => (
   <PageSkeletonWrapper>
     <HeaderSkeleton>
-      <SkeletonText $width="120px" $height="24px" />
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        <SkeletonText $width="60px" $height="32px" $radius="16px" />
-        <SkeletonText $width="60px" $height="32px" $radius="16px" />
-      </div>
+      <SkeletonText $width="120px" $height="20px" />
+      <HeaderRightSkeleton>
+        <SkeletonText $width="72px" $height="32px" $radius="4px" />
+        <SkeletonText $width="40px" $height="40px" $radius="10px" />
+        <SkeletonText $width="40px" $height="40px" $radius="10px" />
+      </HeaderRightSkeleton>
     </HeaderSkeleton>
-    <HeroSkeleton />
-    <div style={{ padding: '2rem 1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <OutfitsGridSkeleton count={8} />
-    </div>
+    <PageHeroSkeleton />
+    <TabBarSkeleton>
+      {[1, 2, 3, 4].map((i) => (
+        <TabPillSkeleton key={i} />
+      ))}
+    </TabBarSkeleton>
+    <PageContentSkeleton>
+      <PageSectionTitleSkeleton>
+        <SkeletonText $width="140px" $height="24px" />
+      </PageSectionTitleSkeleton>
+      <PageOutfitGridSkeleton>
+        {[...Array(6)].map((_, i) => (
+          <PageOutfitCardSkeleton key={i}>
+            <PageOutfitImageSkeleton />
+            <PageOutfitInfoSkeleton>
+              <SkeletonText $width="85%" $height="14px" />
+              <SkeletonText $width="60%" $height="12px" />
+            </PageOutfitInfoSkeleton>
+          </PageOutfitCardSkeleton>
+        ))}
+      </PageOutfitGridSkeleton>
+    </PageContentSkeleton>
   </PageSkeletonWrapper>
 );
 

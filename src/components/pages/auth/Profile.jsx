@@ -6,18 +6,13 @@ import { useAuth } from '../../../context/AuthContext';
 import { useFavorites } from '../../../hooks/useFavorites';
 import { fetchOutfits } from '../../../utils/api';
 import { getOutfitDescription, getOutfitTitle } from '../../../utils/outfitUtils';
-import { theme } from '../../../design-system/theme';
 import { safeGetSession } from '../../../utils/supabaseClient';
+import { SHOW_SECRETS_TAB } from '../../../config/featureFlags';
 
 // Animations
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
-`;
-
-const shimmer = keyframes`
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
 `;
 
 // Layout
@@ -27,40 +22,81 @@ const PageWrapper = styled.div`
 `;
 
 const Header = styled.header`
-  background: #F3F0E9;
-  padding: 1rem 1.5rem;
+  background: #fdfcf8;
+  padding: 0.875rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   z-index: 100;
+  min-height: 56px;
+
+  @media (min-width: 480px) {
+    padding: 1rem 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    padding: 1.125rem 2rem;
+    min-height: 64px;
+  }
 `;
 
 const BackButton = styled(Link)`
   color: #666;
   text-decoration: none;
   font-weight: 500;
-  font-size: 0.9rem;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 10px;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  
+  gap: 0.25rem;
+  margin-right: 0.5rem;
+
+  @media (min-width: 480px) {
+    font-size: 0.9rem;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    font-size: 1rem;
+    border-radius: 12px;
+  }
+
   &:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: #1a1a1a;
+    color: #101010;
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: translateX(-2px);
   }
 `;
 
-const BrandName = styled.span`
-  font-size: 1rem;
-  font-weight: 600;
+const BrandName = styled(Link)`
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.3px;
   color: #101010;
-  letter-spacing: 1px;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  @media (min-width: 480px) {
+    font-size: 1.05rem;
+  }
+
+  @media (min-width: 768px) {
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+  }
+
+  &:hover {
+    opacity: 0.7;
+  }
 `;
 
 const SignOutButton = styled.button`
@@ -73,12 +109,12 @@ const SignOutButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover:not(:disabled) {
     border-color: #dc2626;
     color: #dc2626;
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -88,129 +124,49 @@ const SignOutButton = styled.button`
 const MainContent = styled.main`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+  padding: 1.5rem 1rem 4rem;
+
+  @media (min-width: 768px) {
+    padding: 2rem 1.5rem 4rem;
+  }
 `;
 
-// Welcome Section
+// Welcome Section (Simplified)
 const WelcomeSection = styled.section`
   text-align: center;
-  padding: 2rem 0 3rem;
+  padding: 1.5rem 0 2rem;
   animation: ${fadeIn} 0.5s ease;
-`;
 
-const Avatar = styled.div`
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #E8DFD3 0%, #D4C4B0 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  margin: 0 auto 1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  @media (min-width: 768px) {
+    padding: 2rem 0 2.5rem;
+  }
 `;
 
 const WelcomeTitle = styled.h1`
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #1a1a1a;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.25rem 0;
+
+  @media (min-width: 768px) {
+    font-size: 1.75rem;
+  }
 `;
 
 const WelcomeSubtitle = styled.p`
-  color: #666;
-  font-size: 0.95rem;
-  margin: 0;
-`;
-
-// Stats Section
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-  animation: ${fadeIn} 0.5s ease 0.1s both;
-`;
-
-const StatCard = styled.div`
-  background: white;
-  border-radius: 16px;
-  padding: 1.25rem;
-  text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  }
-`;
-
-const StatNumber = styled.div`
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 0.25rem;
-`;
-
-const StatLabel = styled.div`
-  font-size: 0.8rem;
   color: #888;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`;
-
-// Quick Actions
-const QuickActions = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 2.5rem;
-  animation: ${fadeIn} 0.5s ease 0.2s both;
-  
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-`;
-
-const ActionCard = styled.button`
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 16px;
-  padding: 1.25rem 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border-color: #D4C4B0;
-  }
-`;
-
-const ActionIcon = styled.span`
-  font-size: 1.5rem;
-`;
-
-const ActionLabel = styled.span`
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #333;
+  font-size: 0.9rem;
+  margin: 0;
 `;
 
 // Section
 const Section = styled.section`
-  margin-bottom: 2.5rem;
-  animation: ${fadeIn} 0.5s ease 0.3s both;
+  margin-bottom: 2rem;
+  animation: ${fadeIn} 0.5s ease ${props => props.$delay || '0.1s'} both;
+
+  @media (min-width: 768px) {
+    margin-bottom: 2.5rem;
+  }
 `;
 
 const SectionHeader = styled.div`
@@ -221,107 +177,27 @@ const SectionHeader = styled.div`
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  @media (min-width: 768px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const SectionLink = styled(Link)`
   font-size: 0.85rem;
   color: #888;
   text-decoration: none;
-  
+
   &:hover {
     color: #1a1a1a;
     text-decoration: underline;
-  }
-`;
-
-// Style Preferences Card
-const PreferencesCard = styled.div`
-  background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-`;
-
-const PreferenceRow = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  
-  &:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-  
-  &:first-child {
-    padding-top: 0;
-  }
-`;
-
-const PreferenceIcon = styled.span`
-  font-size: 1.25rem;
-  width: 40px;
-  height: 40px;
-  background: #F8F6F3;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-`;
-
-const PreferenceContent = styled.div`
-  flex: 1;
-`;
-
-const PreferenceLabel = styled.div`
-  font-size: 0.85rem;
-  color: #888;
-  margin-bottom: 0.5rem;
-`;
-
-const TagsContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-`;
-
-const Tag = styled.span`
-  background: ${props => props.$variant === 'style' ? '#E8DFD3' : '#F3F0E9'};
-  color: #333;
-  padding: 0.35rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-`;
-
-const EmptyTag = styled.span`
-  color: #aaa;
-  font-size: 0.85rem;
-  font-style: italic;
-`;
-
-const EditButton = styled.button`
-  background: none;
-  border: none;
-  color: #888;
-  font-size: 0.8rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  
-  &:hover {
-    color: #1a1a1a;
-    background: rgba(0, 0, 0, 0.05);
   }
 `;
 
@@ -329,8 +205,12 @@ const EditButton = styled.button`
 const FavoritesGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  
+  gap: 0.75rem;
+
+  @media (min-width: 480px) {
+    gap: 1rem;
+  }
+
   @media (min-width: 768px) {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -344,7 +224,9 @@ const FavoriteCard = styled.div`
   transition: all 0.2s ease;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(0, 0, 0, 0.05);
-  
+  display: flex;
+  flex-direction: column;
+
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
@@ -356,7 +238,7 @@ const FavoriteImage = styled.div`
   padding-top: 125%;
   position: relative;
   background: #f8f9fa;
-  
+
   img {
     position: absolute;
     top: 0;
@@ -369,6 +251,7 @@ const FavoriteImage = styled.div`
 
 const FavoriteInfo = styled.div`
   padding: 0.75rem;
+  flex: 1;
 `;
 
 const FavoriteBrand = styled.div`
@@ -404,37 +287,102 @@ const RemoveButton = styled.button`
   color: #888;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: #fee2e2;
     color: #dc2626;
   }
 `;
 
+const ShowMoreContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  gap: 0.75rem;
+`;
+
+const ShowMoreButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #333;
+    transform: translateY(-1px);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const ShowLessButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 50px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f5f5f5;
+    border-color: #ccc;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const FavoritesCount = styled.span`
+  color: #888;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-top: 0.75rem;
+`;
+
 // Empty State
 const EmptyState = styled.div`
   text-align: center;
-  padding: 3rem 2rem;
+  padding: 2.5rem 1.5rem;
   background: white;
   border-radius: 16px;
   border: 2px dashed rgba(0, 0, 0, 0.1);
 `;
 
 const EmptyIcon = styled.div`
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.6;
 `;
 
 const EmptyTitle = styled.h3`
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #333;
   margin: 0 0 0.5rem 0;
 `;
 
 const EmptyDescription = styled.p`
   color: #888;
-  font-size: 0.9rem;
-  margin: 0 0 1.5rem 0;
+  font-size: 0.85rem;
+  margin: 0 0 1.25rem 0;
 `;
 
 const PrimaryButton = styled(Link)`
@@ -447,71 +395,105 @@ const PrimaryButton = styled(Link)`
   font-weight: 500;
   text-decoration: none;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: #333;
     transform: translateY(-2px);
   }
 `;
 
-// Engagement Banner
-const EngagementBanner = styled.div`
-  background: linear-gradient(135deg, #E8DFD3 0%, #D4C4B0 100%);
+// Exclusive Perks Section
+const PerksGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+`;
+
+const PerkCard = styled(Link)`
+  background: ${props => props.$gradient || 'linear-gradient(135deg, #1a1a1a 0%, #333 100%)'};
   border-radius: 16px;
   padding: 1.5rem;
-  margin-bottom: 2rem;
+  text-decoration: none;
+  color: white;
   display: flex;
   align-items: center;
   gap: 1rem;
-  animation: ${fadeIn} 0.5s ease 0.4s both;
-  
-  @media (min-width: 768px) {
-    padding: 2rem;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+    pointer-events: none;
   }
 `;
 
-const BannerIcon = styled.div`
-  font-size: 2.5rem;
+const PerkIcon = styled.div`
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
 `;
 
-const BannerContent = styled.div`
+const PerkContent = styled.div`
   flex: 1;
+  min-width: 0;
 `;
 
-const BannerTitle = styled.h3`
+const PerkTitle = styled.div`
   font-size: 1rem;
   font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 0.25rem 0;
+  margin-bottom: 0.25rem;
 `;
 
-const BannerText = styled.p`
-  font-size: 0.85rem;
-  color: #555;
-  margin: 0;
+const PerkDescription = styled.div`
+  font-size: 0.8rem;
+  opacity: 0.85;
 `;
 
-const BannerButton = styled(Link)`
-  background: #1a1a1a;
-  color: white;
-  padding: 0.6rem 1.25rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: #333;
-  }
+const PerkBadge = styled.span`
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const PerkArrow = styled.div`
+  opacity: 0.6;
+  flex-shrink: 0;
 `;
 
 // 7 Days Inspiration Section
 const InspirationSection = styled.section`
-  margin-bottom: 2.5rem;
-  animation: ${fadeIn} 0.5s ease 0.25s both;
+  margin-bottom: 2rem;
+  animation: ${fadeIn} 0.5s ease 0.3s both;
 `;
 
 const InspirationHeader = styled.div`
@@ -522,19 +504,25 @@ const InspirationHeader = styled.div`
 `;
 
 const InspirationTitle = styled.h2`
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  @media (min-width: 768px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const InspirationSubtitle = styled.span`
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #888;
   font-weight: 400;
+  display: block;
+  margin-top: 0.25rem;
 `;
 
 const DaysScroller = styled.div`
@@ -542,39 +530,44 @@ const DaysScroller = styled.div`
   gap: 1rem;
   overflow-x: auto;
   padding-bottom: 1rem;
-  margin: 0 -1.5rem;
-  padding: 0 1.5rem 1rem;
+  margin: 0 -1rem;
+  padding: 0 1rem 1rem;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  
+
   &::-webkit-scrollbar {
     height: 6px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 3px;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: #ccc;
     border-radius: 3px;
+  }
+
+  @media (min-width: 768px) {
+    margin: 0 -1.5rem;
+    padding: 0 1.5rem 1rem;
   }
 `;
 
 const DayCard = styled.div`
   flex: 0 0 auto;
-  width: 160px;
+  width: 140px;
   scroll-snap-align: start;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     transform: translateY(-4px);
   }
-  
+
   @media (min-width: 768px) {
-    width: 180px;
+    width: 160px;
   }
 `;
 
@@ -613,7 +606,7 @@ const DayOutfitImage = styled.div`
   background: linear-gradient(135deg, #f8f6f3 0%, #e8e4df 100%);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   border: ${props => props.$isToday ? '2px solid #1a1a1a' : '1px solid rgba(0, 0, 0, 0.05)'};
-  
+
   img {
     position: absolute;
     top: 0;
@@ -634,27 +627,12 @@ const DayOutfitOverlay = styled.div`
 `;
 
 const DayOutfitTitle = styled.div`
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
   color: white;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-`;
-
-const MatchBadge = styled.div`
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: rgba(255, 255, 255, 0.95);
-  color: #1a1a1a;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.65rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
 `;
 
 const InspirationEmpty = styled.div`
@@ -666,30 +644,15 @@ const InspirationEmpty = styled.div`
 `;
 
 const InspirationEmptyIcon = styled.div`
-  font-size: 2.5rem;
+  font-size: 2rem;
   margin-bottom: 0.75rem;
+  opacity: 0.5;
 `;
 
 const InspirationEmptyText = styled.p`
   color: #888;
-  font-size: 0.9rem;
-  margin: 0 0 1rem 0;
-`;
-
-const InspirationEmptyButton = styled(Link)`
-  display: inline-block;
-  background: #1a1a1a;
-  color: white;
-  padding: 0.6rem 1.25rem;
-  border-radius: 20px;
   font-size: 0.85rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: #333;
-  }
+  margin: 0;
 `;
 
 // Loading
@@ -702,14 +665,17 @@ const LoadingContainer = styled.div`
   color: #666;
 `;
 
+const FAVORITES_PER_PAGE = 8;
+
 const Profile = () => {
   const { t, i18n } = useTranslation();
-  const { user, logout, isAuthenticated, loading } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const { favorites, removeFromFavorites } = useFavorites();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
   const [outfits, setOutfits] = useState([]);
   const [outfitsLoading, setOutfitsLoading] = useState(true);
+  const [favoritesDisplayCount, setFavoritesDisplayCount] = useState(FAVORITES_PER_PAGE);
 
   // Fetch outfits for inspiration
   useEffect(() => {
@@ -732,7 +698,7 @@ const Profile = () => {
   // Check for session and set page ready after timeout
   useEffect(() => {
     let mounted = true;
-    
+
     const checkAndSetReady = async () => {
       try {
         const { data: { session } } = await safeGetSession();
@@ -743,25 +709,21 @@ const Profile = () => {
           setPageReady(true);
         }
       } catch (err) {
-        console.log('Session check error:', err);
+        
         if (mounted) {
-          // On error, still show the page (don't redirect)
           setPageReady(true);
         }
       }
     };
-    
-    // Check session
+
     checkAndSetReady();
-    
-    // Fallback: show page after 2 seconds no matter what
+
     const timeout = setTimeout(() => {
       if (mounted && !pageReady) {
-        console.log('Profile page timeout - showing page');
         setPageReady(true);
       }
     }, 2000);
-    
+
     return () => {
       mounted = false;
       clearTimeout(timeout);
@@ -775,12 +737,10 @@ const Profile = () => {
     }
   }, [shouldRedirect, loggingOut]);
 
-  // Show loading state briefly
   if (!pageReady) {
     return <LoadingContainer>{t('common.loading')}</LoadingContainer>;
   }
 
-  // If logging out, show a brief message then the redirect will happen
   if (loggingOut) {
     return <LoadingContainer>{t('auth.logout.loggingOut', 'Logging out...')}</LoadingContainer>;
   }
@@ -788,29 +748,45 @@ const Profile = () => {
   const handleLogout = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (loggingOut) return;
-    
+
     setLoggingOut(true);
-    
-    // Fire and forget - don't wait for logout to complete
-    logout().catch(err => console.log('Logout error:', err));
-    
-    // Redirect immediately with cache-busting
+    logout().catch(() => {});
+
     setTimeout(() => {
       window.location.href = '/?t=' + Date.now();
     }, 500);
   };
 
-  const brandCount = user?.preferences?.favoriteBrands?.length || 0;
-  const userName = 'Shopper';
+  const handleFavoriteClick = (item) => {
+    if (item.link) {
+      window.open(item.link, '_blank', 'noopener,noreferrer');
+    } else if (item.outfitId) {
+      navigate(`/outfits/${item.outfitId}`);
+    }
+  };
+
+  const rawName =
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.name ||
+    user?.full_name ||
+    '';
+  let userName = (typeof rawName === 'string' && rawName.trim()) ? rawName.trim().split(/\s+/)[0] : null;
+  if (!userName && user?.email) {
+    const local = user.email.split('@')[0] || '';
+    const cleaned = local.replace(/\+.*$/, '').trim();
+    userName = cleaned || 'Shopper';
+  }
+  if (!userName) userName = 'Shopper';
 
   // Get day names for 7 days
   const getDayNames = () => {
     const days = [];
     const today = new Date();
     const locale = i18n.language === 'fr' ? 'fr-FR' : 'en-US';
-    
+
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
@@ -823,52 +799,13 @@ const Profile = () => {
     return days;
   };
 
-  // Get curated outfits based on user preferences
+  // Get curated outfits
   const getCuratedOutfits = () => {
     if (!outfits.length) return [];
-    
-    const userStyles = user?.preferences?.styleInterests || [];
-    const userBrands = user?.preferences?.favoriteBrands || [];
-    
-    // Score outfits based on matching preferences
-    const scoredOutfits = outfits.map(outfit => {
-      let score = 0;
-      let matchReasons = [];
-      
-      // Check if outfit has products matching user's brands
-      if (outfit.products && userBrands.length > 0) {
-        outfit.products.forEach(product => {
-          if (userBrands.some(brand => 
-            product.brand?.toLowerCase().includes(brand.toLowerCase()) ||
-            brand.toLowerCase().includes(product.brand?.toLowerCase() || '')
-          )) {
-            score += 2;
-            matchReasons.push('brand');
-          }
-        });
-      }
-      
-      // Check outfit title/description for style keywords (use language-aware title and description)
-      const outfitTitle = getOutfitTitle(outfit, i18n.language);
-      const outfitDescription = getOutfitDescription(outfit, i18n.language);
-      const outfitText = `${outfitTitle || ''} ${outfitDescription || ''}`.toLowerCase();
-      userStyles.forEach(style => {
-        if (outfitText.includes(style.toLowerCase())) {
-          score += 1;
-          matchReasons.push('style');
-        }
-      });
-      
-      // Add some randomness to keep it fresh
-      score += Math.random() * 0.5;
-      
-      return { ...outfit, score, matchReasons: [...new Set(matchReasons)] };
-    });
-    
-    // Sort by score and take top 7
-    return scoredOutfits
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 7);
+
+    // Shuffle and take 7 outfits for variety
+    const shuffled = [...outfits].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 7);
   };
 
   const days = getDayNames();
@@ -878,73 +815,166 @@ const Profile = () => {
     <PageWrapper>
       <Header>
         <BackButton to="/">
-          ← {t('common.back')}
+          ← {t('common.backToHome')}
         </BackButton>
-        <BrandName>Virtual Dressing</BrandName>
+        <BrandName to="/">Emmanuelle K</BrandName>
         <SignOutButton onClick={handleLogout} disabled={loggingOut}>
           {loggingOut ? '...' : t('auth.logout.button')}
         </SignOutButton>
       </Header>
-      
+
       <MainContent>
         {/* Welcome Section */}
         <WelcomeSection>
-          <Avatar>👋</Avatar>
-          <WelcomeTitle>{t('profile.welcomeBack', { name: userName })}</WelcomeTitle>
-          <WelcomeSubtitle>{user?.email}</WelcomeSubtitle>
+          <WelcomeTitle>{t('profile.greeting', { name: userName })}</WelcomeTitle>
         </WelcomeSection>
 
-        {/* Stats */}
-        <StatsGrid>
-          <StatCard>
-            <StatNumber>{favorites.length}</StatNumber>
-            <StatLabel>{t('profile.stats.favorites')}</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatNumber>{brandCount}</StatNumber>
-            <StatLabel>{t('profile.stats.brands')}</StatLabel>
-          </StatCard>
-        </StatsGrid>
+        {/* Favorites Section - Now at the top */}
+        <Section $delay="0.1s">
+          <SectionHeader>
+            <SectionTitle>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              {t('profile.sections.favorites')} ({favorites.length})
+            </SectionTitle>
+            {favorites.length > 0 && (
+              <SectionLink to="/">{t('profile.addMore')}</SectionLink>
+            )}
+          </SectionHeader>
 
-        {/* Quick Actions */}
-        <QuickActions>
-          <ActionCard onClick={() => navigate('/onboarding')}>
-            <ActionIcon>✨</ActionIcon>
-            <ActionLabel>{t('profile.actions.updateStyle')}</ActionLabel>
-          </ActionCard>
-          <ActionCard onClick={() => document.getElementById('favorites-section')?.scrollIntoView({ behavior: 'smooth' })}>
-            <ActionIcon>❤️</ActionIcon>
-            <ActionLabel>{t('profile.actions.viewFavorites')}</ActionLabel>
-          </ActionCard>
-        </QuickActions>
+          {favorites.length > 0 ? (
+            <>
+              <FavoritesGrid>
+                {favorites.slice(0, favoritesDisplayCount).map((item) => (
+                  <FavoriteCard key={item.id}>
+                    <FavoriteImage onClick={() => handleFavoriteClick(item)}>
+                      {item.imageUrl && <img src={item.imageUrl} alt={item.name} />}
+                    </FavoriteImage>
+                    <FavoriteInfo onClick={() => handleFavoriteClick(item)}>
+                      <FavoriteBrand>{item.brand}</FavoriteBrand>
+                      <FavoriteName>{item.name}</FavoriteName>
+                      {item.price != null && item.price !== '' && (
+                        <FavoritePrice>{item.price}</FavoritePrice>
+                      )}
+                    </FavoriteInfo>
+                    <RemoveButton onClick={() => removeFromFavorites(item.id)}>
+                      {t('favorites.remove')}
+                    </RemoveButton>
+                  </FavoriteCard>
+                ))}
+              </FavoritesGrid>
 
-        {/* Engagement Banner */}
-        {favorites.length < 3 && (
-          <EngagementBanner>
-            <BannerIcon>💡</BannerIcon>
-            <BannerContent>
-              <BannerTitle>{t('profile.banner.discoverTitle')}</BannerTitle>
-              <BannerText>{t('profile.banner.discoverText')}</BannerText>
-            </BannerContent>
-            <BannerButton to="/">{t('profile.banner.discoverButton')}</BannerButton>
-          </EngagementBanner>
-        )}
+              {favorites.length > FAVORITES_PER_PAGE && (
+                <ShowMoreContainer>
+                  {favoritesDisplayCount < favorites.length ? (
+                    <>
+                      <ShowMoreButton onClick={() => setFavoritesDisplayCount(favorites.length)}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                        {t('profile.showAll', 'Voir tout')} ({favorites.length - favoritesDisplayCount} {t('profile.more', 'de plus')})
+                      </ShowMoreButton>
+                    </>
+                  ) : (
+                    <ShowLessButton onClick={() => setFavoritesDisplayCount(FAVORITES_PER_PAGE)}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="18 15 12 9 6 15" />
+                      </svg>
+                      {t('profile.showLess', 'Voir moins')}
+                    </ShowLessButton>
+                  )}
+                </ShowMoreContainer>
+              )}
+            </>
+          ) : (
+            <EmptyState>
+              <EmptyIcon>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </EmptyIcon>
+              <EmptyTitle>{t('profile.emptyFavorites.title')}</EmptyTitle>
+              <EmptyDescription>{t('profile.emptyFavorites.description')}</EmptyDescription>
+              <PrimaryButton to="/">{t('profile.emptyFavorites.button')}</PrimaryButton>
+            </EmptyState>
+          )}
+        </Section>
+
+        {/* Exclusive Perks Section */}
+        <Section $delay="0.2s">
+          <SectionHeader>
+            <SectionTitle>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+              </svg>
+              {t('profile.perks.title', 'Avantages Exclusifs')}
+            </SectionTitle>
+          </SectionHeader>
+
+          <PerksGrid>
+            <PerkCard to="/?tab=coup-de-coeur" $gradient="linear-gradient(135deg, #1a1a1a 0%, #333 100%)">
+              <PerkIcon>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                  <line x1="7" y1="7" x2="7.01" y2="7" />
+                </svg>
+              </PerkIcon>
+              <PerkContent>
+                <PerkTitle>{t('profile.perks.privateSale.title', 'Ventes Privées')}</PerkTitle>
+                <PerkDescription>{t('profile.perks.privateSale.description', 'Accès exclusif aux offres membres')}</PerkDescription>
+              </PerkContent>
+              <PerkBadge>{t('profile.perks.exclusive', 'Exclusif')}</PerkBadge>
+              <PerkArrow>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </PerkArrow>
+            </PerkCard>
+
+            {SHOW_SECRETS_TAB && (
+              <PerkCard to="/?tab=secrets" $gradient="linear-gradient(135deg, #8B7355 0%, #A08060 100%)">
+                <PerkIcon>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                </PerkIcon>
+                <PerkContent>
+                  <PerkTitle>{t('profile.perks.secrets.title', 'Mes Secrets')}</PerkTitle>
+                  <PerkDescription>{t('profile.perks.secrets.description', 'Accès exclusif à mes produits')}</PerkDescription>
+                </PerkContent>
+                <PerkBadge>{t('profile.perks.new', 'Nouveau')}</PerkBadge>
+                <PerkArrow>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </PerkArrow>
+              </PerkCard>
+            )}
+          </PerksGrid>
+        </Section>
 
         {/* 7 Days of Inspiration */}
         <InspirationSection>
           <InspirationHeader>
             <div>
               <InspirationTitle>
-                📅 {t('profile.inspiration.title')}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                {t('profile.inspiration.title')}
               </InspirationTitle>
               <InspirationSubtitle>{t('profile.inspiration.subtitle')}</InspirationSubtitle>
             </div>
             <SectionLink to="/">{t('profile.inspiration.seeAll')}</SectionLink>
           </InspirationHeader>
-          
+
           {outfitsLoading ? (
             <InspirationEmpty>
-              <InspirationEmptyIcon>⏳</InspirationEmptyIcon>
+              <InspirationEmptyIcon>...</InspirationEmptyIcon>
               <InspirationEmptyText>{t('common.loading')}</InspirationEmptyText>
             </InspirationEmpty>
           ) : curatedOutfits.length > 0 ? (
@@ -952,10 +982,10 @@ const Profile = () => {
               {days.map((day, index) => {
                 const outfit = curatedOutfits[index];
                 if (!outfit) return null;
-                
+
                 return (
-                  <DayCard 
-                    key={day.dayNumber} 
+                  <DayCard
+                    key={day.dayNumber}
                     onClick={() => navigate(`/outfits/${outfit.id}`)}
                   >
                     <DayLabel>
@@ -964,11 +994,6 @@ const Profile = () => {
                     </DayLabel>
                     <DayOutfitImage $isToday={day.isToday}>
                       {outfit.image && <img src={outfit.image} alt={getOutfitTitle(outfit, i18n.language)} />}
-                      {outfit.matchReasons?.length > 0 && (
-                        <MatchBadge>
-                          ✨ {t('profile.inspiration.forYou')}
-                        </MatchBadge>
-                      )}
                       <DayOutfitOverlay>
                         <DayOutfitTitle>{getOutfitTitle(outfit, i18n.language)}</DayOutfitTitle>
                       </DayOutfitOverlay>
@@ -979,101 +1004,18 @@ const Profile = () => {
             </DaysScroller>
           ) : (
             <InspirationEmpty>
-              <InspirationEmptyIcon>✨</InspirationEmptyIcon>
-              <InspirationEmptyText>{t('profile.inspiration.empty')}</InspirationEmptyText>
-              <InspirationEmptyButton to="/onboarding">
-                {t('profile.inspiration.setupPreferences')}
-              </InspirationEmptyButton>
+              <InspirationEmptyIcon>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </InspirationEmptyIcon>
+              <InspirationEmptyText>{t('profile.inspiration.empty', 'Découvrez nos looks bientôt')}</InspirationEmptyText>
             </InspirationEmpty>
           )}
         </InspirationSection>
-
-        {/* Style Preferences */}
-        <Section>
-          <SectionHeader>
-            <SectionTitle>
-              ✨ {t('profile.sections.styleProfile')}
-            </SectionTitle>
-            <EditButton onClick={() => navigate('/onboarding')}>
-              {t('common.edit')}
-            </EditButton>
-          </SectionHeader>
-          
-          <PreferencesCard>
-            <PreferenceRow>
-              <PreferenceIcon>👗</PreferenceIcon>
-              <PreferenceContent>
-                <PreferenceLabel>{t('profile.styles')}</PreferenceLabel>
-                <TagsContainer>
-                  {user?.preferences?.styleInterests?.length > 0 ? (
-                    user.preferences.styleInterests.map((style, idx) => (
-                      <Tag key={idx} $variant="style">
-                        {t(`onboarding.style.options.${style}`, style)}
-                      </Tag>
-                    ))
-                  ) : (
-                    <EmptyTag>{t('profile.noStyles')}</EmptyTag>
-                  )}
-                </TagsContainer>
-              </PreferenceContent>
-            </PreferenceRow>
-            
-            <PreferenceRow>
-              <PreferenceIcon>🏷️</PreferenceIcon>
-              <PreferenceContent>
-                <PreferenceLabel>{t('profile.brands')}</PreferenceLabel>
-                <TagsContainer>
-                  {user?.preferences?.favoriteBrands?.length > 0 ? (
-                    user.preferences.favoriteBrands.map((brand, idx) => (
-                      <Tag key={idx}>{brand}</Tag>
-                    ))
-                  ) : (
-                    <EmptyTag>{t('profile.noBrands')}</EmptyTag>
-                  )}
-                </TagsContainer>
-              </PreferenceContent>
-            </PreferenceRow>
-          </PreferencesCard>
-        </Section>
-
-        {/* Favorites */}
-        <Section id="favorites-section">
-          <SectionHeader>
-            <SectionTitle>
-              ❤️ {t('profile.sections.favorites')} ({favorites.length})
-            </SectionTitle>
-            {favorites.length > 0 && (
-              <SectionLink to="/">{t('profile.addMore')}</SectionLink>
-            )}
-          </SectionHeader>
-          
-          {favorites.length > 0 ? (
-            <FavoritesGrid>
-              {favorites.slice(0, 8).map((item) => (
-                <FavoriteCard key={item.id}>
-                  <FavoriteImage onClick={() => navigate(item.outfitId ? `/outfits/${item.outfitId}` : '/')}>
-                    {item.imageUrl && <img src={item.imageUrl} alt={item.name} />}
-                  </FavoriteImage>
-                  <FavoriteInfo onClick={() => navigate(item.outfitId ? `/outfits/${item.outfitId}` : '/')}>
-                    <FavoriteBrand>{item.brand}</FavoriteBrand>
-                    <FavoriteName>{item.name}</FavoriteName>
-                    <FavoritePrice>{item.price}</FavoritePrice>
-                  </FavoriteInfo>
-                  <RemoveButton onClick={() => removeFromFavorites(item.id)}>
-                    {t('favorites.remove')}
-                  </RemoveButton>
-                </FavoriteCard>
-              ))}
-            </FavoritesGrid>
-          ) : (
-            <EmptyState>
-              <EmptyIcon>💝</EmptyIcon>
-              <EmptyTitle>{t('profile.emptyFavorites.title')}</EmptyTitle>
-              <EmptyDescription>{t('profile.emptyFavorites.description')}</EmptyDescription>
-              <PrimaryButton to="/">{t('profile.emptyFavorites.button')}</PrimaryButton>
-            </EmptyState>
-          )}
-        </Section>
       </MainContent>
     </PageWrapper>
   );
