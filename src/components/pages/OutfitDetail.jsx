@@ -2,7 +2,7 @@ import { useState, useEffect, memo, useMemo, useCallback, useRef, lazy, Suspense
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import styled, { keyframes } from 'styled-components'
 import { useTranslation } from 'react-i18next'
-import { getOutfitDescription, getOutfitTitle } from '../../utils/outfitUtils'
+import { getOutfitDescription, getOutfitTitle, parseOutfitDescriptionBlocks } from '../../utils/outfitUtils'
 import { useFavorites } from '../../hooks/useFavorites'
 import { useAuth } from '../../context/AuthContext'
 import { useSEO, seoConfig } from '../../hooks/useSEO'
@@ -998,23 +998,71 @@ const OutfitTitle = styled.h1`
   }
 `
 
-const OutfitDescription = styled.p`
-  font-size: 1rem;
-  color: #666;
-  line-height: 1.6;
-  margin: 0 0 0.75rem 0;
+const OutfitDescription = styled.div`
+  font-size: 0.98rem;
+  color: #4a4a4a;
+  line-height: 1.75;
+  margin: 0 0 1rem 0;
   font-weight: 400;
+  letter-spacing: 0.01em;
+  max-width: 38rem;
 
   /* Instagram in-app browser optimization */
   @media (max-height: 700px) and (max-width: 480px) {
     font-size: 0.9rem;
-    line-height: 1.5;
-    margin-bottom: 0.5rem;
+    line-height: 1.65;
+    margin-bottom: 0.75rem;
   }
 
   @media (min-width: 768px) {
-    font-size: 1.05rem;
-    margin-bottom: 0.75rem;
+    font-size: 1.02rem;
+    line-height: 1.8;
+    margin-bottom: 1.15rem;
+  }
+`
+
+const DescBlock = styled.div`
+  margin: 0 0 1rem 0;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`
+
+const DescLead = styled.p`
+  margin: 0 0 0.35rem 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  line-height: 1.4;
+
+  @media (min-width: 768px) {
+    font-size: 0.74rem;
+  }
+`
+
+const DescBody = styled.p`
+  margin: 0;
+  color: #555;
+  line-height: inherit;
+`
+
+const DescCallout = styled.div`
+  margin: 0.15rem 0 0;
+  padding: 0.85rem 0 0.85rem 0.9rem;
+  border-left: 2px solid #c4b8a8;
+  background: linear-gradient(90deg, rgba(196, 184, 168, 0.12), transparent 85%);
+
+  ${DescLead} {
+    color: #2a2a2a;
+  }
+
+  ${DescBody} {
+    color: #3f3f3f;
+    font-style: italic;
+    line-height: 1.7;
   }
 `
 
@@ -1726,6 +1774,37 @@ const CardFavoriteButton = memo(function CardFavoriteButton({ product, outfitId,
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
       </svg>
     </FavoriteOverlayButton>
+  )
+})
+
+function isCalloutLead(lead) {
+  if (!lead) return false
+  const n = lead
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+  return n.includes('retenir') || n.includes('en resume') || n.includes('a noter')
+}
+
+const LookDescription = memo(function LookDescription({ text }) {
+  const blocks = useMemo(() => parseOutfitDescriptionBlocks(text), [text])
+  if (!blocks.length) return null
+
+  return (
+    <OutfitDescription>
+      {blocks.map((block, i) => {
+        const content = (
+          <>
+            {block.lead && <DescLead>{block.lead}</DescLead>}
+            <DescBody>{block.body}</DescBody>
+          </>
+        )
+        if (isCalloutLead(block.lead)) {
+          return <DescCallout key={i}>{content}</DescCallout>
+        }
+        return <DescBlock key={i}>{content}</DescBlock>
+      })}
+    </OutfitDescription>
   )
 })
 
@@ -2890,7 +2969,7 @@ function OutfitDetail() {
           </ImageContainer>
           <ImageCardContent>
             <OutfitTitle>{getOutfitTitle(outfit, i18n.language)}</OutfitTitle>
-            <OutfitDescription>{getOutfitDescription(outfit, i18n.language)}</OutfitDescription>
+            <LookDescription text={getOutfitDescription(outfit, i18n.language)} />
             <PublicationDate>
               {getRelativeTime(outfit.publishedAt ?? outfit.createdAt)}
               <SubtleShareButton outfit={outfit} />
