@@ -207,27 +207,42 @@
         }
 
         if (!outfitSlug) {
-          var cachedOutfits = getCachedData('dw_cache_v2_outfits');
-          var cachedProfile = getCachedData('dw_cache_v2_profile');
+          // Keep keys in sync with src/utils/api.js STORAGE_VERSION (v4)
+          var cachedOutfits = getCachedData('dw_cache_v4_outfits');
+          var cachedProfile = getCachedData('dw_cache_v4_profile');
 
           if (cachedOutfits) window.__PREFETCHED_OUTFITS__ = Promise.resolve(cachedOutfits);
           if (cachedProfile) window.__PREFETCHED_PROFILE__ = Promise.resolve(cachedProfile);
 
-          if (!cachedOutfits || shouldRefresh('dw_cache_v2_outfits')) {
+          // Single network call: export includes outfits + influencer (+ CMS). No separate /profile.
+          if (!cachedOutfits || shouldRefresh('dw_cache_v4_outfits')) {
             var p = fetch(API_URL + '/outfits/export').then(function(r) { return r.ok ? r.json() : null; })
               .then(function(d) {
-                if (d) try { sessionStorage.setItem('dw_cache_v2_outfits', JSON.stringify({ data: d, timestamp: Date.now() })); } catch(e) {}
+                if (d) {
+                  try { sessionStorage.setItem('dw_cache_v4_outfits', JSON.stringify({ data: d, timestamp: Date.now() })); } catch(e) {}
+                  if (d.influencer) {
+                    var profileFromExport = Object.assign({}, d.influencer, {
+                      socialMedia: d.socialMedia || d.influencer.socialMedia || {}
+                    });
+                    try { sessionStorage.setItem('dw_cache_v4_profile', JSON.stringify({ data: profileFromExport, timestamp: Date.now() })); } catch(e) {}
+                    if (!window.__PREFETCHED_PROFILE__) {
+                      window.__PREFETCHED_PROFILE__ = Promise.resolve(profileFromExport);
+                    }
+                  }
+                }
                 return d || cachedOutfits;
               })
               .catch(function() { return cachedOutfits; });
             if (!window.__PREFETCHED_OUTFITS__) window.__PREFETCHED_OUTFITS__ = p;
-          }
-
-          if (!cachedProfile || shouldRefresh('dw_cache_v2_profile')) {
+          } else if ((!cachedProfile || shouldRefresh('dw_cache_v4_profile')) && !window.__PREFETCHED_PROFILE__) {
+            // Outfits fresh but profile missing — rare fallback
             var q = fetch(API_URL + '/profile').then(function(r) { return r.ok ? r.json() : null; })
-              .then(function(d) { if (d) try { sessionStorage.setItem('dw_cache_v2_profile', JSON.stringify({ data: d, timestamp: Date.now() })); } catch(e) {} return d || cachedProfile; })
+              .then(function(d) {
+                if (d) try { sessionStorage.setItem('dw_cache_v4_profile', JSON.stringify({ data: d, timestamp: Date.now() })); } catch(e) {}
+                return d || cachedProfile;
+              })
               .catch(function() { return cachedProfile; });
-            if (!window.__PREFETCHED_PROFILE__) window.__PREFETCHED_PROFILE__ = q;
+            window.__PREFETCHED_PROFILE__ = q;
           }
         }
       })();

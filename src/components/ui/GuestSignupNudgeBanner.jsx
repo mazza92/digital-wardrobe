@@ -12,6 +12,7 @@ import {
   signupNudgeEventName,
 } from '../../utils/engagementNudge'
 import { trackBannerEvent } from '../../utils/analytics'
+import { fetchProfile } from '../../utils/api'
 
 const Banner = styled.aside`
   position: fixed;
@@ -62,11 +63,14 @@ const CloseButton = styled.button`
 `
 
 export default function GuestSignupNudgeBanner() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { isAuthenticated } = useAuth()
   const location = useLocation()
   const [tick, setTick] = useState(0)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [bannerEnabled, setBannerEnabled] = useState(true)
+  const [cmsMessage, setCmsMessage] = useState(null)
+  const [cmsCta, setCmsCta] = useState(null)
 
   useEffect(() => {
     const onUpdate = () => setTick(t => t + 1)
@@ -74,14 +78,39 @@ export default function GuestSignupNudgeBanner() {
     return () => window.removeEventListener(signupNudgeEventName, onUpdate)
   }, [])
 
+  // Load CMS config from profile (enable + copy)
+  useEffect(() => {
+    let cancelled = false
+    fetchProfile()
+      .then((profile) => {
+        if (cancelled || !profile) return
+        setBannerEnabled(profile.acquisitionBannerEnabled !== false)
+        const isEn = (i18n.language || 'fr').startsWith('en')
+        const message = isEn
+          ? (profile.acquisitionBannerMessageEn || profile.acquisitionBannerMessage)
+          : (profile.acquisitionBannerMessage || profile.acquisitionBannerMessageEn)
+        const cta = isEn
+          ? (profile.acquisitionBannerCtaEn || profile.acquisitionBannerCta)
+          : (profile.acquisitionBannerCta || profile.acquisitionBannerCtaEn)
+        setCmsMessage(message?.trim() || null)
+        setCmsCta(cta?.trim() || null)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [i18n.language])
+
   const shouldHideForRoute = useMemo(() => {
     const p = location.pathname
     return p === '/login' || p === '/signup'
   }, [location.pathname])
 
-  const visible = !isAuthenticated && !shouldHideForRoute && isSignupNudgeTriggered() && !isSignupNudgeDismissed()
+  const visible =
+    bannerEnabled &&
+    !isAuthenticated &&
+    !shouldHideForRoute &&
+    isSignupNudgeTriggered() &&
+    !isSignupNudgeDismissed()
 
-  // Track banner show event when it becomes visible
   useEffect(() => {
     if (visible) {
       trackBannerEvent('show', 'engagement_nudge', { page: location.pathname })
@@ -102,15 +131,15 @@ export default function GuestSignupNudgeBanner() {
   }
 
   const redirect = `${location.pathname}${location.search}${location.hash}`
+  const message = cmsMessage || t('signupNudge.message')
+  const cta = cmsCta || t('signupNudge.cta')
 
   return (
     <>
       {createPortal(
         <Banner role="status" aria-live="polite" data-tick={tick}>
-          <Copy>
-            {t('signupNudge.message')}
-          </Copy>
-          <SignupButton type="button" onClick={goSignup}>{t('signupNudge.cta')}</SignupButton>
+          <Copy>{message}</Copy>
+          <SignupButton type="button" onClick={goSignup}>{cta}</SignupButton>
           <CloseButton type="button" onClick={close} aria-label={t('signupNudge.closeAria')}>x</CloseButton>
         </Banner>,
         document.body

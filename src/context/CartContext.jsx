@@ -33,8 +33,11 @@ export const CartProvider = ({ children }) => {
 
   // Add item to cart
   const addItem = useCallback((product, quantity = 1) => {
+    const itemId = product.id || product.productId
     setItems(prev => {
-      const existingIndex = prev.findIndex(item => item.productId === product.id)
+      const existingIndex = prev.findIndex(item =>
+        item.productId === itemId || item.id === itemId
+      )
       
       if (existingIndex > -1) {
         // Update quantity if item exists
@@ -46,15 +49,22 @@ export const CartProvider = ({ children }) => {
         return updated
       }
       
-      // Add new item
+      // Add new item - use product.id or product.productId as fallback
+      const itemId = product.id || product.productId
+      if (!itemId) {
+        console.error('Cannot add item without id:', product)
+        return prev
+      }
       return [...prev, {
-        productId: product.id,
+        productId: itemId,
+        id: itemId, // Also store as 'id' for backwards compatibility
         name: product.name,
         nameEn: product.nameEn,
         price: product.price,
-        imageUrl: product.imageUrl,
+        imageUrl: product.imageUrl || product.images?.[0],
         quantity,
-        stock: product.stock
+        stock: product.stock,
+        saleId: product.saleId || null // Track which private sale this item belongs to
       }]
     })
     

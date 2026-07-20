@@ -21,6 +21,7 @@ const AuthCallback = lazy(() => import('./components/pages/auth/AuthCallback.jsx
 const ResetPassword = lazy(() => import('./components/pages/auth/ResetPassword.jsx'))
 
 // Shop - Lazy loaded
+const TermsOfSale = lazy(() => import('./components/pages/TermsOfSale.jsx'))
 const Shop = lazy(() => import('./components/pages/Shop.jsx'))
 const PrivateSale = lazy(() => import('./components/pages/PrivateSale.jsx'))
 const PrivateSaleProduct = lazy(() => import('./components/pages/PrivateSaleProduct.jsx'))
@@ -156,13 +157,21 @@ function App() {
                   </Suspense>
                 } 
               />
-              <Route 
-                path="/legal" 
+              <Route
+                path="/legal"
                 element={
                   <Suspense fallback={<LoadingFallback message={t('loading.legal', 'Chargement...')} />}>
                     <LazyLegalInfo />
                   </Suspense>
-                } 
+                }
+              />
+              <Route
+                path="/cgv"
+                element={
+                  <Suspense fallback={<LoadingFallback message={t('loading.legal', 'Chargement...')} />}>
+                    <TermsOfSale />
+                  </Suspense>
+                }
               />
               <Route path="/login" element={
                 <Suspense fallback={<AuthLoadingFallback />}>

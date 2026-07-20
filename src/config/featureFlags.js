@@ -1,5 +1,6 @@
 /**
  * Feature flags for gradual rollout.
- * Set SHOW_SECRETS_TAB to true to show the "Mes secrets" tab again.
+ * SHOW_SECRETS_TAB is deprecated — use CMS Paramètres → "Mes secrets"
+ * via profile.showSecretsTab / useShowSecretsTab(). Kept as false fallback only.
  */
 export const SHOW_SECRETS_TAB = false

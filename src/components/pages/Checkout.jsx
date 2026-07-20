@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
@@ -295,15 +295,16 @@ const COUNTRIES = [
   { code: 'GB', name: 'Royaume-Uni' }
 ]
 
-const FREE_SHIPPING_THRESHOLD = 50
-const SHIPPING_COST = 4.90
+// Default fallback values (will be overridden by API)
+const DEFAULT_SHIPPING_COST = 4.90
+const DEFAULT_FREE_THRESHOLD = 50
 
 function Checkout() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { items, subtotal, clearCart, setIsLoading } = useCart()
   const { user, isAuthenticated } = useAuth()
-  
+
   const [formData, setFormData] = useState({
     email: user?.email || '',
     name: user?.name || '',
@@ -317,8 +318,60 @@ function Checkout() {
   })
   const [error, setError] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [shippingSettings, setShippingSettings] = useState({
+    shippingCost: DEFAULT_SHIPPING_COST,
+    freeShippingThreshold: DEFAULT_FREE_THRESHOLD
+  })
 
-  const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST
+  // Fetch shipping settings based on cart items
+  useEffect(() => {
+    const fetchShippingSettings = async () => {
+      try {
+        // Check if all items are from the same private sale
+        const saleIds = [...new Set(items.map(item => item.saleId).filter(Boolean))]
+
+        if (saleIds.length === 1) {
+          // All items from same private sale - fetch sale-specific settings
+          const saleId = saleIds[0]
+          const res = await fetch(`${API_BASE_URL}/private-sales/${saleId}`)
+          if (res.ok) {
+            const data = await res.json()
+            const sale = data.sale || data
+            // Use sale-specific settings if defined, otherwise fall back to global
+            if (sale.shippingCost !== null && sale.shippingCost !== undefined) {
+              setShippingSettings({
+                shippingCost: sale.shippingCost,
+                freeShippingThreshold: sale.freeShippingThreshold
+              })
+              return
+            }
+          }
+        }
+
+        // Fetch global settings
+        const globalRes = await fetch(`${API_BASE_URL}/settings/shipping`)
+        if (globalRes.ok) {
+          const globalData = await globalRes.json()
+          setShippingSettings({
+            shippingCost: globalData.shippingCost ?? DEFAULT_SHIPPING_COST,
+            freeShippingThreshold: globalData.freeShippingThreshold ?? DEFAULT_FREE_THRESHOLD
+          })
+        }
+      } catch (err) {
+        console.error('Error fetching shipping settings:', err)
+        // Keep defaults on error
+      }
+    }
+
+    if (items.length > 0) {
+      fetchShippingSettings()
+    }
+  }, [items])
+
+  // Calculate shipping based on settings
+  const shippingCost = (shippingSettings.freeShippingThreshold && subtotal >= shippingSettings.freeShippingThreshold)
+    ? 0
+    : shippingSettings.shippingCost
   const total = subtotal + shippingCost
 
   const handleChange = (e) => {
@@ -354,8 +407,9 @@ function Checkout() {
     try {
       const checkoutData = {
         items: items.map(item => ({
-          productId: item.productId,
-          quantity: item.quantity
+          productId: item.productId || item.id, // Use id as fallback
+          quantity: item.quantity,
+          saleId: item.saleId || null
         })),
         customerEmail: formData.email,
         customerName: formData.name,

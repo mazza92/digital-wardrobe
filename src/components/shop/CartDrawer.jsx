@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useCart } from '../../context/CartContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://admin.emmanuellek.com/api'
 
 const Overlay = styled.div`
   position: fixed;
@@ -263,7 +265,7 @@ const ContinueShopping = styled(Link)`
   }
 `
 
-const FREE_SHIPPING_THRESHOLD = 50
+const DEFAULT_FREE_THRESHOLD = 50
 
 const CartDrawer = () => {
   const { t, i18n } = useTranslation()
@@ -277,11 +279,50 @@ const CartDrawer = () => {
     removeItem
   } = useCart()
 
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(DEFAULT_FREE_THRESHOLD)
+
+  // Fetch shipping settings when cart opens
+  useEffect(() => {
+    if (!isOpen || items.length === 0) return
+
+    const fetchSettings = async () => {
+      try {
+        // Check if items are from a private sale
+        const saleIds = [...new Set(items.map(item => item.saleId).filter(Boolean))]
+
+        if (saleIds.length === 1) {
+          const res = await fetch(`${API_BASE_URL}/private-sales/${saleIds[0]}`)
+          if (res.ok) {
+            const data = await res.json()
+            const sale = data.sale || data
+            if (sale.freeShippingThreshold !== null && sale.freeShippingThreshold !== undefined) {
+              setFreeShippingThreshold(sale.freeShippingThreshold)
+              return
+            }
+          }
+        }
+
+        // Fetch global settings
+        const globalRes = await fetch(`${API_BASE_URL}/settings/shipping`)
+        if (globalRes.ok) {
+          const globalData = await globalRes.json()
+          if (globalData.freeShippingThreshold !== null) {
+            setFreeShippingThreshold(globalData.freeShippingThreshold)
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching shipping settings:', err)
+      }
+    }
+
+    fetchSettings()
+  }, [isOpen, items])
+
   // Lock body scroll when drawer is open (must be called before early return)
   useBodyScrollLock(isOpen)
 
-  const amountToFreeShipping = FREE_SHIPPING_THRESHOLD - subtotal
-  const hasFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD
+  const amountToFreeShipping = freeShippingThreshold - subtotal
+  const hasFreeShipping = freeShippingThreshold ? subtotal >= freeShippingThreshold : false
 
   const getItemName = (item) => {
     if (i18n.language === 'en' && item.nameEn) {

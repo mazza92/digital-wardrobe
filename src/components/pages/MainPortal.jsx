@@ -29,8 +29,9 @@ const CoupDeCoeurAccessModal = lazy(() => import('../ui/CoupDeCoeurAccessModal')
 const SecretsAccessModal = lazy(() => import('../ui/SecretsAccessModal'))
 import { getCoupDeCoeurUnlocked } from '../ui/CoupDeCoeurAccessModal'
 import { trackDiscoverClick } from '../../utils/analytics'
+import { handleEditorialAffiliateClick } from '../../utils/tracking'
 import { resolveHeroCuratedBy, resolveHeroTagline } from '../../utils/heroCopy'
-import { SHOW_SECRETS_TAB } from '../../config/featureFlags'
+import { useShowSecretsTab } from '../../hooks/useShowSecretsTab'
 
 const MainContainer = styled.div`
   min-height: 100vh;
@@ -1898,8 +1899,10 @@ function MainPortal() {
   const navigate = useNavigate()
   const location = useLocation()
   const outfitsSectionRef = useRef(null)
+  const tabContainerRef = useRef(null)
   const { outfits, influencer, isLoading, error } = useOutfits()
   const { user, isAuthenticated, logout } = useAuth()
+  const { showSecretsTab } = useShowSecretsTab()
   const { addItem: addToCart, openCart } = useCart()
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
@@ -1913,27 +1916,54 @@ function MainPortal() {
   const [outfitsPage, setOutfitsPage] = useState(1)
   const [wishlistPage, setWishlistPage] = useState(1)
   // Support deep-linking to a specific tab from profile cards, etc.
-  // Example: /?tab=coup-de-coeur
+  // Example: /?tab=coup-de-coeur or /?tab=ventes-privees
   useEffect(() => {
     const params = new URLSearchParams(location.search)
-    const tab = params.get('tab')
+    let tab = params.get('tab')
     if (!tab) return
+
+    // Map friendly aliases to internal tab names
+    const tabAliases = {
+      'ventes-privees': 'coup-de-coeur',
+      'private-sales': 'coup-de-coeur',
+      'looks': 'outfits',
+      'editos': 'wishlist',
+      'editorial': 'wishlist'
+    }
+    const originalTab = tab
+    if (tabAliases[tab]) {
+      tab = tabAliases[tab]
+    }
+
     const allowedTabs = new Set(
-      SHOW_SECRETS_TAB
+      showSecretsTab
         ? ['outfits', 'wishlist', 'secrets', 'coup-de-coeur']
         : ['outfits', 'wishlist', 'coup-de-coeur']
     )
     if (allowedTabs.has(tab)) {
       setActiveTab(tab)
+
+      // Scroll to show the tab content when deep-linking (especially for social shares)
+      // Use a small delay to ensure content is rendered, then scroll with offset for header
+      setTimeout(() => {
+        if (tabContainerRef.current) {
+          const headerHeight = 64 // Account for sticky header
+          const elementTop = tabContainerRef.current.getBoundingClientRect().top + window.scrollY
+          window.scrollTo({
+            top: elementTop - headerHeight,
+            behavior: 'smooth'
+          })
+        }
+      }, 100)
     }
-  }, [location.search])
+  }, [location.search, showSecretsTab])
 
   // If secrets is disabled, never stay on secrets (e.g. stale state)
   useEffect(() => {
-    if (!SHOW_SECRETS_TAB && activeTab === 'secrets') {
+    if (!showSecretsTab && activeTab === 'secrets') {
       setActiveTab('outfits')
     }
-  }, [activeTab])
+  }, [activeTab, showSecretsTab])
 
   // Optional deep-link scroll target used by "Voir plus" from outfit detail.
   useEffect(() => {
@@ -2458,7 +2488,7 @@ function MainPortal() {
       </HeroSection>
       
       {/* Tab Menu - Restored */}
-      <TabContainer>
+      <TabContainer ref={tabContainerRef}>
         <TabMenu>
           <TabButton 
             $active={activeTab === 'outfits'} 
@@ -2476,7 +2506,7 @@ function MainPortal() {
           >
             {t('nav.wishlist')}
           </TabButton>
-          {SHOW_SECRETS_TAB && (
+          {showSecretsTab && (
             <TabButton
               $active={activeTab === 'secrets'}
               onClick={() => setActiveTab('secrets')}
@@ -2616,13 +2646,26 @@ function MainPortal() {
                   dangerouslySetInnerHTML={{
                     __html: i18n.language === 'en' && selectedEditorial.contentEn ? selectedEditorial.contentEn : selectedEditorial.content
                   }}
+                  onClick={(e) => {
+                    const anchor = e.target.closest?.('a')
+                    if (!anchor?.href || !selectedEditorial?.id) return
+                    handleEditorialAffiliateClick(
+                      {
+                        affiliateLink: anchor.href,
+                        name: anchor.textContent?.trim()?.slice(0, 120) || null
+                      },
+                      selectedEditorial.id,
+                      e,
+                      'content'
+                    )
+                  }}
                 />
               )}
 
               {selectedEditorial.curatedProducts && selectedEditorial.curatedProducts.length > 0 && (
                 <EditorialProductsSection>
                   <EditorialProductsTitle>
-                    {t('editorial.shopTheEdit', 'Shop the Edit')}
+                    {t('editorial.shopTheEdit', 'In this edit:')}
                   </EditorialProductsTitle>
                   <EditorialProductsGrid>
                     {selectedEditorial.curatedProducts.map((product, index) => (
@@ -2631,6 +2674,13 @@ function MainPortal() {
                         href={product.affiliateLink ? product.affiliateLink.replace(/&amp;/g, '&') : '#'}
                         target={product.affiliateLink ? '_blank' : undefined}
                         rel={product.affiliateLink ? 'noopener noreferrer' : undefined}
+                        onClick={(e) => {
+                          if (!product.affiliateLink) {
+                            e.preventDefault()
+                            return
+                          }
+                          handleEditorialAffiliateClick(product, selectedEditorial.id, e, 'card')
+                        }}
                       >
                         <EditorialProductImage>
                           {product.imageUrl && (
@@ -2986,7 +3036,7 @@ function MainPortal() {
         </EditorialSection>
       )}
 
-      {SHOW_SECRETS_TAB && activeTab === 'secrets' && (
+      {showSecretsTab && activeTab === 'secrets' && (
         <EditorialSection>
           <SectionHeaderRow>
             <SectionTitle>{t('nav.secretEmmanuelle')}</SectionTitle>

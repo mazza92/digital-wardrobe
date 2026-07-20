@@ -9,6 +9,7 @@ import CartButton from '../shop/CartButton'
 import SubtleShareButton from '../ui/SubtleShareButton'
 import { postToSlug } from '../../utils/slugify'
 import { LazyCartButton, LazyFavoritesList, LoadingFallback } from '../../utils/performance'
+import { handleEditorialAffiliateClick } from '../../utils/tracking'
 
 const LoginModal = lazy(() => import('../ui/LoginModal'))
 
@@ -265,13 +266,15 @@ const ProductsGrid = styled.div`
   }
 `
 
-const ProductCard = styled(Link)`
+const ProductCard = styled.a`
   position: relative;
   background: white;
   border-radius: 0;
   overflow: hidden;
   text-decoration: none;
+  color: inherit;
   contain: layout style;
+  cursor: pointer;
   
   @media (min-width: 768px) {
     transition: opacity 0.2s ease;
@@ -519,19 +522,42 @@ export default function EditorialDetail() {
             <SubtleShareButton post={post} />
           </MetaRow>
           {content && (
-            <Content dangerouslySetInnerHTML={{ __html: content }} />
+            <Content
+              dangerouslySetInnerHTML={{ __html: content }}
+              onClick={(e) => {
+                const anchor = e.target.closest?.('a')
+                if (!anchor?.href || !post?.id) return
+                handleEditorialAffiliateClick(
+                  {
+                    affiliateLink: anchor.href,
+                    name: anchor.textContent?.trim()?.slice(0, 120) || null
+                  },
+                  post.id,
+                  e,
+                  'content'
+                )
+              }}
+            />
           )}
         </HeroSection>
 
         {post.curatedProducts && post.curatedProducts.length > 0 && (
           <ProductsSection>
-            <SectionTitle>{t('editorial.shopTheEdit', 'Shop the Edit')}</SectionTitle>
+            <SectionTitle>{t('editorial.shopTheEdit', 'In this edit:')}</SectionTitle>
             <ProductsGrid>
               {post.curatedProducts.map((product, index) => (
                 <ProductCard 
                   key={product.id || index}
-                  to={product.affiliateLink ? product.affiliateLink.replace(/&amp;/g, '&') : '#'}
+                  href={product.affiliateLink ? product.affiliateLink.replace(/&amp;/g, '&') : '#'}
                   target={product.affiliateLink ? '_blank' : undefined}
+                  rel={product.affiliateLink ? 'noopener noreferrer' : undefined}
+                  onClick={(e) => {
+                    if (!product.affiliateLink) {
+                      e.preventDefault()
+                      return
+                    }
+                    handleEditorialAffiliateClick(product, post.id, e, 'card')
+                  }}
                 >
                   <ProductImageWrapper>
                     {product.imageUrl && (

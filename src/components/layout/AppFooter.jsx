@@ -205,7 +205,10 @@ export default function AppFooter() {
             {t('footer.privacyPolicy', 'Politique de confidentialité')}
           </FooterLink>
           <FooterLink to="/legal">
-            {t('footer.legalInfo', 'Legal information')}
+            {t('footer.legalInfo', 'Mentions légales')}
+          </FooterLink>
+          <FooterLink to="/cgv">
+            CGV
           </FooterLink>
         </FooterBottom>
       </FooterContent>

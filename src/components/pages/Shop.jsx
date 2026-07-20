@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, memo, Suspense, lazy } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useCart } from '../../context/CartContext'
@@ -10,6 +10,7 @@ import { useSEO, seoConfig } from '../../hooks/useSEO'
 import CartButton from '../shop/CartButton'
 import OptimizedImage from '../ui/OptimizedImage'
 import { LazyCartButton, LazyFavoritesList } from '../../utils/performance'
+import { useShowSecretsTab } from '../../hooks/useShowSecretsTab'
 
 const TALLY_NOTIFY_URL = 'https://tally.so/r/eqrGq0'
 
@@ -610,9 +611,11 @@ ProductCardComponent.displayName = 'ProductCard'
 // Main Shop Component
 function Shop() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const { addItem } = useCart()
   const { isAuthenticated } = useAuth()
   const { getFavoritesCount, favorites, removeFromFavorites, clearFavorites } = useFavorites()
+  const { showSecretsTab, loaded: secretsFlagLoaded } = useShowSecretsTab()
   const [products, setProducts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -626,6 +629,13 @@ function Shop() {
     title: t('shop.seoTitle', 'Boutique - EMMANUELLE K'),
     description: t('shop.seoDescription', 'Découvrez la collection exclusive de produits sélectionnés par Emmanuelle K. Mode, accessoires et bijoux de qualité.')
   })
+
+  // Redirect home when Mes secrets is disabled in CMS
+  useEffect(() => {
+    if (secretsFlagLoaded && !showSecretsTab) {
+      navigate('/', { replace: true })
+    }
+  }, [secretsFlagLoaded, showSecretsTab, navigate])
 
   // Fetch products
   useEffect(() => {
@@ -656,6 +666,10 @@ function Shop() {
 
   const handleAddToCart = (product) => {
     addItem(product)
+  }
+
+  if (secretsFlagLoaded && !showSecretsTab) {
+    return null
   }
 
   if (isLoading) {

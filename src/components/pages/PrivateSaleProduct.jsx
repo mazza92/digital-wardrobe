@@ -390,9 +390,10 @@ export default function PrivateSaleProduct() {
     if (!product) return
     addItem({
       ...product,
-      price: product.price.toString()
+      price: product.price.toString(),
+      saleId: saleId // Include the sale ID for shipping calculation
     })
-  }, [product, addItem])
+  }, [product, addItem, saleId])
 
   if (!isVerified) return null
 

@@ -147,11 +147,26 @@ export const fetchOutfits = async (forceRefresh = false) => {
     const data = await prefetched
     if (data) {
       setCachedData('outfits', data)
+      // Seed profile cache from export so we don't need a second /profile round-trip
+      if (data.influencer) {
+        const profileFromExport = {
+          ...data.influencer,
+          socialMedia: data.socialMedia || data.influencer.socialMedia || {}
+        }
+        setCachedData('profile', profileFromExport)
+      }
       return data
     }
   }
   const url = `${API_BASE_URL}/outfits/export`
-  return fetchWithCache(url, 'outfits', { forceRefresh })
+  const data = await fetchWithCache(url, 'outfits', { forceRefresh })
+  if (data?.influencer) {
+    setCachedData('profile', {
+      ...data.influencer,
+      socialMedia: data.socialMedia || data.influencer.socialMedia || {}
+    })
+  }
+  return data
 }
 
 export const fetchProfile = async (forceRefresh = false) => {

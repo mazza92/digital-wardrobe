@@ -57,7 +57,7 @@
     }
   },
   "editorial": {
-    "shopTheEdit": "Shop the Edit"
+    "shopTheEdit": "Dans cet Edito :"
   },
   "home": {
     "newArrivals": "New arrivals",
@@ -81,8 +81,8 @@
     "order": "Commander",
     "discover": "Découvrir",
     "save": "Sauvegarder",
-    "findItHere": "Où le trouver",
-    "findIt": "Le trouver",
+    "findItHere": "Voir >",
+    "findIt": "Voir >",
     "myStyle": "C'est mon style",
     "notForMe": "Pas pour moi",
     "saveForLater": "Sauvegarde pour plus tard",

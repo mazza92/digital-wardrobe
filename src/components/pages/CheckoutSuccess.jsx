@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useCart } from '../../context/CartContext'
+import { trackGA4Purchase } from '../../utils/ga4'
 
 const Container = styled.div`
   min-height: 100vh;
@@ -177,10 +178,13 @@ function CheckoutSuccess() {
   
   const orderNumber = searchParams.get('order')
 
-  // Clear cart on successful checkout
+  // Clear cart on successful checkout + GA4 purchase
   useEffect(() => {
     clearCart()
-  }, [clearCart])
+    if (orderNumber) {
+      trackGA4Purchase({ orderId: orderNumber })
+    }
+  }, [clearCart, orderNumber])
 
   return (
     <Container>

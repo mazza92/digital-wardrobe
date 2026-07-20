@@ -1,4 +1,6 @@
 import React from 'react'
+import { trackEditorialAffiliateClick } from './analytics.js'
+import { trackGA4AffiliateClick } from './ga4.js'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://admin.emmanuellek.com'
 const SHOPMY_ID = '2FPSlX'
@@ -94,6 +96,12 @@ export const handleAffiliateClick = (product, outfitId, event) => {
     decodedLink
   ).catch(() => {})
 
+  trackGA4AffiliateClick({
+    brand: product.brand,
+    productName: product.name,
+    source: 'look'
+  })
+
   if (isAffiliateRedirectLink(decodedLink)) {
     if (event) {
       if (event.preventDefault) event.preventDefault()
@@ -104,6 +112,51 @@ export const handleAffiliateClick = (product, outfitId, event) => {
           event.nativeEvent.stopImmediatePropagation()
         }
       }
+    }
+
+    if (isInAppBrowser()) {
+      setTimeout(() => {
+        window.location.href = decodedLink
+      }, 100)
+      return true
+    }
+
+    window.open(decodedLink, '_blank', 'noopener,noreferrer')
+    return true
+  }
+
+  return false
+}
+
+/**
+ * Handle editorial product / content affiliate clicks.
+ * Tracks via analytics, then opens ShopMy/Affilae the same way as outfit products.
+ */
+export const handleEditorialAffiliateClick = (product, editorialPostId, event, source = 'card') => {
+  const rawLink = product?.affiliateLink || product?.link
+  if (!rawLink || !editorialPostId) return false
+
+  const decodedLink = decodeUrl(rawLink)
+
+  trackEditorialAffiliateClick({
+    editorialPostId,
+    editorialProductId: product?.id || null,
+    productName: product?.name || null,
+    brand: product?.brand || null,
+    affiliateLink: decodedLink,
+    source
+  })
+
+  trackGA4AffiliateClick({
+    brand: product?.brand,
+    productName: product?.name,
+    source: `editorial_${source}`
+  })
+
+  if (isAffiliateRedirectLink(decodedLink)) {
+    if (event) {
+      if (event.preventDefault) event.preventDefault()
+      if (event.stopPropagation) event.stopPropagation()
     }
 
     if (isInAppBrowser()) {

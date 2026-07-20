@@ -211,9 +211,10 @@ const sendTrackingData = (endpoint, data) => {
  */
 export const trackPageView = (options = {}) => {
   const { outfitId, productId, brand, page } = options
+  const pagePath = page || `${window.location.pathname}${window.location.search || ''}`
 
   sendTrackingData('/analytics/page-view', {
-    page: page || window.location.pathname,
+    page: pagePath,
     outfitId,
     productId,
     brand,
@@ -293,6 +294,28 @@ export const trackFavorite = (productId, outfitId, brand, action) => {
 }
 
 /**
+ * Track affiliate link click from an editorial (product card or in-content link)
+ */
+export const trackEditorialAffiliateClick = ({
+  editorialPostId,
+  editorialProductId = null,
+  productName = null,
+  brand = null,
+  affiliateLink = null,
+  source = 'card'
+} = {}) => {
+  if (!editorialPostId) return
+  sendTrackingData('/analytics/editorial-click', {
+    editorialPostId,
+    editorialProductId,
+    productName,
+    brand,
+    affiliateLink,
+    source // "card" | "content"
+  })
+}
+
+/**
  * Get session ID for use in other tracking calls
  */
 export const getAnalyticsSessionId = getSessionId
@@ -310,6 +333,7 @@ export default {
   trackBannerEvent,
   trackPrivateSaleAccess,
   trackFavorite,
+  trackEditorialAffiliateClick,
   getSessionId: getAnalyticsSessionId,
   getUtmParams: getAnalyticsUtmParams
 }

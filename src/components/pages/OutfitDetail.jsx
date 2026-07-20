@@ -1871,35 +1871,36 @@ function OutfitDetail() {
     return sessionIdRef.current
   }, [])
 
-  // Defer vote counts fetch - not critical for initial render
+  // Initialize vote counts with baseline values from product data (instant display)
+  // Then fetch actual counts (baseline + real votes) to get the accurate totals
   useEffect(() => {
     if (!outfit?.products?.length) return
 
-    const fetchVoteCounts = () => {
-      const ids = outfit.products.map((p) => p.id).join(',')
-      const sid = getSessionId()
-      fetch(`${API_BASE_URL}/products/vote-counts?ids=${encodeURIComponent(ids)}&sessionId=${encodeURIComponent(sid)}`)
-        .then((res) => res.ok ? res.json() : {})
-        .then((data) => {
-          if (data?.counts != null) {
-            setVoteCounts(data.counts)
-            setMyVotes(data.myVotes || {})
-          } else if (typeof data === 'object' && !Array.isArray(data) && data !== null && !data.error) {
-            setVoteCounts(data)
-            setMyVotes({})
-          }
-        })
-        .catch(() => {})
+    // Set initial baseline values immediately for instant display
+    const initialCounts = {}
+    for (const p of outfit.products) {
+      const baseUp = p.baseVotesUp || 0
+      const baseDown = p.baseVotesDown || 0
+      initialCounts[p.id] = { love: baseUp, notMyStyle: baseDown }
     }
+    setVoteCounts(initialCounts)
 
-    // Use requestIdleCallback to defer non-critical API call
-    // This allows the main content to render first
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(fetchVoteCounts, { timeout: 3000 })
-    } else {
-      setTimeout(fetchVoteCounts, 1000)
-    }
-  }, [outfit?.id, outfit?.products, getSessionId])
+    // Fetch actual vote counts (baseline + real votes) immediately
+    const ids = outfit.products.map((p) => p.id).join(',')
+    const sid = getSessionId()
+    fetch(`${API_BASE_URL}/products/vote-counts?ids=${encodeURIComponent(ids)}&sessionId=${encodeURIComponent(sid)}`)
+      .then((res) => res.ok ? res.json() : {})
+      .then((data) => {
+        if (data?.counts != null) {
+          setVoteCounts(data.counts)
+          setMyVotes(data.myVotes || {})
+        } else if (typeof data === 'object' && !Array.isArray(data) && data !== null && !data.error) {
+          setVoteCounts(data)
+          setMyVotes({})
+        }
+      })
+      .catch(() => {})
+  }, [outfit?.id, getSessionId])
 
   const handleProductVote = useCallback((productId, voteType) => {
     // Signup nudge trigger: only count positive "Mon style" votes
@@ -2401,7 +2402,7 @@ function OutfitDetail() {
               rel={product.link && (product.link.includes('go.shopmy.us') || product.link.includes('affilae.com')) ? 'noopener' : 'noopener noreferrer'}
               onClick={(e) => handleAffiliateClick(product, outfit.id, e)}
             >
-              {t('outfit.findIt', 'Le trouver')} →
+              {t('outfit.findIt', 'See >')}
             </ProductCardButton>
             {(() => {
               const myVote = myVotes[product.id]
@@ -2809,7 +2810,7 @@ function OutfitDetail() {
                     if (selectedProduct) handleAffiliateClick(selectedProduct, outfit.id, e)
                   }}
                 >
-                  {t('outfit.findItHere', 'Où le trouver')} →
+                  {t('outfit.findItHere', 'See >')}
                 </PopupShopButton>
 
                 {/* Vote buttons or poll results */}

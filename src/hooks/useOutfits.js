@@ -1,23 +1,25 @@
 // Custom hook for managing outfits data
-// Optimized with caching and SWR-like behavior
+// Single shared store — multiple components share one network load
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { fetchOutfits, fetchProfile } from '../utils/api'
+import { useState, useEffect, useCallback } from 'react'
+import { fetchOutfits } from '../utils/api'
 
-// Try to get initial data from sessionStorage for instant first paint
+const STORAGE_KEY_OUTFITS = 'dw_cache_v4_outfits'
+const STORAGE_KEY_PROFILE = 'dw_cache_v4_profile'
+const VISIBILITY_REFRESH_MIN_MS = 60 * 1000
+
 const getInitialFromStorage = () => {
   try {
-    const profileStr = sessionStorage.getItem('dw_cache_v3_profile')
-    const outfitsStr = sessionStorage.getItem('dw_cache_v3_outfits')
+    const profileStr = sessionStorage.getItem(STORAGE_KEY_PROFILE)
+    const outfitsStr = sessionStorage.getItem(STORAGE_KEY_OUTFITS)
     if (profileStr && outfitsStr) {
       const profile = JSON.parse(profileStr)
       const outfits = JSON.parse(outfitsStr)
-      // Check if data is fresh (within 5 minutes - reduced for faster updates)
       const isFresh = Date.now() - profile.timestamp < 5 * 60 * 1000
       if (isFresh && profile.data && outfits.data) {
         return {
           outfits: outfits.data.outfits || [],
-          influencer: profile.data
+          influencer: mergeInfluencer(outfits.data, profile.data)
         }
       }
     }
@@ -27,101 +29,123 @@ const getInitialFromStorage = () => {
   return null
 }
 
-// Module-level cache for instant subsequent renders (initialized from storage)
+/** Build influencer object from export payload (includes socialMedia + CMS fields). */
+function mergeInfluencer(outfitsPayload, profileFallback = null) {
+  if (outfitsPayload?.influencer) {
+    return {
+      ...outfitsPayload.influencer,
+      socialMedia:
+        outfitsPayload.socialMedia ||
+        outfitsPayload.influencer.socialMedia ||
+        {}
+    }
+  }
+  return profileFallback
+}
+
+// Module-level shared state
 let cachedData = getInitialFromStorage()
+let listeners = new Set()
+let inFlight = null
+let lastNetworkAt = 0
+
+function notify() {
+  for (const listener of listeners) {
+    listener()
+  }
+}
+
+function setShared(next) {
+  cachedData = next
+  notify()
+}
+
+async function loadShared(forceRefresh = false) {
+  // Coalesce concurrent loads
+  if (inFlight) return inFlight
+
+  inFlight = (async () => {
+    try {
+      const outfitsData = await fetchOutfits(forceRefresh)
+      lastNetworkAt = Date.now()
+
+      const newOutfits = outfitsData?.outfits || []
+      const influencer = mergeInfluencer(outfitsData, cachedData?.influencer || null)
+
+      setShared({
+        outfits: newOutfits,
+        influencer
+      })
+
+      return cachedData
+    } finally {
+      inFlight = null
+    }
+  })()
+
+  return inFlight
+}
 
 export const useOutfits = () => {
-  // Initialize with cached data for instant render
-  const [outfits, setOutfits] = useState(cachedData?.outfits || [])
-  const [influencer, setInfluencer] = useState(cachedData?.influencer || null)
+  const [, bump] = useState(0)
   const [isLoading, setIsLoading] = useState(!cachedData)
   const [error, setError] = useState(null)
-  const isMounted = useRef(true)
 
-  const loadData = useCallback(async (forceRefresh = false, silent = false) => {
+  useEffect(() => {
+    const listener = () => bump((n) => n + 1)
+    listeners.add(listener)
+    return () => {
+      listeners.delete(listener)
+    }
+  }, [])
+
+  const runLoad = useCallback(async (forceRefresh = false, silent = false) => {
     try {
-      // Keep cached UI visible while we revalidate in background.
       if (!silent && (!cachedData || forceRefresh)) {
         setIsLoading(true)
       }
       setError(null)
-      
-      // Fetch data in parallel
-      const [outfitsData, profileData] = await Promise.all([
-        fetchOutfits(forceRefresh),
-        fetchProfile(forceRefresh)
-      ])
-      
-      if (isMounted.current) {
-        const newOutfits = outfitsData.outfits || []
-        setOutfits(newOutfits)
-        setInfluencer(profileData)
-        
-        // Update cache
-        cachedData = {
-          outfits: newOutfits,
-          influencer: profileData
-        }
-      }
-      
+      await loadShared(forceRefresh)
     } catch (err) {
-      if (isMounted.current) {
-        setError(err.message)
-        console.error('Failed to load data:', err)
-      }
+      setError(err.message)
+      console.error('Failed to load data:', err)
     } finally {
-      if (isMounted.current && !silent) {
-        setIsLoading(false)
-      }
+      if (!silent) setIsLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    isMounted.current = true
+    // One load on mount — no immediate forceRefresh (that caused double /outfits/export)
+    if (cachedData) {
+      runLoad(false, true)
+    } else {
+      runLoad(false, false)
+    }
 
-    // Refetch when user returns to the tab (e.g. after editing profile in back office)
     const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        loadData(true, true)
-      }
+      if (document.visibilityState !== 'visible') return
+      if (Date.now() - lastNetworkAt < VISIBILITY_REFRESH_MIN_MS) return
+      runLoad(true, true)
     }
     document.addEventListener('visibilitychange', onVisibilityChange)
 
-    let idleId = null
-    let refreshTimer = null
-    if (cachedData) {
-      // 1) Instant cached paint
-      loadData(false, true)
-      // 2) Force refresh in background so newly published outfits appear quickly
-      if ('requestIdleCallback' in window) {
-        idleId = requestIdleCallback(() => loadData(true, true), { timeout: 1500 })
-      } else {
-        refreshTimer = setTimeout(() => loadData(true, true), 150)
-      }
-    } else {
-      loadData()
-    }
-
     return () => {
-      isMounted.current = false
-      if (idleId !== null) cancelIdleCallback(idleId)
-      if (refreshTimer !== null) clearTimeout(refreshTimer)
       document.removeEventListener('visibilitychange', onVisibilityChange)
     }
-  }, [loadData])
+  }, [runLoad])
 
   return {
-    outfits,
-    influencer,
+    outfits: cachedData?.outfits || [],
+    influencer: cachedData?.influencer || null,
     isLoading,
     error,
-    refetch: () => loadData(true)
+    refetch: () => runLoad(true)
   }
 }
 
 // Pre-fetch data utility - can be called on hover/anticipation
 export const prefetchOutfits = () => {
-  if (!cachedData) {
-    Promise.all([fetchOutfits(), fetchProfile()]).catch(() => {})
+  if (!cachedData && !inFlight) {
+    loadShared(false).catch(() => {})
   }
 }

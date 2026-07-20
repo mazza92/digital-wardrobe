@@ -7,7 +7,7 @@ import { useFavorites } from '../../../hooks/useFavorites';
 import { fetchOutfits } from '../../../utils/api';
 import { getOutfitDescription, getOutfitTitle } from '../../../utils/outfitUtils';
 import { safeGetSession } from '../../../utils/supabaseClient';
-import { SHOW_SECRETS_TAB } from '../../../config/featureFlags';
+import { useShowSecretsTab } from '../../../hooks/useShowSecretsTab';
 
 // Animations
 const fadeIn = keyframes`
@@ -671,6 +671,7 @@ const Profile = () => {
   const { t, i18n } = useTranslation();
   const { user, logout, isAuthenticated } = useAuth();
   const { favorites, removeFromFavorites } = useFavorites();
+  const { showSecretsTab } = useShowSecretsTab();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
   const [outfits, setOutfits] = useState([]);
@@ -932,7 +933,7 @@ const Profile = () => {
               </PerkArrow>
             </PerkCard>
 
-            {SHOW_SECRETS_TAB && (
+            {showSecretsTab && (
               <PerkCard to="/?tab=secrets" $gradient="linear-gradient(135deg, #8B7355 0%, #A08060 100%)">
                 <PerkIcon>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
